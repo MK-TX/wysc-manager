@@ -165,6 +165,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .tag-row{display:flex;gap:4px;flex-wrap:wrap;align-items:center;width:100%;margin:0}
 .mcbg{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;line-height:1.5;white-space:nowrap;background:#f1f5f9;color:#64748b}
 .mcbg.cat{font-weight:600}
+.mcbg.note-tag{background:#fef3c7;color:#92400e;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mccat{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;line-height:1.5;white-space:nowrap;color:#fff}
 .mcf{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:7px;margin-top:4px}
 .mcs{font-size:11px;display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0}
@@ -314,6 +315,18 @@ input,select,textarea{font-family:inherit;font-size:16px}
   .imgs-grid{grid-template-columns:repeat(2,1fr)}
   .main-content{padding-bottom:env(safe-area-inset-bottom)}
 }
+/* Filter Modal */
+.filter-modal{background:var(--card);border-radius:var(--radius);max-width:600px;width:95vw;max-height:85vh;overflow-y:auto}
+.filter-modal h3{font-size:16px;padding:16px 20px 0;margin:0}
+.filter-modal .fm-body{padding:16px 20px;display:flex;flex-direction:column;gap:16px}
+.filter-modal .fm-sec{}
+.filter-modal .fm-sec h4{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.filter-modal .fm-chips{display:flex;flex-wrap:wrap;gap:6px}
+.filter-modal .fm-chip{padding:5px 12px;border-radius:16px;font-size:12px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:var(--card);color:var(--text);user-select:none}
+.filter-modal .fm-chip:hover{border-color:var(--primary);background:var(--primary-light)}
+.filter-modal .fm-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.filter-modal .fm-ft{display:flex;gap:8px;padding:12px 20px 16px;border-top:1px solid var(--border);justify-content:flex-end}
+.filter-modal .fm-count{font-size:12px;color:var(--text2);margin-left:auto;align-self:center}
 </style>
 </head>
 <body>
@@ -357,8 +370,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
       <div class="mat-hd">
         <div class="mht"><span id="mttl">未分类店铺</span><span class="src-badge" id="msub"></span></div>
         <div class="mat-fl">
-          <select id="fcat" onchange="renderMaterials()"><option value="all">全部分类</option></select>
-          <select id="fused" onchange="renderMaterials()"><option value="all">全部状态</option><option value="unused">未使用</option><option value="used">已使用</option></select>
+          <select id="fcat" onchange="onCatFilterChange()"><option value="all">全部分类</option></select>
+          <select id="fused" onchange="renderMaterials()"><option value="all">全部状态</option><option value="pending_sponsor">待赞助</option><option value="unused">未使用</option><option value="used">已使用</option></select>
           <select id="fsort" onchange="renderMaterials()">
             <option value="time_desc">时间最新</option><option value="time_asc">时间最早</option>
             <option value="price_desc">价格↓</option><option value="price_asc">价格↑</option>
@@ -372,6 +385,25 @@ input,select,textarea{font-family:inherit;font-size:16px}
       <div id="mg"></div>
     </div>
   </main>
+</div>
+
+<!-- Filter Modal -->
+<div class="mo" id="fmo" style="display:none" onclick="if(event.target===this)closeFilterModal()">
+  <div class="filter-modal">
+    <div class="mdh"><h3>筛选条件</h3><button class="btn-icon" onclick="closeFilterModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="fm-body">
+      <div class="fm-sec"><h4>画师/美工</h4><div class="fm-chips" id="fmArtist"></div></div>
+      <div class="fm-sec"><h4>售卖类型</h4><div class="fm-chips" id="fmSaleType"></div></div>
+      <div class="fm-sec"><h4>属性分类</h4><div class="fm-chips" id="fmCategory"></div></div>
+      <div class="fm-sec"><h4>购买来源</h4><div class="fm-chips" id="fmSource"></div></div>
+      <div class="fm-sec"><h4>通加规则</h4><div class="fm-chips" id="fmTongjia"></div></div>
+    </div>
+    <div class="fm-ft">
+      <span class="fm-count" id="fmCount"></span>
+      <button class="btn btn-sm" onclick="resetFilter()">重置</button>
+      <button class="btn btn-primary btn-sm" onclick="applyFilter()">应用筛选</button>
+    </div>
+  </div>
 </div>
 
 <!-- Item Modal -->
@@ -814,6 +846,7 @@ function ld(){
     selectedGroup = st.selectedGroup !== undefined ? st.selectedGroup : 'all';
     S._filterCat=st.filterCat||'all'; S._filterUsed=st.filterUsed||'all';
     S._filterSort=st.filterSort||'time_desc'; S._filterQuery=st.filterQuery||'';
+    if(st.S_filter) S_filter=st.S_filter;
     // If localStorage has data, we need to migrate to IDB
     if(S.shops.length||S.persons.length||S.items.length) _ldFromLS=true;
   }catch(e){ S.shops=[]; S.persons=[]; S.items=[]; S.pinned={}; S.groups={shop:[],person:[]}; S.sourceGroup={}; S.groupCollapsed={shop:{},person:{}}; }
@@ -823,14 +856,14 @@ function sv(){
   idbSet('shops',S.shops);
   idbSet('persons',S.persons);
   idbSet('items',S.items);
-  idbSet('state',{selType:S.selType,selName:S.selName,selectedGroup,filterCat:S._filterCat||'all',filterUsed:S._filterUsed||'all',filterSort:S._filterSort||'time_desc',filterQuery:S._filterQuery||''});
+  idbSet('state',{selType:S.selType,selName:S.selName,selectedGroup,filterCat:S._filterCat||'all',filterUsed:S._filterUsed||'all',filterSort:S._filterSort||'time_desc',filterQuery:S._filterQuery||'',S_filter});
   idbSet('pinned',S.pinned);
   idbSet('groups',S.groups);
   idbSet('sourceGroup',S.sourceGroup);
   idbSet('groupCollapsed',S.groupCollapsed);
   // Also save small text data to localStorage as backup (best effort)
   try{
-    localStorage.setItem(PREFIX+'state',JSON.stringify({selType:S.selType,selName:S.selName,selectedGroup,filterCat:S._filterCat||'all',filterUsed:S._filterUsed||'all',filterSort:S._filterSort||'time_desc',filterQuery:S._filterQuery||''}));
+    localStorage.setItem(PREFIX+'state',JSON.stringify({selType:S.selType,selName:S.selName,selectedGroup,filterCat:S._filterCat||'all',filterUsed:S._filterUsed||'all',filterSort:S._filterSort||'time_desc',filterQuery:S._filterQuery||'',S_filter}));
     localStorage.setItem(PREFIX+'groups',JSON.stringify(S.groups));
     localStorage.setItem(PREFIX+'sourceGroup',JSON.stringify(S.sourceGroup));
     localStorage.setItem(PREFIX+'groupCollapsed',JSON.stringify(S.groupCollapsed));
@@ -1172,6 +1205,7 @@ function sdragStart(e,idx,name){
 }
 function sdragOver(e,idx,name){
   e.preventDefault();
+  e.dataTransfer.dropEffect='move';
   if(!dragSrc||dragSrc===name) return;
   e.currentTarget.classList.add('drag-over');
 }
@@ -1182,9 +1216,12 @@ function sdragDrop(e,idx,name){
   const list=getSidebarList();
   const srcIdx=list.indexOf(dragSrc);
   if(srcIdx<0) return;
-  list.splice(srcIdx,1);
-  const targetIdx=list.indexOf(name);
-  list.splice(targetIdx,0,dragSrc);
+  // Remove source first
+  const [moved]=list.splice(srcIdx,1);
+  // Find target after removal (index may have shifted)
+  let targetIdx=list.indexOf(name);
+  if(targetIdx<0) targetIdx=idx>srcIdx?idx-1:idx;
+  list.splice(targetIdx,0,moved);
   sv(); renderSidebar();
 }
 function sdragEnd(e){
@@ -1611,6 +1648,7 @@ function renderCard(i){
   if(tjTag) uniTagsHtml+=`<span class="mcbg">${eh(tjTag)}</span>`;
   const scopeTag=getScopeTag(i);
   if(scopeTag) uniTagsHtml+=`<span class="mcbg">${eh(scopeTag)}</span>`;
+  if(i.note&&i.note.trim()) uniTagsHtml+=`<span class="mcbg note-tag" title="${eh(i.note)}">📝 ${eh(i.note.length>20?i.note.slice(0,20)+'…':i.note)}</span>`;
   if(getCats(i).includes('加装')&&i.jzRestrict&&i.jzRestrict.length){
     i.jzRestrict.forEach(r=>{
       if(r==='无限制') return;
@@ -1712,6 +1750,9 @@ function renderMaterials(){
   S._filterCat=fcat;S._filterUsed=fused;S._filterSort=fsort;S._filterQuery=document.getElementById('q').value||'';
   sv();
   if(fcat!=='all') items=items.filter(i=>getCats(i).includes(fcat));
+  // Apply multi-filter when fcat is 'all' and filters are active
+  if(fcat==='all'&&hasActiveFilter()) items=applyFilterToItems(items);
+  if(fused==='pending_sponsor') items=items.filter(i=>{const psd=getPSD(i);return psd&&/余\d+待赞助/.test(psd)});
   if(fused==='unused') items=items.filter(i=>!i.isUsed);
   if(fused==='used') items=items.filter(i=>i.isUsed);
   if(q) items=items.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.artist||'').toLowerCase().includes(q)||(i.note||'').toLowerCase().includes(q)||getCatD(i).toLowerCase().includes(q)||getPSD(i).toLowerCase().includes(q));
@@ -1747,6 +1788,105 @@ function updateCatFilter(){
   const el=document.getElementById('fcat'),cats=new Set();
   getItemsForView().forEach(i=>{getCats(i).forEach(c=>cats.add(c))});
   el.innerHTML='<option value="all">全部分类</option>'+[...cats].sort((a,b)=>a.localeCompare(b,'zh')).map(c=>`<option value="${eh(c)}">${eh(c)}</option>`).join('');
+}
+// ---- Filter Modal (Advanced Filter) ----
+let S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[]};
+function onCatFilterChange(){
+  const v=document.getElementById('fcat').value;
+  if(v==='all'){
+    openFilterModal();
+  }else{
+    // Single category selected — clear multi-filter and apply directly
+    S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[]};
+    renderMaterials();
+  }
+}
+function openFilterModal(){
+  const items=getItemsForView();
+  // Collect all unique values
+  const artists=new Set(), saleTypes=new Set(), cats=new Set(), sources=new Set(), tongjias=new Set();
+  items.forEach(i=>{
+    if(i.artist) splitArtists(i.artist).forEach(a=>artists.add(a));
+    if(i.saleType) saleTypes.add(i.saleType);
+    getCats(i).forEach(c=>cats.add(c));
+    if(i.ownerName) sources.add(i.ownerName);
+    const tj=getTongjiaRule(i);
+    if(tj) tongjias.add(tj);
+  });
+  // Render chips
+  renderFilterChips('fmArtist',[...artists].sort((a,b)=>a.localeCompare(b,'zh')),'artist');
+  renderFilterChips('fmSaleType',[...saleTypes].sort((a,b)=>a.localeCompare(b,'zh')),'saleType');
+  renderFilterChips('fmCategory',[...cats].sort((a,b)=>a.localeCompare(b,'zh')),'category');
+  renderFilterChips('fmSource',[...sources].sort((a,b)=>a.localeCompare(b,'zh')),'source');
+  renderFilterChips('fmTongjia',[...tongjias].sort((a,b)=>a.localeCompare(b,'zh')),'tongjia');
+  updateFilterCount();
+  document.getElementById('fmo').style.display='flex';
+}
+function renderFilterChips(containerId,values,dim){
+  const el=document.getElementById(containerId);
+  if(values.length===0){el.innerHTML='<span style="font-size:12px;color:var(--text2)">无</span>';return}
+  el.innerHTML=values.map(v=>{
+    const active=S_filter[dim].includes(v)?' active':'';
+    return `<span class="fm-chip${active}" onclick="toggleFilterChip(event,'${dim}','${eh(v)}')">${eh(v)}</span>`;
+  }).join('');
+}
+function toggleFilterChip(e,dim,val){
+  e.currentTarget.classList.toggle('active');
+  const arr=S_filter[dim];
+  const idx=arr.indexOf(val);
+  if(idx>=0) arr.splice(idx,1); else arr.push(val);
+  updateFilterCount();
+}
+function updateFilterCount(){
+  const total=S_filter.artist.length+S_filter.saleType.length+S_filter.category.length+S_filter.source.length+S_filter.tongjia.length;
+  document.getElementById('fmCount').textContent=total>0?`已选 ${total} 项`:'';
+}
+function applyFilter(){
+  document.getElementById('fmo').style.display='none';
+  // Reset fcat to 'all' so it doesn't conflict
+  document.getElementById('fcat').value='all';
+  renderMaterials();
+}
+function resetFilter(){
+  S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[]};
+  // Reset all chips
+  document.querySelectorAll('#fmo .fm-chip.active').forEach(c=>c.classList.remove('active'));
+  updateFilterCount();
+}
+function closeFilterModal(){
+  document.getElementById('fmo').style.display='none';
+  // Restore fcat to last persisted value or 'all'
+  const fcat=document.getElementById('fcat');
+  if(fcat.value==='all'&&!hasActiveFilter()){
+    // keep as all
+  }
+}
+function hasActiveFilter(){
+  return S_filter.artist.length>0||S_filter.saleType.length>0||S_filter.category.length>0||S_filter.source.length>0||S_filter.tongjia.length>0;
+}
+function applyFilterToItems(items){
+  if(!hasActiveFilter()) return items;
+  return items.filter(i=>{
+    if(S_filter.artist.length>0){
+      const iArtists=splitArtists(i.artist||'');
+      if(!iArtists.some(a=>S_filter.artist.includes(a))) return false;
+    }
+    if(S_filter.saleType.length>0&&!S_filter.saleType.includes(i.saleType||'')) return false;
+    if(S_filter.category.length>0){
+      const iCats=getCats(i);
+      if(!iCats.some(c=>S_filter.category.includes(c))) return false;
+    }
+    if(S_filter.source.length>0&&!S_filter.source.includes(i.ownerName||'')) return false;
+    if(S_filter.tongjia.length>0){
+      const tj=getTongjiaRule(i);
+      if(!S_filter.tongjia.includes(tj)) return false;
+    }
+    return true;
+  });
+}
+function getTongjiaRule(i){
+  if(!i.tongjiaRule) return '无';
+  return i.tongjiaRule;
 }
 function updateDataBanner(){
   return;
@@ -2638,8 +2778,8 @@ function lbEnablePan(){
     document.onmousemove=function(ev2){
       if(!lbDragging)return;
       lbDidDrag=true;
-      lbPanX=lbDragStartX+(ev2.clientX-lbDragSX)/lbZoom;
-      lbPanY=lbDragStartY+(ev2.clientY-lbDragSY)/lbZoom;
+      lbPanX=lbDragStartX-(ev2.clientX-lbDragSX)/lbZoom;
+      lbPanY=lbDragStartY-(ev2.clientY-lbDragSY)/lbZoom;
       clampLbPan();
       img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
       updateLbMinimap();
@@ -2664,8 +2804,8 @@ function lbEnablePan(){
     ev.preventDefault();
     const t=ev.touches[0];
     lbDidDrag=true;
-    lbPanX=lbDragStartX+(t.clientX-lbDragSX)/lbZoom;
-    lbPanY=lbDragStartY+(t.clientY-lbDragSY)/lbZoom;
+    lbPanX=lbDragStartX-(t.clientX-lbDragSX)/lbZoom;
+    lbPanY=lbDragStartY-(t.clientY-lbDragSY)/lbZoom;
     clampLbPan();
     img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
     updateLbMinimap();
@@ -3180,7 +3320,7 @@ function closeConfirm(){document.getElementById('co').style.display='none'}
 function st(msg,type){const el=document.getElementById('tst');el.textContent=msg;el.style.display='block';el.style.background=type==='err'?'var(--danger)':'#1e293b';clearTimeout(el._t);el._t=setTimeout(()=>{el.style.display='none'},2500)}
 
 // ---- Keyboard ----
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeItemModal();closeLb();closeConfirm();closeExcelImport();hideCtxMenu();closeSourceModal();closeGroupModal()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeItemModal();closeLb();closeConfirm();closeExcelImport();hideCtxMenu();closeSourceModal();closeGroupModal();closeFilterModal()}});
 
 // ---- Drag & drop for import ----
 document.getElementById('xidrop').addEventListener('dragover',e=>{e.preventDefault();e.currentTarget.style.borderColor='var(--primary)'});
