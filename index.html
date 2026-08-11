@@ -2731,11 +2731,14 @@ function updateLbMinimap(){
   const mm=document.getElementById('lbMinimap');
   const vp=document.getElementById('lbVport');
   function mmToPan(pL,pT){
-    const img=document.getElementById('lbi');if(!img||!img.naturalWidth)return;
-    const nw=img.naturalWidth,nh=img.naturalHeight;
-    const vpW=window.innerWidth,vpH=window.innerHeight;
-    lbPanX=(pL/100)*nw-nw/2+vpW/(2*lbZoom);
-    lbPanY=(pT/100)*nh-nh/2+vpH/(2*lbZoom);
+    const img = document.getElementById('lbi');
+    if (!img || !img.naturalWidth) return;
+    const nw = img.naturalWidth,
+      nh = img.naturalHeight;
+    const vpW = window.innerWidth,
+      vpH = window.innerHeight;
+    lbPanX = nw / 2 - (pL / 100) * nw + vpW / (2 * lbZoom);
+    lbPanY = nh / 2 - (pT / 100) * nh + vpH / (2 * lbZoom);
     clampLbPan();
     img.style.transform='scale('+lbZoom+') translate('+lbPanX+'px,'+lbPanY+'px)';
     updateLbMinimap();
