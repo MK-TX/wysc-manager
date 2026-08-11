@@ -1734,6 +1734,7 @@ function updateCatFilter(){
   el.innerHTML='<option value="all">全部分类</option>'+[...cats].sort((a,b)=>a.localeCompare(b,'zh')).map(c=>`<option value="${eh(c)}">${eh(c)}</option>`).join('');
 }
 function updateDataBanner(){
+  return;
   const el=document.getElementById('db');
   if(S.items.length>=30){
     el.style.display='flex';
