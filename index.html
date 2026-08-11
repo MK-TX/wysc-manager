@@ -1814,9 +1814,7 @@ function openFilterModal(){
   const hasSponsor=items.some(i=>{const psd=getPSD(i);return psd&&/余\d+待赞助/.test(psd)});
   const hasPendingSponsor=items.some(i=>{const psd=getPSD(i);return psd&&/余\d+待赞助/.test(psd)});
   if(hasPendingSponsor) statusOptions.push({val:'pending_sponsor',label:'待赞助'});
-  if(hasUnused&&hasUsed){statusOptions.push({val:'unused',label:'未使用'});statusOptions.push({val:'used',label:'已使用'})}
-  else if(hasUnused&&!hasUsed) statusOptions.push({val:'unused',label:'未使用'});
-  else if(!hasUnused&&hasUsed) statusOptions.push({val:'used',label:'已使用'});
+  if(hasUnused&&hasUsed){statusOptions.push({val:'unused',label:'未使用'});statusOptions.push({val:'used',label:'已使用'});}
   const statusSec=document.getElementById('fmStatusSec');
   if(statusOptions.length===0){statusSec.style.display='none'}
   else{statusSec.style.display='';renderStatusChips(statusOptions)}
@@ -2814,8 +2812,8 @@ function lbEnablePan(){
     document.onmousemove=function(ev2){
       if(!lbDragging)return;
       lbDidDrag=true;
-      lbPanX=lbDragStartX-(ev2.clientX-lbDragSX)/lbZoom;
-      lbPanY=lbDragStartY-(ev2.clientY-lbDragSY)/lbZoom;
+      lbPanX=lbDragStartX+(ev2.clientX-lbDragSX)/lbZoom;
+      lbPanY=lbDragStartY+(ev2.clientY-lbDragSY)/lbZoom;
       clampLbPan();
       img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
       updateLbMinimap();
@@ -2840,8 +2838,8 @@ function lbEnablePan(){
     ev.preventDefault();
     const t=ev.touches[0];
     lbDidDrag=true;
-    lbPanX=lbDragStartX-(t.clientX-lbDragSX)/lbZoom;
-    lbPanY=lbDragStartY-(t.clientY-lbDragSY)/lbZoom;
+    lbPanX=lbDragStartX+(t.clientX-lbDragSX)/lbZoom;
+    lbPanY=lbDragStartY+(t.clientY-lbDragSY)/lbZoom;
     clampLbPan();
     img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
     updateLbMinimap();
