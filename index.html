@@ -295,6 +295,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .pay-rec-box{border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;background:#fafbfc}
 .pay-rec-box .fg{margin-bottom:10px}
 .pay-rec-box .fg:last-child{margin-bottom:0}
+#payImgGrid .iu-box{height:180px}
+#payImgGrid .iu-box img{object-fit:contain}
 
 @media(max-width:768px){
   .app-header{padding:8px 12px}.app-header h1{font-size:15px}
@@ -600,13 +602,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
       <div class="fg"><label>付款记录</label>
         <div class="pay-rec-box">
           <div class="fg"><label style="font-size:12px;font-weight:500">付款截图</label>
-            <div class="iua" id="payImgBox" onclick="document.getElementById('payImgi').click()" ondragover="event.preventDefault();this.style.borderColor='var(--primary)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="event.preventDefault();this.style.borderColor='var(--border)';if(event.dataTransfer.files.length>0)handlePayFile(event.dataTransfer.files[0])">
-              <div class="iuph" id="payIp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div>上传付款截图</div></div>
-              <img id="payIpr" style="display:none" alt="付款截图预览">
-              <div class="icl" id="payIcl" style="display:none" onclick="event.stopPropagation();clearPayImage()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
-            </div>
-            <input type="file" id="payImgi" accept="image/*" style="display:none" onchange="handlePayImage(event)">
-            <button type="button" class="btn btn-sm" id="payDelBtn" style="display:none;margin-top:6px" onclick="clearPayImage()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg><span>删除付款截图</span></button>
+            <div class="imgs-grid" id="payImgGrid"></div>
+            <input type="file" id="payImgi" accept="image/*" multiple style="display:none" onchange="handlePayImage(event)">
           </div>
           <div class="fg"><label style="font-size:12px;font-weight:500">付款备注</label><input type="text" id="fpayNote" placeholder="如：微信转账、支付宝等"></div>
         </div>
@@ -660,6 +657,11 @@ input,select,textarea{font-family:inherit;font-size:16px}
 <div class="ctx-menu" id="lbCtxMenu">
   <div class="ctx-item" onclick="lbCopy()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>复制图片</div>
   <div class="ctx-item" onclick="lbDownload()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>下载图片</div>
+</div>
+<div class="ctx-menu" id="payCtxMenu">
+  <div class="ctx-item" onclick="openPayImgLb(payCtxIdx)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>查看</div>
+  <div class="ctx-item" onclick="copyPayImg(payCtxIdx)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>复制</div>
+  <div class="ctx-item" onclick="downloadPayImg(payCtxIdx)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>下载</div>
 </div>
 
 <!-- Add/Rename Source Modal -->
@@ -730,7 +732,7 @@ const I={ shop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
 // ---- State ----
 // groups: { shop:[{name:'分组1',collapsed:false},...], person:[...] }
 // sourceGroup: { 'shop_店名':'分组名', 'person_人名':'分组名' }
-let S={ shops:[], persons:[], items:[], selType:'shop', selName:'all', editItem:null, imgData:[], payImgData:'', pinned:{}, groups:{shop:[],person:[]}, sourceGroup:{}, groupCollapsed:{shop:{},person:{}} };
+let S={ shops:[], persons:[], items:[], selType:'shop', selName:'all', editItem:null, imgData:[], payImgData:[], pinned:{}, groups:{shop:[],person:[]}, sourceGroup:{}, groupCollapsed:{shop:{},person:{}} };
 // selectedGroup: when a group is selected (null=not on a group, string=group name, 'all'=ungrouped)
 let selectedGroup='all';
 
@@ -769,7 +771,7 @@ function migrateOld(){
         usageLimitType:'limited', usageLimitSubtype:'total', usageTotal:1, usageLead:1, usageSupport:1, usageOtherNote:'',
         usedCount:i.usedCount||0, isUsed:i.isUsed||false,
         note:i.note||'', createdAt:i.createdAt||new Date().toISOString(),
-        paymentImage:'', paymentNote:''
+        paymentImage:[], paymentNote:''
       });
     });
     sv(); return true;
@@ -781,7 +783,9 @@ function migrateImages(){
   S.items.forEach(i=>{
     if(i.image && !i.images){ i.images=[i.image]; delete i.image; changed=true; }
     if(!i.images) i.images=[];
-    if(i.paymentImage===undefined) i.paymentImage='';
+    if(i.paymentImage===undefined) i.paymentImage=[];
+    if(typeof i.paymentImage==='string') i.paymentImage=i.paymentImage?[i.paymentImage]:[];
+    if(!Array.isArray(i.paymentImage)) i.paymentImage=[];
     if(i.paymentNote===undefined) i.paymentNote='';
     if(i.countInPerson===undefined){ i.countInPerson=i.ownerType==='person'?(i.countInShop!==false):true; changed=true; }
   });
@@ -1462,8 +1466,8 @@ function ctxDelete(){
   deleteSidebarSource(t);
 }
 
-document.addEventListener('click',e=>{if(!e.target.closest('.ctx-menu')){hideCtxMenu();hideGCtxMenu();document.getElementById('lbCtxMenu').style.display='none'}});
-document.addEventListener('contextmenu',e=>{if(!e.target.closest('.sidebar-item')&&!e.target.closest('.sidebar-group-header')&&!e.target.closest('.lb-main')){hideCtxMenu();hideGCtxMenu();document.getElementById('lbCtxMenu').style.display='none'}});
+document.addEventListener('click',e=>{if(!e.target.closest('.ctx-menu')){hideCtxMenu();hideGCtxMenu();document.getElementById('lbCtxMenu').style.display='none';document.getElementById('payCtxMenu').style.display='none'}});
+document.addEventListener('contextmenu',e=>{if(!e.target.closest('.sidebar-item')&&!e.target.closest('.sidebar-group-header')&&!e.target.closest('.lb-main')&&!e.target.closest('#payImgGrid')){hideCtxMenu();hideGCtxMenu();document.getElementById('lbCtxMenu').style.display='none';document.getElementById('payCtxMenu').style.display='none'}});
 
 function toggleGroupCollapse(groupName){
   const key=S.selType+'_'+groupName;
@@ -2039,7 +2043,7 @@ document.getElementById('fowner').addEventListener('change',function(){
 });
 
 function openItemModal(){
-  S.editItem=null; S.imgData=[]; S.payImgData='';
+  S.editItem=null; S.imgData=[]; S.payImgData=[];
   document.getElementById('imt').textContent='添加素材';document.getElementById('di').style.display='none';
   clearItemForm();
   const ot=S.selType;
@@ -2057,11 +2061,13 @@ function openItemModal(){
 
 function openEditItem(id){
   const i=S.items.find(x=>x.id===id);if(!i)return;
-  S.editItem=i; S.payImgData=i.paymentImage||'';
+  S.editItem=i;
   document.getElementById('imt').textContent='编辑素材';document.getElementById('di').style.display='';
   clearItemForm();
   S.imgData=[...getImages(i)];
   renderImgGrid();
+  S.payImgData=Array.isArray(i.paymentImage)?[...i.paymentImage]:(i.paymentImage?[i.paymentImage]:[]);
+  renderPayImgGrid();
   // Default owner type based on current tab context
   let editOwnerType=i.ownerType, editOwnerName=i.ownerName;
   if(S.selType==='person'){editOwnerType='person';editOwnerName=i.artist||i.ownerName}
@@ -2162,15 +2168,11 @@ function openEditItem(id){
   document.getElementById('fuc').value=i.usedCount||0;
   document.getElementById('fucucheck').checked=i.isUsed===true;
   document.getElementById('fnt').value=i.note||'';
-  if(i.paymentImage){
-    document.getElementById('payIp').style.display='none';document.getElementById('payIpr').style.display='';
-    document.getElementById('payIpr').src=i.paymentImage;document.getElementById('payIcl').style.display='';document.getElementById('payDelBtn').style.display='';
-  }
   document.getElementById('fpayNote').value=i.paymentNote||'';
   document.getElementById('imo').style.display='flex';
 }
 
-function closeItemModal(){document.getElementById('imo').style.display='none';S.editItem=null;S.imgData=[];S.payImgData=''}
+function closeItemModal(){document.getElementById('imo').style.display='none';S.editItem=null;S.imgData=[];S.payImgData=[]}
 function clearItemForm(){
   document.getElementById('fn').value='';
   S.imgData=[]; renderImgGrid();
@@ -2207,9 +2209,9 @@ function clearItemForm(){
   document.getElementById('fucu').style.display='none';document.getElementById('fnt').value='';
   document.getElementById('fuls-total').style.display='';document.getElementById('fuls-ls').style.display='none';
   document.getElementById('fuls-lu').style.display='none';document.getElementById('fuls-oth').style.display='none';
-  S.payImgData='';
-  document.getElementById('payIp').style.display='';document.getElementById('payIpr').style.display='none';
-  document.getElementById('payIcl').style.display='none';document.getElementById('payDelBtn').style.display='none';document.getElementById('payImgi').value='';
+  S.payImgData=[];
+  renderPayImgGrid();
+  document.getElementById('payImgi').value='';
   document.getElementById('fpayNote').value='';
   onTransfer();
 }
@@ -2487,72 +2489,83 @@ function autoFillRules(){
   // Same-artist records (excluding the one being edited)
   const match=S.items.filter(i=>splitArtists(i.artist).includes(artist)&&(!S.editItem||i.id!==S.editItem.id));
   if(match.length===0) return;
-  // Same-artist AND same-category records
-  let catRef=null, sharedCats=[];
-  if(formCats.length>0){
-    const cm=match.filter(i=>getCats(i).some(c=>formCats.includes(c)));
-    if(cm.length>0){ catRef=cm[cm.length-1]; sharedCats=formCats.filter(c=>getCats(catRef).includes(c)); }
-  }
-  const ref=catRef||match[match.length-1]; // most recent relevant record
   const filled=[];
-  // Transfer rule — same artist only (not category-derived), skip if already picked
-  if((!document.querySelector('input[name="fr"]:checked')||checkedIsAuto('fr'))&&ref.transferRule){
-    const fr=document.querySelector(`input[name="fr"][value="${ref.transferRule}"]`);
+
+  // 1. 转让规则 — same artist only (no category matching needed)
+  const trMatch=match.filter(i=>i.transferRule);
+  const artistRef=trMatch.length>0?trMatch[trMatch.length-1]:null;
+  if(artistRef&&(!document.querySelector('input[name="fr"]:checked')||checkedIsAuto('fr'))){
+    const fr=document.querySelector('input[name="fr"][value="'+artistRef.transferRule+'"]');
     if(fr){fr.checked=true;markAuto(fr);onTransferRule();filled.push('转让规则')}
-    if(ref.transferSub){
-      if(ref.transferRule==='退圈可转'){
-        const r=document.querySelector(`input[name="frsq"][value="${ref.transferSub}"]`);
+    if(artistRef.transferSub){
+      if(artistRef.transferRule==='退圈可转'){
+        const r=document.querySelector('input[name="frsq"][value="'+artistRef.transferSub+'"]');
         if(r){r.checked=true;markAuto(r);}
-      }else if(ref.transferRule==='不退圈可转'){
+      }else if(artistRef.transferRule==='不退圈可转'){
         document.querySelectorAll('input[name="frsnq"][data-auto]').forEach(c=>c.checked=false);
-        ref.transferSub.split(',').forEach(v=>{
-          const c=document.querySelector(`input[name="frsnq"][value="${v.trim()}"]`);
+        artistRef.transferSub.split(',').forEach(v=>{
+          const c=document.querySelector('input[name="frsnq"][value="'+v.trim()+'"]');
           if(c){c.checked=true;markAuto(c);}
         });
-        if(ref.frVipNote){const el=document.getElementById('frvipnote');el.value=ref.frVipNote;markAuto(el);}
-        if(ref.frOtherNote){const el=document.getElementById('frothernote');el.value=ref.frOtherNote;markAuto(el);}
+        if(artistRef.frVipNote){const el=document.getElementById('frvipnote');el.value=artistRef.frVipNote;markAuto(el);}
+        if(artistRef.frOtherNote){const el=document.getElementById('frothernote');el.value=artistRef.frOtherNote;markAuto(el);}
         onFrNoQuit();
       }
     }
   }
-  // Usage limit — prefer same-category record, skip if already picked
-  if((!document.querySelector('input[name="ful"]:checked')||checkedIsAuto('ful'))&&ref.usageLimitType){
-    const ulr=document.querySelector(`input[name="ful"][value="${ref.usageLimitType}"]`);
-    if(ulr){ulr.checked=true;markAuto(ulr);onUsageLimit();filled.push('使用次数规则')}
-    if(ref.usageLimitSubtype){
-      const ulsr=document.querySelector(`input[name="fulst"][value="${ref.usageLimitSubtype}"]`);
-      if(ulsr){ulsr.checked=true;markAuto(ulsr);onUsageLimitSub()}
+
+  // 2. 立绘/卤蛋 → 通加规则 + 使用次数 (must be same artist AND same category)
+  const tjCats=[];
+  if(formCats.includes('立绘')) tjCats.push('立绘');
+  if(formCats.includes('卤蛋')) tjCats.push('卤蛋');
+  if(tjCats.length>0){
+    const cm=match.filter(i=>getCats(i).some(c=>tjCats.includes(c)));
+    if(cm.length>0){
+      const tjRef=cm[cm.length-1];
+      // 通加规则
+      if((!document.querySelector('input[name="tj"]:checked')||checkedIsAuto('tj'))&&tjRef.tongjiaRule){
+        const tj=document.querySelector('input[name="tj"][value="'+tjRef.tongjiaRule+'"]');
+        if(tj){tj.checked=true;markAuto(tj);onTj();filled.push('通加规则')}
+        if(tjRef.tongjiaLimit){const tlr=document.querySelector('input[name="tjl"][value="'+tjRef.tongjiaLimit+'"]');if(tlr){tlr.checked=true;markAuto(tlr);onTjl()}}
+        if(tjRef.tongjiaType){const ttr=document.querySelector('input[name="tjt"][value="'+tjRef.tongjiaType+'"]');if(ttr){ttr.checked=true;markAuto(ttr)}}
+        if(tjRef.tongjiaScope){const tsr=document.querySelector('input[name="tjs"][value="'+tjRef.tongjiaScope+'"]');if(tsr){tsr.checked=true;markAuto(tsr)}}
+      }
+      // 使用次数规则
+      if((!document.querySelector('input[name="ful"]:checked')||checkedIsAuto('ful'))&&tjRef.usageLimitType){
+        const ulr=document.querySelector('input[name="ful"][value="'+tjRef.usageLimitType+'"]');
+        if(ulr){ulr.checked=true;markAuto(ulr);onUsageLimit();filled.push('使用次数规则')}
+        if(tjRef.usageLimitSubtype){
+          const ulsr=document.querySelector('input[name="fulst"][value="'+tjRef.usageLimitSubtype+'"]');
+          if(ulsr){ulsr.checked=true;markAuto(ulsr);onUsageLimitSub()}
+        }
+        if(tjRef.usageTotal){const el=document.getElementById('fult');el.value=tjRef.usageTotal;markAuto(el);}
+        if(tjRef.usageLead){
+          const el=document.getElementById('fulLead');el.value=tjRef.usageLead;markAuto(el);
+          const el2=document.getElementById('fulLead2');el2.value=tjRef.usageLead;markAuto(el2);
+        }
+        if(tjRef.usageSupport){const el=document.getElementById('fulSupp');el.value=tjRef.usageSupport;markAuto(el);}
+        if(tjRef.usageOtherNote){const el=document.getElementById('fulOther');el.value=tjRef.usageOtherNote;markAuto(el);}
+      }
     }
-    if(ref.usageTotal){const el=document.getElementById('fult');el.value=ref.usageTotal;markAuto(el);}
-    if(ref.usageLead){
-      const el=document.getElementById('fulLead');el.value=ref.usageLead;markAuto(el);
-      const el2=document.getElementById('fulLead2');el2.value=ref.usageLead;markAuto(el2);
+  }
+
+  // 3. 加装限制 — same artist AND 加装
+  if(formCats.includes('加装')){
+    const cm=match.filter(i=>getCats(i).includes('加装'));
+    if(cm.length>0){
+      const jzRef=cm[cm.length-1];
+      if((!document.querySelector('input[name="jzr"]:checked')||checkedIsAuto('jzr'))&&jzRef.jzRestrict&&jzRef.jzRestrict.length){
+        document.querySelectorAll('input[name="jzr"][data-auto]').forEach(c=>c.checked=false);
+        jzRef.jzRestrict.forEach(v=>{const cb=document.querySelector('input[name="jzr"][value="'+v+'"]');if(cb){cb.checked=true;markAuto(cb)}});
+        if(jzRef.jzShop){const el=document.getElementById('fjzshop');el.style.display='';el.value=jzRef.jzShop;markAuto(el);}
+        if(jzRef.jzLihui){const el=document.getElementById('fjzlihui');el.style.display='';el.value=jzRef.jzLihui;markAuto(el);}
+        if(jzRef.jzCustom){const el=document.getElementById('fjzcustom');el.style.display='';el.value=jzRef.jzCustom;markAuto(el);}
+        onJz();filled.push('加装限制');
+      }
     }
-    if(ref.usageSupport){const el=document.getElementById('fulSupp');el.value=ref.usageSupport;markAuto(el);}
-    if(ref.usageOtherNote){const el=document.getElementById('fulOther');el.value=ref.usageOtherNote;markAuto(el);}
   }
-  // 通加规则 — only when form has 立绘/卤蛋 AND a same-category record exists
-  if(catRef&&(sharedCats.includes('立绘')||sharedCats.includes('卤蛋'))&&(!document.querySelector('input[name="tj"]:checked')||checkedIsAuto('tj'))&&catRef.tongjiaRule){
-    const tj=document.querySelector(`input[name="tj"][value="${catRef.tongjiaRule}"]`);
-    if(tj){tj.checked=true;markAuto(tj);onTj();filled.push('通加规则')}
-    if(catRef.tongjiaLimit){const tlr=document.querySelector(`input[name="tjl"][value="${catRef.tongjiaLimit}"]`);if(tlr){tlr.checked=true;markAuto(tlr);onTjl()}}
-    if(catRef.tongjiaType){const ttr=document.querySelector(`input[name="tjt"][value="${catRef.tongjiaType}"]`);if(ttr){ttr.checked=true;markAuto(ttr)}}
-    if(catRef.tongjiaScope){const tsr=document.querySelector(`input[name="tjs"][value="${catRef.tongjiaScope}"]`);if(tsr){tsr.checked=true;markAuto(tsr)}}
-  }
-  // 加装限制 — when form has 加装 and the same-category record has restrictions
-  if(catRef&&sharedCats.includes('加装')&&(!document.querySelector('input[name="jzr"]:checked')||checkedIsAuto('jzr'))&&catRef.jzRestrict&&catRef.jzRestrict.length){
-    document.querySelectorAll('input[name="jzr"][data-auto]').forEach(c=>c.checked=false);
-    catRef.jzRestrict.forEach(v=>{const cb=document.querySelector(`input[name="jzr"][value="${v}"]`);if(cb){cb.checked=true;markAuto(cb)}});
-    if(catRef.jzShop){const el=document.getElementById('fjzshop');el.style.display='';el.value=catRef.jzShop;markAuto(el);}
-    if(catRef.jzLihui){const el=document.getElementById('fjzlihui');el.style.display='';el.value=catRef.jzLihui;markAuto(el);}
-    if(catRef.jzCustom){const el=document.getElementById('fjzcustom');el.style.display='';el.value=catRef.jzCustom;markAuto(el);}
-    onJz();filled.push('加装限制');
-  }
-  // 其他 → 自定义分类名称
-  if(catRef&&sharedCats.includes('其他')&&(!document.getElementById('fcc').value.trim()||inputIsAuto('fcc'))&&catRef.customCategory){
-    const fccEl=document.getElementById('fcc');fccEl.value=catRef.customCategory;markAuto(fccEl);filled.push('自定义分类');
-  }
-  if(filled.length>0) st(`已从「${artist}」的已有记录自动填充：${filled.join('、')}`);
+
+  if(filled.length>0) st('已从「'+artist+'」的已有记录自动填充：'+filled.join('、'));
 }
 // Render multi-cat checkbox grid
 function renderCatGrid(checkedArr){
@@ -2582,26 +2595,23 @@ function onCatCheck(){
   if(cats.includes('其他')) fcc.style.display='';
   if(cats.includes('加装')) jzg.style.display='';
   if(cats.includes('立绘')||cats.includes('卤蛋')) tjg.style.display='';
-  // Sync category-derived choices from same-artist + same-category record (only fills empty fields)
+  // Sync from same-artist + same-category records (fills empty or auto-filled fields)
   if(document.getElementById('fa').value.trim()) autoFillRules();
-  // Defaults — only when still empty (autoFill may have filled them)
-  if(cats.includes('加装')&&!document.querySelector('input[name="jzr"]:checked')){ const ulc=document.querySelector('input[name="jzr"][value="无限制"]'); if(ulc){ulc.checked=true;markAuto(ulc);onJz();} }
-  if(cats.includes('卤蛋')&&!document.querySelector('input[name="tj"]:checked')){
-    const tjr=document.querySelector('input[name="tj"][value="可穿通加"]'); if(tjr){tjr.checked=true;markAuto(tjr);onTj()}
-    const tlr=document.querySelector('input[name="tjl"][value="unlimited"]'); if(tlr&&!document.querySelector('input[name="tjl"]:checked')){tlr.checked=true;markAuto(tlr);onTjl()}
+  // Default: 加装限制 → 无限制 (only if still empty or auto-filled)
+  if(cats.includes('加装')&&(!document.querySelector('input[name="jzr"]:checked')||checkedIsAuto('jzr'))){
+    const ulc=document.querySelector('input[name="jzr"][value="无限制"]');
+    if(ulc){ulc.checked=true;markAuto(ulc);onJz();}
+  }
+  // Default: 非立绘/卤蛋 → 使用次数=不限制 (universal, no artist matching needed)
+  const hasLihuiOrLudan=cats.includes('立绘')||cats.includes('卤蛋');
+  if(cats.length>0&&!hasLihuiOrLudan&&(!document.querySelector('input[name="ful"]:checked')||checkedIsAuto('ful'))){
+    const ulr=document.querySelector('input[name="ful"][value="unlimited"]');
+    if(ulr){ulr.checked=true;markAuto(ulr);onUsageLimit();}
   }
   // Update artist label: use label prefix based on first category with a mapping
   const first=cats[0]||'';
   const sourceCats=['美工','特效','音乐','黑科技'];
   document.querySelector('#fa').previousElementSibling.textContent=sourceCats.includes(first)?'画师/美工/来源名字':'画师/美工名字';
-  // Default usage limit: 立绘/卤蛋 → limited, others → unlimited (only if still unchecked)
-  if(cats.length>0&&!document.querySelector('input[name="ful"]:checked')){
-    const isLimited=cats.includes('立绘')||cats.includes('卤蛋');
-    const defaultUL=isLimited?'limited':'unlimited';
-    const ulr=document.querySelector(`input[name="ful"][value="${defaultUL}"]`);
-    if(ulr){ulr.checked=true;markAuto(ulr);}
-    onUsageLimit();
-  }
 }
 function onCatSubCheck(){
   const checked=Array.from(document.querySelectorAll('input[name="fcsk"]:checked')).map(c=>c.value);
@@ -2705,26 +2715,113 @@ function removeImg(idx){
   S.imgData.splice(idx,1);renderImgGrid();
 }
 function handlePayImage(e){
-  const file=e.target.files[0];if(!file)return;
+  if(e.target.files.length>0) processPayFiles(e.target.files);
   e.target.value='';
-  handlePayFile(file);
 }
-function handlePayFile(file){
-  if(!file||!file.type.startsWith('image/'))return;
-  const reader=new FileReader();
-  reader.onload=function(ev){
+function processPayFiles(files){
+  Array.from(files).forEach(file=>{
+    if(!file.type.startsWith('image/')) return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      const img=new Image();
+      img.onload=function(){
+        const c=document.createElement('canvas'),maxW=1600;let w=img.width,h=img.height;
+        if(w>maxW){h=(h*maxW)/w;w=maxW}c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        S.payImgData.push(c.toDataURL('image/jpeg',0.85));
+        renderPayImgGrid();
+      };img.src=ev.target.result;
+    };reader.readAsDataURL(file);
+  });
+}
+let _payGridListenersAttached=false;
+function renderPayImgGrid(){
+  const grid=document.getElementById('payImgGrid');
+  let h='';
+  S.payImgData.forEach((img,idx)=>{
+    h+=`<div class="iu-box" oncontextmenu="payImgContextMenu(event,${idx});return false">
+      <img src="${img}" alt="付款截图${idx+1}">
+      <div class="icl" onclick="event.stopPropagation();removePayImg(${idx})"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+    </div>`;
+  });
+  const n=S.payImgData.length;
+  h+=`<div class="iu-box drop-zone" onclick="document.getElementById('payImgi').click()" title="点击或拖拽上传">
+    <div class="iph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div>上传付款截图${n>0?`（已上传${n}张）`:''}</div></div>
+  </div>`;
+  grid.innerHTML=h;
+  if(!_payGridListenersAttached){
+    _payGridListenersAttached=true;
+    grid.addEventListener('dragover',e=>{e.preventDefault()});
+    grid.addEventListener('drop',e=>{
+      e.preventDefault();
+      if(e.dataTransfer.files.length>0) processPayFiles(e.dataTransfer.files);
+    });
+  }
+}
+function removePayImg(idx){
+  S.payImgData.splice(idx,1);
+  renderPayImgGrid();
+}
+
+// ---- Payment screenshot: view / copy / download / context menu ----
+let payCtxIdx=0;
+function openPayImgLb(idx){
+  if(S.payImgData.length===0)return;
+  lbImgs=[...S.payImgData];lbIdx=idx||0;lbItemName='付款截图';lbItemArtist='';
+  lbResetZoom();
+  showLbImg();
+  document.getElementById('lbx').style.display='flex';
+  document.getElementById('payCtxMenu').style.display='none';
+}
+function downloadPayImg(idx){
+  const url=S.payImgData[idx];if(!url)return;
+  const a=document.createElement('a');
+  a.href=url;
+  const ext=url.startsWith('data:')?'.'+((url.match(/data:image\/(\w+)/)||[])[1]||'jpg'):'.'+((url.match(/\.(\w+)(\?|$)/)||[])[1]||'jpg');
+  a.download='付款截图'+(S.payImgData.length>1?'_'+(idx+1):'')+ext;
+  a.click();
+  st('已下载');
+  document.getElementById('payCtxMenu').style.display='none';
+}
+function copyPayImg(idx){
+  const url=S.payImgData[idx];if(!url)return;
+  document.getElementById('payCtxMenu').style.display='none';
+  function doCopy(blob){
+    try{
+      navigator.clipboard.write([new ClipboardItem({[blob.type]:blob})]).then(
+        ()=>st('图片已复制到剪贴板'),
+        ()=>st('复制失败，请尝试下载','err')
+      );
+    }catch(e){st('复制失败','err')}
+  }
+  function canvasCopy(){
     const img=new Image();
     img.onload=function(){
-      const c=document.createElement('canvas'),maxW=1600;let w=img.width,h=img.height;
-      if(w>maxW){h=(h*maxW)/w;w=maxW}c.width=w;c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      S.payImgData=c.toDataURL('image/jpeg',0.85);
-      document.getElementById('payIp').style.display='none';document.getElementById('payIpr').style.display='';
-      document.getElementById('payIpr').src=S.payImgData;document.getElementById('payIcl').style.display='';document.getElementById('payDelBtn').style.display='';
-    };img.src=ev.target.result;
-  };reader.readAsDataURL(file);
+      try{
+        const c=document.createElement('canvas');
+        c.width=img.naturalWidth||img.width;c.height=img.naturalHeight||img.height;
+        c.getContext('2d').drawImage(img,0,0);
+        c.toBlob(b=>{if(b)doCopy(b);else st('复制失败','err')},'image/png');
+      }catch(e){st('复制失败','err')}
+    };
+    img.onerror=function(){st('图片加载失败','err')};
+    img.src=url;
+  }
+  if(!url.startsWith('data:')){
+    fetch(url).then(r=>r.blob()).then(b=>doCopy(b)).catch(()=>canvasCopy());
+  }else{
+    canvasCopy();
+  }
 }
-function clearPayImage(){S.payImgData='';document.getElementById('payIp').style.display='';document.getElementById('payIpr').style.display='none';document.getElementById('payIcl').style.display='none';document.getElementById('payDelBtn').style.display='none';document.getElementById('payImgi').value=''}
+function payImgContextMenu(e,idx){
+  if(S.payImgData.length===0)return;
+  e.preventDefault();
+  payCtxIdx=idx;
+  const menu=document.getElementById('payCtxMenu');
+  menu.style.display='block';
+  menu.style.left=Math.min(e.clientX,window.innerWidth-160)+'px';
+  menu.style.top=Math.min(e.clientY,window.innerHeight-120)+'px';
+}
 
 // ---- Lightbox ----
 let lbImgs=[],lbIdx=0,lbItemName='',lbItemArtist='';
@@ -3461,7 +3558,7 @@ function runExcelImport(){
         usageTotal:ulTotal,usageLead:ulLead,usageSupport:ulSupp,usageOtherNote:ulONote,
         usedCount:uc,isUsed:isUsedFlag,
         note,createdAt:new Date().toISOString(),
-        paymentImage:'',paymentNote:payNote
+        paymentImage:[],paymentNote:payNote
       };
       S.items.push(item);imported++;
     }catch(err){skipped++;}
