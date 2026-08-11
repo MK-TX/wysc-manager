@@ -257,6 +257,10 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .lb .lc{position:absolute;top:16px;right:16px;color:#fff;cursor:pointer;z-index:2;background:rgba(0,0,0,.5);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
 .lb .lc svg{width:24px;height:24px}
 .lb .lc:hover{background:rgba(255,255,255,.2)}
+/* Lightbox minimap */
+.lb-minimap{position:fixed;right:16px;bottom:16px;width:160px;height:120px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.25);border-radius:6px;overflow:hidden;z-index:10;cursor:pointer}
+.lb-minimap img{width:100%;height:100%;object-fit:contain;opacity:.7;pointer-events:none}
+.lb-vport{position:absolute;border:2px solid #fff;background:rgba(255,255,255,.15);border-radius:2px;pointer-events:none}
 .lb-tools{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:2;display:flex;gap:8px;background:rgba(0,0,0,.5);border-radius:20px;padding:4px 12px}
 .lb-tool{color:#fff;cursor:pointer;font-size:12px;padding:4px 10px;border-radius:12px;transition:background .15s}
 .lb-tool:hover{background:rgba(255,255,255,.2)}
@@ -398,7 +402,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
       <div class="fg"><label>素材名称 <span class="rq">*</span></label><input type="text" id="fn" placeholder="填写立绘/素材名字"></div>
 
       <!-- 画师/美工 -->
-      <div class="fg"><label>画师/美工/来源名字</label><input type="text" id="fa" placeholder="多人用逗号或顿号隔开" onblur="autoFillRules()"></div>
+      <div class="fg"><label>画师/美工/来源名字</label><input type="text" id="fa" placeholder="多人用,，、xX+隔开" onblur="autoFillRules()"></div>
 
       <!-- 售卖类型 -->
       <div class="fg"><label>售卖类型</label>
@@ -406,6 +410,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
           <label><input type="radio" name="fst" value="限时"> 限时</label>
           <label><input type="radio" name="fst" value="限量"> 限量</label>
           <label><input type="radio" name="fst" value="车"> 车</label>
+          <label><input type="radio" name="fst" value="福利购"> 福利购</label>
           <label><input type="radio" name="fst" value="其他"> 其他</label>
         </div>
       </div>
@@ -607,6 +612,10 @@ input,select,textarea{font-family:inherit;font-size:16px}
     <img class="lb-main" id="lbi" src="" alt="放大" oncontextmenu="lbContextMenu(event);return false">
   </div>
   <div class="lb-thumbs" id="lbThumbs"></div>
+  <div class="lb-minimap" id="lbMinimap" style="display:none">
+    <img id="lbMiniImg" src="" alt="">
+    <div class="lb-vport" id="lbVport"></div>
+  </div>
 </div>
 
 <!-- Context Menu -->
@@ -881,7 +890,7 @@ function getTjD(i){
   return null;
 }
 function getEffPrice(i){return (i.price||0)*(i.sponsorCount||1);}
-function splitArtists(str){return (str||'').split(/[,，、]/).map(s=>s.trim()).filter(Boolean)}
+function splitArtists(str){return (str||'').split(/[,，、xX+]/).map(s=>s.trim()).filter(Boolean)}
 function getPSD(i){
   const m={'微店':'微店购入','淘宝':'淘宝购入','私戳':'私戳购入','填表':'填表购入'};
   if(i.purchaseSource==='购入') return m[i.purchaseSub]||(i.purchaseSub||'购入');
@@ -946,15 +955,17 @@ function hasTongjia(i){ return i.category==='立绘'||i.category==='卤蛋'; }
 
 // ---- Sidebar ----
 function getSourcesInGroup(groupName){
-  const result=[];
+  const mainList=S.selType==='shop'?S.shops:S.persons;
+  const set=new Set();
   Object.entries(S.sourceGroup).forEach(([key,grp])=>{
     if(grp===groupName){
       const parts=key.split('_');
       const type=parts[0],name=parts.slice(1).join('_');
-      if(type===S.selType) result.push(name);
+      if(type===S.selType) set.add(name);
     }
   });
-  return result;
+  // Preserve order from main list
+  return mainList.filter(n=>set.has(n));
 }
 
 function getGroupForSource(name){
@@ -1726,17 +1737,15 @@ function updateDataBanner(){
   const el=document.getElementById('db');
   if(S.items.length>=30){
     el.style.display='flex';
-    let msg=`数据已积累 ${S.items.length} 条，建议导出备份`;
-    // Show storage usage if available
+    let msg=`数据已积累 ${S.items.length} 条，建议导出备份`;document.getElementById('dbt').textContent=msg;
     if(navigator.storage&&navigator.storage.estimate){
       navigator.storage.estimate().then(est=>{
         const usedMB=(est.usage/1048576).toFixed(1);
         const quotaMB=(est.quota/1048576).toFixed(0);
         const pct=((est.usage/est.quota)*100).toFixed(1);
-        document.getElementById('dbt').textContent=`${msg} | 存储：${usedMB}MB / ${quotaMB}MB（${pct}%）`;
-      }).catch(()=>{document.getElementById('dbt').textContent=msg});
-    }else{
-      document.getElementById('dbt').textContent=msg;
+        // Quota is usually ~10GB for IndexedDB - plenty of room
+        document.getElementById('dbt').textContent=`${msg} | 存储：${usedMB}MB / ${quotaMB}MB（${pct}%）— 配额充足，无需担心上限`;
+      }).catch(()=>{});
     }
   }else{
     el.style.display='none';
@@ -1798,6 +1807,7 @@ function openItemModal(){
   onUsageLimit();onUsageLimitSub();
   const psr=document.querySelector('input[name="ps"][value="购入"]'); if(psr){psr.checked=true;onPS()}
   document.getElementById('imo').style.display='flex';
+  document.querySelector('#imo .mdb').scrollTop=0;
 }
 
 function openEditItem(id){
@@ -2258,7 +2268,12 @@ function onCatSub(){
 function onTj(){
   const v=document.querySelector('input[name="tj"]:checked')?.value;
   document.getElementById('tjs').style.display=v==='可穿通加'?'':'none';
-  if(v!=='可穿通加'){document.querySelectorAll('input[name="tjl"]').forEach(r=>r.checked=false);onTjl()}
+  if(v==='可穿通加'){
+    const ul=document.querySelector('input[name="tjl"][value="unlimited"]');
+    if(ul){ul.checked=true;onTjl()}
+  }else{
+    document.querySelectorAll('input[name="tjl"]').forEach(r=>r.checked=false);onTjl()
+  }
 }
 function onTjl(){
   const v=document.querySelector('input[name="tjl"]:checked')?.value;
@@ -2440,6 +2455,7 @@ function lbApplyZoom(){
     img.style.maxWidth='92vw';
     img.style.maxHeight='85vh';
     img.style.width='';
+    document.getElementById('lbMinimap').style.display='none';
   }else{
     img.classList.add('zoomed');
     // Remove constraints so image shows at natural resolution (not blurry upscale)
@@ -2447,6 +2463,7 @@ function lbApplyZoom(){
     img.style.maxHeight='none';
     img.style.width='auto';
     img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
+    updateLbMinimap();
   }
 }
 function showLbImg(){
@@ -2459,7 +2476,69 @@ function renderLbThumbs(){
   document.getElementById('lbThumbs').innerHTML=lbImgs.map((img,idx)=>`<div class="lb-thumb${idx===lbIdx?' active':''}" onclick="event.stopPropagation();lbJump(${idx})"><img src="${img}"></div>`).join('');
 }
 function lbJump(idx){lbIdx=idx;showLbImg()}
-function closeLb(){document.getElementById('lbx').style.display='none';lbImgs=[];lbIdx=0;lbResetZoom()}
+function closeLb(){document.getElementById('lbx').style.display='none';lbImgs=[];lbIdx=0;lbResetZoom();document.getElementById('lbMinimap').style.display='none'}
+function updateLbMinimap(){
+  const img=document.getElementById('lbi');
+  const mini=document.getElementById('lbMinimap');
+  if(lbZoom<=1){mini.style.display='none';return}
+  mini.style.display='block';
+  document.getElementById('lbMiniImg').src=lbImgs[lbIdx]||'';
+  // Wait for image layout, then compute viewport rect
+  setTimeout(()=>{
+    const ir=img.getBoundingClientRect();
+    const vpW=window.innerWidth, vpH=window.innerHeight;
+    const vsL=Math.max(0,-ir.left), vsT=Math.max(0,-ir.top);
+    const vsR=Math.min(ir.width, vpW-ir.left), vsB=Math.min(ir.height, vpH-ir.top);
+    if(ir.width<=0||ir.height<=0)return;
+    const pL=(vsL/ir.width)*100, pT=(vsT/ir.height)*100;
+    const pW=((vsR-vsL)/ir.width)*100, pH=((vsB-vsT)/ir.height)*100;
+    const vp=document.getElementById('lbVport');
+    vp.style.left=Math.max(0,Math.min(100,pL))+'%';
+    vp.style.top=Math.max(0,Math.min(100,pT))+'%';
+    vp.style.width=Math.max(2,Math.min(100-pL,pW))+'%';
+    vp.style.height=Math.max(2,Math.min(100-pT,pH))+'%';
+  },30);
+}
+// Minimap drag to quick-navigate
+(function(){
+  let mmDragging=false,mmStartX=0,mmStartY=0;
+  const mm=document.getElementById('lbMinimap');
+  mm.addEventListener('mousedown',function(e){
+    if(lbZoom<=1)return;
+    e.preventDefault();e.stopPropagation();
+    mmDragging=true;
+    mmStartX=e.clientX; mmStartY=e.clientY;
+    const img=document.getElementById('lbi');
+    if(!img.naturalWidth)return;
+    // Jump to clicked position
+    const mr=mm.getBoundingClientRect();
+    const pctX=(e.clientX-mr.left)/mr.width;
+    const pctY=(e.clientY-mr.top)/mr.height;
+    const vpW=window.innerWidth, vpH=window.innerHeight;
+    lbPanX=-(pctX*img.naturalWidth-vpW/2/lbZoom);
+    lbPanY=-(pctY*img.naturalHeight-vpH/2/lbZoom);
+    img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
+    updateLbMinimap();
+    document.onmousemove=function(ev){
+      if(!mmDragging||!img.naturalWidth)return;
+      const dx=(ev.clientX-mmStartX), dy=(ev.clientY-mmStartY);
+      const mr2=mm.getBoundingClientRect();
+      const scX=img.naturalWidth/mr2.width/lbZoom;
+      const scY=img.naturalHeight/mr2.height/lbZoom;
+      // Re-calc from current pan (which was set by click or previous drag)
+      const curPX=lbPanX, curPY=lbPanY;
+      lbPanX=curPX-dx*scX;
+      lbPanY=curPY-dy*scY;
+      mmStartX=ev.clientX; mmStartY=ev.clientY; // reset for next delta
+      img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
+      updateLbMinimap();
+    };
+    document.onmouseup=function(){
+      mmDragging=false;
+      document.onmousemove=null;document.onmouseup=null;
+    };
+  });
+})();
 function lbToggleZoom(e){
   if(e)e.stopPropagation();
   // Suppress click after drag
@@ -2488,6 +2567,7 @@ function lbEnablePan(){
       lbPanX=lbDragStartX+(ev2.clientX-lbDragSX)/lbZoom;
       lbPanY=lbDragStartY+(ev2.clientY-lbDragSY)/lbZoom;
       img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
+      updateLbMinimap();
     };
     document.onmouseup=function(){
       lbDragging=false;
@@ -2512,6 +2592,7 @@ function lbEnablePan(){
     lbPanX=lbDragStartX+(t.clientX-lbDragSX)/lbZoom;
     lbPanY=lbDragStartY+(t.clientY-lbDragSY)/lbZoom;
     img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
+    updateLbMinimap();
   };
   img.ontouchend=function(){lbDragging=false};
 }
@@ -2823,7 +2904,7 @@ const XI_FIELDS=[
   {id:'name',label:'素材名称',required:true},
   {id:'ownerType',label:'所属类型',required:false},
   {id:'ownerName',label:'所属名称',required:true},
-  {id:'category',label:'属性分类',required:true},
+  {id:'category',label:'属性分类',required:false},
   {id:'subCategory',label:'子分类',required:false},
   {id:'customSubCategory',label:'自定义子分类',required:false},
   {id:'boundLihui',label:'绑定立绘',required:false},
