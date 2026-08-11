@@ -717,6 +717,9 @@ const MAIN_CATS=['立绘','卤蛋','加装','CG','美工','Q版','素材','特�
 const SUBS={ '美工':['打光','空镜','封面','表白卡','UI','挂件','套图','宣传模板','字素','其他'], 'Q版':['绑定Q','养成Q','动物Q','表情包','其他'], '音乐':['BGM','主题曲','其他'] };
 const CCOL={'立绘':'#6366f1','卤蛋':'#f97316','加装':'#db2777','CG':'#8b5cf6','美工':'#f59e0b','Q版':'#22c55e','素材':'#64748b','特效':'#7c3aed','场景':'#0ea5e9','音乐':'#d946ef','黑科技':'#1e293b','其他':'#94a3b8'};
 
+// Preset shop name list — only names in this set are recognized as shops during import
+const PRESET_SHOPS=new Set(['三分春色','寻意阁','烤鸭坊','喵样年华','光明顶','染霜华','春日宴','栖西楼','嗷呜菜园','森罗万象','犀峰阁','十四轩','癫笑往生','沁黎居','银河庄园','锦瑟','柠檬汽水糖','一沽酒','枕砚','弱水三千','河底捞','沁梦阁','一页书','画重锦','溯梦','休眠火山','定风波','琉心瑜','YSYS~TUDIO','甜鱼','清鸢','Evildoer','绘里','汉晴画轩','诸城叙梦','舞幺幺','金风细雨','千亦阁','酒香村','壹人组','有枝小店','储秀云心','欢乐炸鸡店','古道有巷','鸢上花','景云蔚','三薰屋','岁如初','十里长欢','子非鱼','易稚园','清曜','水墨蛋清','麻将馆麻酱','点今阁','云桓工作室','君笙拂兮','听说有神也有人便利小店','十二宫','临念樱','食鉴','长街小筑','妙蝉舟','稻香村','墨上枝头','无肉不欢','画厂','浮生若梦','小云楼','大观园','闲云鹤居','碧海潮生','千秋令','满庭芳','玉棂','丹青客','画夜','花果山','栖木轩','不眠夜','易梦铺子','十方庭','烩面馆','果酒一两','陌心堂','三台令','一川云山','清水滴墨','污力葫','夜阑听雨阁','竹间庭','惓思记','三叶草','纸入风华工作室','天边的鱼','未央宫','秦时歌','六壮士','聚锦州','韶华梦','壹鹊桥','凤华引','沐棠里','注咕生','一品墨客','鸽子小卖部','远山眉黛','诗晴画意','伊甸园','废画','忘川阁','相见欢','北梦店铺','他山玉','羽若雪兮','橙娘素材铺','圣山','能不能画','上上签','喜和爱','食半','青玉案','寒江雪','锦鲤绘','荷糖月色','妙笔花生','花晨月夕','永遇乐','向阳花','浮镜阁','好运来','兰亭阁','雪言禾心','鸽鸽屋','三重雪','清平乐','椒花颂声','青庭','无尽夏','枕山栖水','柔树特效','米卷儿小铺','紫光特效','笙歌惊鸿','黑相簿','黄桃罐头','泊客音频','寻欢CV工作室','乔一音乐屋','天音纪','久盟音画','麋鹿','寒松吟','花园','云月素材','猫耳面馆','晚荷渡','山水有色','迭代联盟','无声诗','六月集','五月流火','南梦湖','鹤云楼','汀雨阁','明日雪','浮生记','双栖阁','青玉阁','山有木兮','霖楚阁','悦君兮','春禅秋茗','故人归','陌上情','富婆养生会所','溯月楼','吟君音','璇星阁','喵花屋','归心殿','红莲落衣','大观园剧本分部','春日尽','小小柠檬','踏鹊枝','红尘之上','花暮瑾年','九重春色','墨离阁','意难平','无言书生','疏楼曲','西江月','花谷','幺幺零','亿镜','木寒阁','小山禾','江文明']);
+
 const I={ shop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11a1 1 0 001 1h14a1 1 0 001-1V9"/><path d="M9 22V12h6v10"/></svg>',
   user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>',
   edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
@@ -1254,18 +1257,40 @@ function sdragLeave(e){ e.currentTarget.classList.remove('drag-over');e.currentT
 function sdragDrop(e,idx,name){
   e.preventDefault(); e.currentTarget.classList.remove('drag-over');e.currentTarget.classList.remove('drag-after');
   if(!dragSrc||dragSrc===name) return;
+  // Check if dragged source and target are in different groups
+  const targetGroup=getGroupForSource(name); // '' means ungrouped
+  const dragGroup=getGroupForSource(dragSrc);
+  const crossGroup=targetGroup!==dragGroup;
+  // Handle multi-select: move all selected sources to target's group + reorder
+  const multiList=(multiSelectSources.size>0&&multiSelectSources.has(dragSrc))?[...multiSelectSources]:[dragSrc];
   const list=getSidebarList();
-  const srcIdx=list.indexOf(dragSrc);
-  if(srcIdx<0) return;
-  // Remove source first
-  const [moved]=list.splice(srcIdx,1);
-  // Find target after removal (index may have shifted)
+  // Remove all dragged sources from list first (in reverse order to keep indices valid)
+  const removed=[];
+  multiList.forEach(src=>{
+    const si=list.indexOf(src);
+    if(si>=0) removed.push({name:list.splice(si,1)[0],group:getGroupForSource(src)});
+  });
+  if(removed.length===0) return;
+  // If cross-group, assign all moved sources to target's group
+  if(crossGroup){
+    removed.forEach(r=>{
+      if(targetGroup) S.sourceGroup[gref(S.selType,r.name)]=targetGroup;
+      else delete S.sourceGroup[gref(S.selType,r.name)];
+    });
+  }
+  // Find target index after removals
   let targetIdx=list.indexOf(name);
-  if(targetIdx<0) targetIdx=idx>srcIdx?idx-1:idx;
-  // Insert before or after the target depending on pointer position
+  if(targetIdx<0){ // target was also removed (shouldn't happen for non-multi target)
+    targetIdx=Math.min(idx,list.length);
+  }
   if(!dragBefore) targetIdx++;
-  list.splice(targetIdx,0,moved);
-  sv(); renderSidebar();
+  // Insert all removed sources at target position (preserve their relative order)
+  removed.forEach((r,i)=>list.splice(targetIdx+i,0,r.name));
+  multiSelectSources.clear();
+  sv(); renderSidebar(); renderAll();
+  if(crossGroup){
+    st(`已将 ${removed.length} 个来源移入「${targetGroup||'未分类'}」`);
+  }
 }
 function sdragEnd(e){
   e.currentTarget.classList.remove('dragging');
@@ -3414,9 +3439,9 @@ function handleCSVImport(file){
 }
 
 const XI_FIELDS=[
-  {id:'name',label:'素材名称',required:true},
+  {id:'name',label:'素材名称',required:false},
   {id:'ownerType',label:'所属类型',required:false},
-  {id:'ownerName',label:'所属名称',required:true},
+  {id:'ownerName',label:'所属名称',required:false},
   {id:'category',label:'属性分类',required:false},
   {id:'subCategory',label:'子分类',required:false},
   {id:'customSubCategory',label:'自定义子分类',required:false},
@@ -3451,13 +3476,14 @@ const XI_FIELDS=[
 function buildXIMap(){
   const el=document.getElementById('xicols');
   const guesses={};
+  // 1. Header-based guessing
   xiHeaders.forEach((h,i)=>{
     const hl=h.toLowerCase().replace(/\s+/g,'');
     XI_FIELDS.forEach(f=>{
       const fl=f.label.toLowerCase().replace(/\s+/g,'').replace(/[\/（）()]/g,'');
       if(hl.includes(fl)||fl.includes(hl)) guesses[f.id]=i;
       if(!guesses[f.id]){
-        if(f.id==='name'&&(hl.includes('名称')||hl.includes('素材名'))) guesses[f.id]=i;
+        if(f.id==='name'&&(hl.includes('名称')||hl.includes('素材名')||hl.includes('商品'))) guesses[f.id]=i;
         if(f.id==='category'&&(hl.includes('分类')||hl.includes('属性'))) guesses[f.id]=i;
         if(f.id==='price'&&(hl.includes('价格')||hl.includes('金额')||hl.includes('¥'))) guesses[f.id]=i;
         if(f.id==='purchaseDate'&&(hl.includes('日期')||hl.includes('时间'))) guesses[f.id]=i;
@@ -3466,6 +3492,41 @@ function buildXIMap(){
       }
     });
   });
+  // 2. Smart detection: find price column by numeric content
+  if(guesses.price===undefined){
+    let bestCol=-1,bestScore=0;
+    xiHeaders.forEach((h,i)=>{
+      let numCount=0,nonEmpty=0;
+      xiData.forEach(row=>{
+        if(i<row.length){
+          const v=(row[i]||'').toString().trim();
+          if(v){nonEmpty++; if(/^[\d,.]+$/.test(v)||/^[¥￥][\d,.]+$/.test(v)) numCount++}
+        }
+      });
+      if(nonEmpty>=2&&numCount/nonEmpty>=0.6&&numCount>bestScore){
+        bestScore=numCount; bestCol=i;
+      }
+    });
+    if(bestCol>=0) guesses.price=bestCol;
+  }
+  // 3. Text left of price → name (and/or artist)
+  if(guesses.price!==undefined&&guesses.name===undefined){
+    const priceCol=guesses.price;
+    if(priceCol>0){
+      // Check if the column to the left has text content
+      const leftCol=priceCol-1;
+      let hasText=false;
+      xiData.forEach(row=>{
+        if(leftCol<row.length){
+          const v=(row[leftCol]||'').toString().trim();
+          if(v&&!/^[\d,.]+$/.test(v)) hasText=true;
+        }
+      });
+      if(hasText) guesses.name=leftCol;
+    }
+  }
+  // 4. If name found but no artist column, and there's a separate text column, try artist
+  // (If no separate artist column, artist stays unmapped — text treated as name only)
   el.innerHTML=XI_FIELDS.map(f=>{
     const sel=`<select id="xim_${f.id}"><option value="">-- 不映射 --</option>${xiHeaders.map((h,i)=>`<option value="${i}" ${guesses[f.id]===i?'selected':''}>${eh(h)}</option>`).join('')}</select>`;
     return `<div class="fg"><label>${eh(f.label)}${f.required?' <span class="rq">*</span>':''}</label>${sel}</div>`;
@@ -3480,55 +3541,57 @@ function buildXIPreview(){
 
 function runExcelImport(){
   if(!xiData||!xiHeaders){st('请先上传文件','err');return}
-  const maps={};let ok=true;
+  const maps={};
   XI_FIELDS.forEach(f=>{
     const sel=document.getElementById('xim_'+f.id);
     if(sel&&sel.value!=='') maps[f.id]=parseInt(sel.value);
-    else if(f.required) ok=false;
   });
-  if(!ok){st('请完成必填字段的列映射','err');return}
   let imported=0,skipped=0;
   xiData.forEach((row,i)=>{
     try{
-      const name=(maps.name!=null?row[maps.name]:'').trim();if(!name){skipped++;return}
-      const cat=(maps.category!=null?row[maps.category]:'').trim();
-      const oname=(maps.ownerName!=null?row[maps.ownerName]:'').trim()||'导入数据';
+      const name=(maps.name!=null?(row[maps.name]||'').toString().trim():'');
+      const cat=(maps.category!=null?(row[maps.category]||'').toString().trim():'');
+      const oname=(maps.ownerName!=null?(row[maps.ownerName]||'').toString().trim():'')||'导入数据';
+      // Determine owner type: preset shop list takes priority
       let otype='shop';
-      if(maps.ownerType!=null){const ov=row[maps.ownerType].trim();if(ov.includes('个人')||ov==='person') otype='person'}
-      if(!maps.ownerType&&S.persons.includes(oname)) otype='person';
+      if(maps.ownerType!=null){const ov=(row[maps.ownerType]||'').toString().trim();if(ov.includes('个人')||ov==='person') otype='person'}
+      else if(S.persons.includes(oname)) otype='person';
+      else if(S.shops.includes(oname)) otype='shop';
+      else if(PRESET_SHOPS.has(oname)) otype='shop';
+      else otype='person'; // not in preset shop list → default to person
       if(otype==='shop'&&!S.shops.includes(oname)) S.shops.push(oname);
       if(otype==='person'&&!S.persons.includes(oname)) S.persons.push(oname);
-      const subCat=(maps.subCategory!=null?row[maps.subCategory]:'').trim();
-      const csCat=(maps.customSubCategory!=null?row[maps.customSubCategory]:'').trim();
-      const bnd=(maps.boundLihui!=null?row[maps.boundLihui]:'').trim();
-      const ps=(maps.purchaseSource!=null?row[maps.purchaseSource]:'').trim();
-      const psub=(maps.purchaseSub!=null?row[maps.purchaseSub]:'').trim();
-      const spId=(maps.sponsorId!=null?row[maps.sponsorId]:'').trim();
-      const spCount=parseInt((maps.sponsorCount!=null?row[maps.sponsorCount]:'1').trim())||1;
-      const isTrans=(maps.isTransfer!=null?row[maps.isTransfer]:'').trim();
-      const trId=(maps.transferId!=null?row[maps.transferId]:'').trim();
-      const tjR=(maps.tongjiaRule!=null?row[maps.tongjiaRule]:'').trim();
-      const tjT=(maps.tongjiaType!=null?row[maps.tongjiaType]:'').trim();
-      const tjS=(maps.tongjiaScope!=null?row[maps.tongjiaScope]:'').trim();
-      const trR=(maps.transferRule!=null?row[maps.transferRule]:'').trim();
-      const art=(maps.artist!=null?row[maps.artist]:'').trim();
-      const price=parseFloat((maps.price!=null?row[maps.price]:'0').replace(/[¥,]/g,''))||0;
-      const pDate=(maps.purchaseDate!=null?row[maps.purchaseDate]:'').trim();
-      const dpStr=(maps.isDoublePoints!=null?row[maps.isDoublePoints]:'').trim();
+      const subCat=(maps.subCategory!=null?(row[maps.subCategory]||'').toString().trim():'');
+      const csCat=(maps.customSubCategory!=null?(row[maps.customSubCategory]||'').toString().trim():'');
+      const bnd=(maps.boundLihui!=null?(row[maps.boundLihui]||'').toString().trim():'');
+      const ps=(maps.purchaseSource!=null?(row[maps.purchaseSource]||'').toString().trim():'');
+      const psub=(maps.purchaseSub!=null?(row[maps.purchaseSub]||'').toString().trim():'');
+      const spId=(maps.sponsorId!=null?(row[maps.sponsorId]||'').toString().trim():'');
+      const spCount=parseInt((maps.sponsorCount!=null?(row[maps.sponsorCount]||'1').toString().trim():'1'))||1;
+      const isTrans=(maps.isTransfer!=null?(row[maps.isTransfer]||'').toString().trim():'');
+      const trId=(maps.transferId!=null?(row[maps.transferId]||'').toString().trim():'');
+      const tjR=(maps.tongjiaRule!=null?(row[maps.tongjiaRule]||'').toString().trim():'');
+      const tjT=(maps.tongjiaType!=null?(row[maps.tongjiaType]||'').toString().trim():'');
+      const tjS=(maps.tongjiaScope!=null?(row[maps.tongjiaScope]||'').toString().trim():'');
+      const trR=(maps.transferRule!=null?(row[maps.transferRule]||'').toString().trim():'');
+      const art=(maps.artist!=null?(row[maps.artist]||'').toString().trim():'');
+      const price=parseFloat((maps.price!=null?(row[maps.price]||'0').toString():'0').replace(/[¥,]/g,''))||0;
+      const pDate=(maps.purchaseDate!=null?(row[maps.purchaseDate]||'').toString().trim():'');
+      const dpStr=(maps.isDoublePoints!=null?(row[maps.isDoublePoints]||'').toString().trim():'');
       const dp=dpStr==='是'||dpStr==='yes'||dpStr==='1'||dpStr==='true';
-      const cisStr=(maps.countInShop!=null?row[maps.countInShop]:'').trim();
+      const cisStr=(maps.countInShop!=null?(row[maps.countInShop]||'').toString().trim():'');
       const cis=cisStr!=='否'&&cisStr!=='no'&&cisStr!=='0'&&cisStr!=='false';
-      const ult=(maps.usageLimitType!=null?row[maps.usageLimitType]:'').trim();
-      const ulst=(maps.usageLimitSubtype!=null?row[maps.usageLimitSubtype]:'').trim();
-      const ulTotal=parseInt((maps.usageTotal!=null?row[maps.usageTotal]:'1'))||1;
-      const ulLead=parseInt((maps.usageLead!=null?row[maps.usageLead]:'1'))||1;
-      const ulSupp=parseInt((maps.usageSupport!=null?row[maps.usageSupport]:'1'))||1;
-      const ulONote=(maps.usageOtherNote!=null?row[maps.usageOtherNote]:'').trim();
-      const uc=parseInt((maps.usedCount!=null?row[maps.usedCount]:'0'))||0;
-      const isUsedRaw=(maps.isUsed!=null?row[maps.isUsed]:'').trim();
+      const ult=(maps.usageLimitType!=null?(row[maps.usageLimitType]||'').toString().trim():'');
+      const ulst=(maps.usageLimitSubtype!=null?(row[maps.usageLimitSubtype]||'').toString().trim():'');
+      const ulTotal=parseInt((maps.usageTotal!=null?(row[maps.usageTotal]||'1').toString():'1'))||1;
+      const ulLead=parseInt((maps.usageLead!=null?(row[maps.usageLead]||'1').toString():'1'))||1;
+      const ulSupp=parseInt((maps.usageSupport!=null?(row[maps.usageSupport]||'1').toString():'1'))||1;
+      const ulONote=(maps.usageOtherNote!=null?(row[maps.usageOtherNote]||'').toString().trim():'');
+      const uc=parseInt((maps.usedCount!=null?(row[maps.usedCount]||'0').toString():'0'))||0;
+      const isUsedRaw=(maps.isUsed!=null?(row[maps.isUsed]||'').toString().trim():'');
       const isUsedFlag=isUsedRaw===''?(uc>0):(isUsedRaw.includes('是')||isUsedRaw==='1'||isUsedRaw.toLowerCase()==='true'||isUsedRaw.includes('已使用'));
-      const note=(maps.note!=null?row[maps.note]:'').trim();
-      const payNote=(maps.paymentNote!=null?row[maps.paymentNote]:'').trim();
+      const note=(maps.note!=null?(row[maps.note]||'').toString().trim():'');
+      const payNote=(maps.paymentNote!=null?(row[maps.paymentNote]||'').toString().trim():'');
       let finalPs=ps,finalPsub=psub;
       if(!['购入','赞助','接转','回购','定制','其他'].includes(finalPs)){if(ps.includes('赞助')&&!ps.includes('购入')) finalPs='赞助';else if(ps.includes('接转')) finalPs='接转';else if(ps.includes('回购')) finalPs='回购';else if(ps.includes('定制')) finalPs='定制';else if(ps.includes('购入')||ps.includes('微店')||ps.includes('淘宝')||ps.includes('私戳')||ps.includes('填表')) finalPs='购入';else if(ps) finalPs='其他'}
       if(finalPs==='购入'&&!['微店','淘宝','私戳','填表'].includes(finalPsub)&&psub){finalPsub='微店'}
