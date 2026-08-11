@@ -1795,18 +1795,23 @@ function renderMaterials(){
 
 // ---- Filter Modal (Advanced Filter) ----
 let S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[],status:[]};
-function openFilterModal(){
-  const items=getItemsForView();
-  // Collect all unique values
-  const artists=new Set(), saleTypes=new Set(), cats=new Set(), sources=new Set(), tongjias=new Set();
-  items.forEach(i=>{
-    if(i.artist) splitArtists(i.artist).forEach(a=>artists.add(a));
-    if(i.saleType) saleTypes.add(i.saleType);
-    getCats(i).forEach(c=>cats.add(c));
-    if(i.ownerName) sources.add(i.ownerName);
-    const tj=getTongjiaRule(i);
-    if(tj) tongjias.add(tj);
-  });
+const artists = new Set(), saleTypes = new Set(), cats = new Set(), sources = new Set(), tongjias = new Set();
+items.forEach(i => {
+  if (i.artist) splitArtists(i.artist).forEach(a => artists.add(a));
+  if (i.saleType) saleTypes.add(i.saleType);
+  getCats(i).forEach(c => cats.add(c));
+  let psLabel = '';
+  if (i.purchaseSource === '购入' && i.purchaseSub) {
+    psLabel = i.purchaseSub + '购入';
+  } else if (i.purchaseSource === '赞助') {
+    psLabel = (i.purchaseSub === '被赞助') ? '被赞助' : '赞助';
+  } else if (i.purchaseSource) {
+    psLabel = i.purchaseSource;
+  }
+  if (psLabel) sources.add(psLabel);
+  const tj = getTongjiaRule(i);
+  if (tj) tongjias.add(tj);
+});
   // Dynamic status options
   const statusOptions=[];
   const hasUsed=items.some(i=>i.isUsed);
