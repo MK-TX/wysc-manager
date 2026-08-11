@@ -57,14 +57,15 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .sidebar-group-header .gn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:none;letter-spacing:0}
 .sidebar-group-header .gc{font-size:10px;color:var(--text2);background:#f1f5f9;padding:1px 6px;border-radius:10px;flex-shrink:0;font-weight:400;letter-spacing:0}
 .sidebar-group-header.active .gc{background:var(--primary);color:#fff}
-.sidebar-group-items{margin-left:0}
+.sidebar-group-items{margin-left:0;padding-bottom:8px}
 .sidebar-group-items.collapsed{display:none}
 
 .sidebar-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:background .15s;margin-bottom:1px;user-select:none;position:relative;font-size:13px}
 .sidebar-item:hover{background:#f1f5f9}
 .sidebar-item.active{background:var(--primary-light);color:var(--primary-dark);font-weight:600}
 .sidebar-item.dragging{opacity:0.5;background:#e0e7ff}
-.sidebar-item.drag-over{border:2px dashed var(--primary);border-radius:var(--radius-sm)}
+.sidebar-item.drag-over{box-shadow:inset 0 2px 0 0 var(--primary);border-radius:var(--radius-sm)}
+.sidebar-item.drag-over.drag-after{box-shadow:inset 0 -2px 0 0 var(--primary)}
 .sidebar-group-header.dragging{opacity:0.5;background:#e0e7ff}
 .sidebar-group-header.drag-over{border:2px dashed var(--primary);border-radius:var(--radius-sm)}
 
@@ -140,6 +141,10 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .swrap{position:relative}
 .swrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text2)}
 .swrap input{padding-left:30px}
+.sort-tabs{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.sort-tab{padding:7px 11px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;background:var(--card);color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap;line-height:1;font-family:inherit}
+.sort-tab:hover{border-color:var(--primary);color:var(--primary-dark)}
+.sort-tab.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:600}
 
 .mat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 .mc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:box-shadow .15s,transform .15s;content-visibility:auto;contain-intrinsic-size:auto 320px}
@@ -372,12 +377,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
         <div class="mht"><span id="mttl">未分类店铺</span><span class="src-badge" id="msub"></span></div>
         <div class="mat-fl">
           <button class="btn btn-sm" id="fcatBtn" onclick="openFilterModal()">筛选条件 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button>
-          <select id="fsort" onchange="renderMaterials()">
-            <option value="time_desc">时间最新</option><option value="time_asc">时间最早</option>
-            <option value="price_desc">价格↓</option><option value="price_asc">价格↑</option>
-            <option value="category">按分类</option>
-            <option value="manual">手动排序</option>
-          </select>
+          <div class="sort-tabs" id="sortTabs"></div>
           <div class="swrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="q" placeholder="搜索素材/画师..." oninput="renderMaterials()"></div>
           <button class="btn btn-primary btn-sm" onclick="openItemModal()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>添加素材</button>
         </div>
@@ -1201,7 +1201,7 @@ function selectUngrouped(){
 }
 
 // ---- Sidebar drag reorder ----
-let dragSrc=null, dragIdx=-1;
+let dragSrc=null, dragIdx=-1, dragBefore=true;
 let multiSelectSources=new Set();
 function selectSource(e,name){
   if(e&&(e.ctrlKey||e.metaKey)){
@@ -1220,7 +1220,7 @@ function selectSource(e,name){
   sv(); renderSidebar(); renderOV(); renderMaterials(); renderDonut(); renderBars();
 }
 function sdragStart(e,idx,name){
-  dragSrc=name; dragIdx=idx;
+  dragSrc=name; dragIdx=idx; dragBefore=true;
   e.currentTarget.classList.add('dragging');
   e.dataTransfer.effectAllowed='move';
   e.dataTransfer.setData('text/plain',name);
@@ -1240,11 +1240,15 @@ function sdragOver(e,idx,name){
   e.preventDefault();
   e.dataTransfer.dropEffect='move';
   if(!dragSrc||dragSrc===name) return;
+  // Pointer in bottom half of target → insert AFTER it; top half → insert BEFORE it
+  const r=e.currentTarget.getBoundingClientRect();
+  dragBefore=(e.clientY-r.top)<r.height/2;
+  e.currentTarget.classList.toggle('drag-after',!dragBefore);
   e.currentTarget.classList.add('drag-over');
 }
-function sdragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
+function sdragLeave(e){ e.currentTarget.classList.remove('drag-over');e.currentTarget.classList.remove('drag-after'); }
 function sdragDrop(e,idx,name){
-  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');e.currentTarget.classList.remove('drag-after');
   if(!dragSrc||dragSrc===name) return;
   const list=getSidebarList();
   const srcIdx=list.indexOf(dragSrc);
@@ -1254,13 +1258,15 @@ function sdragDrop(e,idx,name){
   // Find target after removal (index may have shifted)
   let targetIdx=list.indexOf(name);
   if(targetIdx<0) targetIdx=idx>srcIdx?idx-1:idx;
+  // Insert before or after the target depending on pointer position
+  if(!dragBefore) targetIdx++;
   list.splice(targetIdx,0,moved);
   sv(); renderSidebar();
 }
 function sdragEnd(e){
   e.currentTarget.classList.remove('dragging');
-  document.querySelectorAll('.sidebar-item.drag-over,.sidebar-group-header.drag-over,.sidebar-group-header.drag-over-src,.sidebar-section-label.drag-over').forEach(el=>{el.classList.remove('drag-over');el.classList.remove('drag-over-src')});
-  dragSrc=null; dragIdx=-1;
+  document.querySelectorAll('.sidebar-item.drag-over,.sidebar-group-header.drag-over,.sidebar-group-header.drag-over-src,.sidebar-section-label.drag-over').forEach(el=>{el.classList.remove('drag-over');el.classList.remove('drag-over-src');el.classList.remove('drag-after')});
+  dragSrc=null; dragIdx=-1; dragBefore=true;
 }
 
 // ---- Group drag reorder ----
@@ -1540,7 +1546,7 @@ function renderSidebar(){
         <span class="gn">${eh(g.name)}</span><span class="gc">${groupTotal}来源·${groupItems}条</span>
         <span class="sd btn-icon" onclick="event.stopPropagation();showGroupCtxMenu(event,'${eh(g.name)}')"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg></span>
       </div>
-      <div class="sidebar-group-items ${isCollapsed?'collapsed':''}">`;
+      <div class="sidebar-group-items ${isCollapsed?'collapsed':''}" ondragover="sgGroupOver(event)" ondragleave="sgGroupLeave(event)" ondrop="sgGroupDrop(event,'${eh(g.name)}')">`;
 
     // Sort: pinned first
     const sortedSources=[...sources];
@@ -1773,22 +1779,63 @@ function getItemsForView(){
   return items;
 }
 
+// ---- Sort tabs (名称/时间/价格/分类/手动, click again to reverse) ----
+const SORT_MODES=['name','time','price','category','manual'];
+const SORT_BASE={'name':'名称','time':'时间','price':'价格','category':'分类','manual':'手动'};
+const SORT_DEF={'name':'name_asc','time':'time_desc','price':'price_desc','category':'category_asc','manual':'manual'};
+const SORT_LABEL={
+  name_asc:'名称 A→Z', name_desc:'名称 Z→A',
+  time_desc:'时间 最新→最早', time_asc:'时间 最早→最新',
+  price_desc:'价格 高→低', price_asc:'价格 低→高',
+  category_asc:'分类顺序', category_desc:'分类倒序',
+  manual:'手动'
+};
+function getSortMode(v){ if(!v) return 'time'; const m=v.split('_')[0]; return SORT_MODES.includes(m)?m:'time'; }
+function setSort(mode){
+  // Leaving move mode when picking a real sort
+  if(moveMode&&mode!=='manual') cancelMoveMode();
+  const cur=S._filterSort||'time_desc';
+  if(mode==='manual'){ S._filterSort='manual'; }
+  else if(getSortMode(cur)===mode){
+    // Clicking the active sort again reverses its direction
+    S._filterSort=mode+(cur.endsWith('_desc')?'_asc':'_desc');
+  } else {
+    S._filterSort=SORT_DEF[mode];
+  }
+  saveFilterState();
+  renderSortTabs();
+  renderMaterials();
+}
+function renderSortTabs(){
+  const el=document.getElementById('sortTabs'); if(!el) return;
+  const cur=S._filterSort||'time_desc';
+  const curMode=getSortMode(cur);
+  el.innerHTML=SORT_MODES.map(m=>{
+    const active=curMode===m;
+    const label=active?(SORT_LABEL[cur]||SORT_BASE[m]):SORT_BASE[m];
+    return `<button class="sort-tab${active?' active':''}" title="再次点击切换方向" onclick="setSort('${m}')">${label}</button>`;
+  }).join('');
+}
+
 function renderMaterials(){
   let items=getItemsForView();
-  const fsort=document.getElementById('fsort').value;
+  const fsort=S._filterSort||'time_desc';
   const q=(document.getElementById('q').value||'').toLowerCase();
   // Persist filter state (lightweight, no full IDB save)
-  S._filterSort=fsort;S._filterQuery=document.getElementById('q').value||'';
+  S._filterQuery=document.getElementById('q').value||'';
   saveFilterState();
   // Apply multi-filter if active (includes status filter from filter modal)
   if(hasActiveFilter()) items=applyFilterToItems(items);
   if(q) items=items.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.artist||'').toLowerCase().includes(q)||(i.note||'').toLowerCase().includes(q)||getCatD(i).toLowerCase().includes(q)||getPSD(i).toLowerCase().includes(q));
   switch(fsort){
+    case 'name_asc': items.sort((a,b)=>(a.name||'').localeCompare(b.name||'','zh'));break;
+    case 'name_desc': items.sort((a,b)=>(b.name||'').localeCompare(a.name||'','zh'));break;
     case 'time_desc': items.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));break;
     case 'time_asc': items.sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));break;
     case 'price_desc': items.sort((a,b)=>getEffPrice(b)-getEffPrice(a));break;
     case 'price_asc': items.sort((a,b)=>getEffPrice(a)-getEffPrice(b));break;
-    case 'category': items.sort((a,b)=>getCatD(a).localeCompare(getCatD(b),'zh'));break;
+    case 'category_asc': case 'category': items.sort((a,b)=>getCatD(a).localeCompare(getCatD(b),'zh'));break;
+    case 'category_desc': items.sort((a,b)=>getCatD(b).localeCompare(getCatD(a),'zh'));break;
     case 'manual': break;
     default: items.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
   }
@@ -2299,7 +2346,8 @@ function copyItem(id){
 
 function enterMoveMode(){
   moveMode=true;
-  document.getElementById('fsort').value='manual';
+  S._filterSort='manual';
+  renderSortTabs();
   renderMaterials();
 }
 function cancelMoveMode(){
@@ -2411,51 +2459,98 @@ function onFrNoQuit(){
   document.getElementById('frvipnote').style.display=document.querySelector('input[name="frsnq"][value="VIP转让"]').checked?'':'none';
   document.getElementById('frothernote').style.display=document.querySelector('input[name="frsnq"][value="其他"]').checked?'':'none';
 }
-// Auto-fill transfer rule + usage limit rule from existing items with same artist/source
+// Auto-fill: same artist → transfer rule; same artist AND same category → category-derived
+// choices (通加规则 / 使用次数规则 / 加装限制 / 自定义分类). Only fills empty/unselected fields.
+// ---- Auto-fill tracking: fields set by autoFillRules get data-auto=1 so a later,
+// better match can update them; anything the user edits manually loses the mark and
+// becomes protected ("前提是未选择/填写" applies to manual input only). ----
+function markAuto(el){ if(el) el.setAttribute('data-auto','1'); }
+function checkedIsAuto(name){
+  const el=document.querySelector('input[name="'+name+'"]:checked');
+  return el?el.getAttribute('data-auto')==='1':false;
+}
+function inputIsAuto(id){
+  const el=document.getElementById(id);
+  return el?el.getAttribute('data-auto')==='1':false;
+}
+(function(){
+  const f=document.getElementById('imo');
+  if(!f)return;
+  const unmark=function(e){const t=e.target;if(t&&t.removeAttribute)t.removeAttribute('data-auto');};
+  f.addEventListener('change',unmark);
+  f.addEventListener('input',unmark);
+})();
 function autoFillRules(){
   const artist=document.getElementById('fa').value.trim();
   if(!artist) return;
-  // Find the most recent item with the same artist (not the one being edited)
+  const formCats=getCheckedCats();
+  // Same-artist records (excluding the one being edited)
   const match=S.items.filter(i=>splitArtists(i.artist).includes(artist)&&(!S.editItem||i.id!==S.editItem.id));
   if(match.length===0) return;
-  const ref=match[match.length-1]; // most recent
-  let filled=[];
-  // Transfer rule — skip if user already selected one
-  const hasTR=document.querySelector('input[name="fr"]:checked');
-  if(!hasTR&&ref.transferRule){
+  // Same-artist AND same-category records
+  let catRef=null, sharedCats=[];
+  if(formCats.length>0){
+    const cm=match.filter(i=>getCats(i).some(c=>formCats.includes(c)));
+    if(cm.length>0){ catRef=cm[cm.length-1]; sharedCats=formCats.filter(c=>getCats(catRef).includes(c)); }
+  }
+  const ref=catRef||match[match.length-1]; // most recent relevant record
+  const filled=[];
+  // Transfer rule — same artist only (not category-derived), skip if already picked
+  if((!document.querySelector('input[name="fr"]:checked')||checkedIsAuto('fr'))&&ref.transferRule){
     const fr=document.querySelector(`input[name="fr"][value="${ref.transferRule}"]`);
-    if(fr){fr.checked=true;onTransferRule();filled.push('转让规则')}
+    if(fr){fr.checked=true;markAuto(fr);onTransferRule();filled.push('转让规则')}
     if(ref.transferSub){
       if(ref.transferRule==='退圈可转'){
         const r=document.querySelector(`input[name="frsq"][value="${ref.transferSub}"]`);
-        if(r)r.checked=true;
+        if(r){r.checked=true;markAuto(r);}
       }else if(ref.transferRule==='不退圈可转'){
+        document.querySelectorAll('input[name="frsnq"][data-auto]').forEach(c=>c.checked=false);
         ref.transferSub.split(',').forEach(v=>{
           const c=document.querySelector(`input[name="frsnq"][value="${v.trim()}"]`);
-          if(c)c.checked=true;
+          if(c){c.checked=true;markAuto(c);}
         });
-        if(ref.frVipNote){document.getElementById('frvipnote').value=ref.frVipNote}
-        if(ref.frOtherNote){document.getElementById('frothernote').value=ref.frOtherNote}
+        if(ref.frVipNote){const el=document.getElementById('frvipnote');el.value=ref.frVipNote;markAuto(el);}
+        if(ref.frOtherNote){const el=document.getElementById('frothernote');el.value=ref.frOtherNote;markAuto(el);}
         onFrNoQuit();
       }
     }
   }
-  // Usage limit — skip if user already selected one
-  const hasUL=document.querySelector('input[name="ful"]:checked');
-  if(!hasUL&&ref.usageLimitType){
+  // Usage limit — prefer same-category record, skip if already picked
+  if((!document.querySelector('input[name="ful"]:checked')||checkedIsAuto('ful'))&&ref.usageLimitType){
     const ulr=document.querySelector(`input[name="ful"][value="${ref.usageLimitType}"]`);
-    if(ulr){ulr.checked=true;onUsageLimit();filled.push('使用次数规则')}
+    if(ulr){ulr.checked=true;markAuto(ulr);onUsageLimit();filled.push('使用次数规则')}
     if(ref.usageLimitSubtype){
       const ulsr=document.querySelector(`input[name="fulst"][value="${ref.usageLimitSubtype}"]`);
-      if(ulsr){ulsr.checked=true;onUsageLimitSub()}
+      if(ulsr){ulsr.checked=true;markAuto(ulsr);onUsageLimitSub()}
     }
-    if(ref.usageTotal)document.getElementById('fult').value=ref.usageTotal;
+    if(ref.usageTotal){const el=document.getElementById('fult');el.value=ref.usageTotal;markAuto(el);}
     if(ref.usageLead){
-      document.getElementById('fulLead').value=ref.usageLead;
-      document.getElementById('fulLead2').value=ref.usageLead;
+      const el=document.getElementById('fulLead');el.value=ref.usageLead;markAuto(el);
+      const el2=document.getElementById('fulLead2');el2.value=ref.usageLead;markAuto(el2);
     }
-    if(ref.usageSupport)document.getElementById('fulSupp').value=ref.usageSupport;
-    if(ref.usageOtherNote)document.getElementById('fulOther').value=ref.usageOtherNote;
+    if(ref.usageSupport){const el=document.getElementById('fulSupp');el.value=ref.usageSupport;markAuto(el);}
+    if(ref.usageOtherNote){const el=document.getElementById('fulOther');el.value=ref.usageOtherNote;markAuto(el);}
+  }
+  // 通加规则 — only when form has 立绘/卤蛋 AND a same-category record exists
+  if(catRef&&(sharedCats.includes('立绘')||sharedCats.includes('卤蛋'))&&(!document.querySelector('input[name="tj"]:checked')||checkedIsAuto('tj'))&&catRef.tongjiaRule){
+    const tj=document.querySelector(`input[name="tj"][value="${catRef.tongjiaRule}"]`);
+    if(tj){tj.checked=true;markAuto(tj);onTj();filled.push('通加规则')}
+    if(catRef.tongjiaLimit){const tlr=document.querySelector(`input[name="tjl"][value="${catRef.tongjiaLimit}"]`);if(tlr){tlr.checked=true;markAuto(tlr);onTjl()}}
+    if(catRef.tongjiaType){const ttr=document.querySelector(`input[name="tjt"][value="${catRef.tongjiaType}"]`);if(ttr){ttr.checked=true;markAuto(ttr)}}
+    if(catRef.tongjiaScope){const tsr=document.querySelector(`input[name="tjs"][value="${catRef.tongjiaScope}"]`);if(tsr){tsr.checked=true;markAuto(tsr)}}
+  }
+  // 加装限制 — when form has 加装 and the same-category record has restrictions
+  if(catRef&&sharedCats.includes('加装')&&(!document.querySelector('input[name="jzr"]:checked')||checkedIsAuto('jzr'))&&catRef.jzRestrict&&catRef.jzRestrict.length){
+    document.querySelectorAll('input[name="jzr"][data-auto]').forEach(c=>c.checked=false);
+    catRef.jzRestrict.forEach(v=>{const cb=document.querySelector(`input[name="jzr"][value="${v}"]`);if(cb){cb.checked=true;markAuto(cb)}});
+    if(catRef.jzShop){const el=document.getElementById('fjzshop');el.style.display='';el.value=catRef.jzShop;markAuto(el);}
+    if(catRef.jzLihui){const el=document.getElementById('fjzlihui');el.style.display='';el.value=catRef.jzLihui;markAuto(el);}
+    if(catRef.jzCustom){const el=document.getElementById('fjzcustom');el.style.display='';el.value=catRef.jzCustom;markAuto(el);}
+    onJz();filled.push('加装限制');
+  }
+  // 其他 → 自定义分类名称
+  if(catRef&&sharedCats.includes('其他')&&(!document.getElementById('fcc').value.trim()||inputIsAuto('fcc'))&&catRef.customCategory){
+    const fccEl=document.getElementById('fcc');fccEl.value=catRef.customCategory;markAuto(fccEl);filled.push('自定义分类');
   }
   if(filled.length>0) st(`已从「${artist}」的已有记录自动填充：${filled.join('、')}`);
 }
@@ -2485,28 +2580,26 @@ function onCatCheck(){
     grid.innerHTML=subArr.map(s=>`<label><input type="checkbox" name="fcsk" value="${s}" onchange="onCatSubCheck()"> ${s}</label>`).join('');
   }
   if(cats.includes('其他')) fcc.style.display='';
-  if(cats.includes('加装')){ jzg.style.display=''; const ulc=document.querySelector('input[name="jzr"][value="无限制"]'); if(ulc&&!document.querySelector('input[name="jzr"]:checked')){ulc.checked=true;onJz();} }
-  if(cats.includes('其他')) fcc.style.display='';
-  if(cats.includes('加装')){ jzg.style.display=''; const ulc=document.querySelector('input[name="jzr"][value="无限制"]'); if(ulc&&!document.querySelector('input[name="jzr"]:checked')){ulc.checked=true;onJz();} }
-  if(cats.includes('立绘')||cats.includes('卤蛋')){
-    tjg.style.display='';
-    if(cats.includes('卤蛋')){
-      const tjr=document.querySelector('input[name="tj"][value="可穿通加"]'); if(tjr&&!document.querySelector('input[name="tj"]:checked')) tjr.checked=true;
-      onTj();
-      const tlr=document.querySelector('input[name="tjl"][value="unlimited"]'); if(tlr&&!document.querySelector('input[name="tjl"]:checked')) tlr.checked=true;
-      onTjl();
-    }
+  if(cats.includes('加装')) jzg.style.display='';
+  if(cats.includes('立绘')||cats.includes('卤蛋')) tjg.style.display='';
+  // Sync category-derived choices from same-artist + same-category record (only fills empty fields)
+  if(document.getElementById('fa').value.trim()) autoFillRules();
+  // Defaults — only when still empty (autoFill may have filled them)
+  if(cats.includes('加装')&&!document.querySelector('input[name="jzr"]:checked')){ const ulc=document.querySelector('input[name="jzr"][value="无限制"]'); if(ulc){ulc.checked=true;markAuto(ulc);onJz();} }
+  if(cats.includes('卤蛋')&&!document.querySelector('input[name="tj"]:checked')){
+    const tjr=document.querySelector('input[name="tj"][value="可穿通加"]'); if(tjr){tjr.checked=true;markAuto(tjr);onTj()}
+    const tlr=document.querySelector('input[name="tjl"][value="unlimited"]'); if(tlr&&!document.querySelector('input[name="tjl"]:checked')){tlr.checked=true;markAuto(tlr);onTjl()}
   }
   // Update artist label: use label prefix based on first category with a mapping
   const first=cats[0]||'';
   const sourceCats=['美工','特效','音乐','黑科技'];
   document.querySelector('#fa').previousElementSibling.textContent=sourceCats.includes(first)?'画师/美工/来源名字':'画师/美工名字';
-  // Default usage limit: 立绘/卤蛋 → limited, others → unlimited
-  if(cats.length>0){
+  // Default usage limit: 立绘/卤蛋 → limited, others → unlimited (only if still unchecked)
+  if(cats.length>0&&!document.querySelector('input[name="ful"]:checked')){
     const isLimited=cats.includes('立绘')||cats.includes('卤蛋');
     const defaultUL=isLimited?'limited':'unlimited';
     const ulr=document.querySelector(`input[name="ful"][value="${defaultUL}"]`);
-    if(ulr) ulr.checked=true;
+    if(ulr){ulr.checked=true;markAuto(ulr);}
     onUsageLimit();
   }
 }
@@ -2746,28 +2839,53 @@ function updateLbMinimap(){
   document.getElementById('lbMiniImg').src=lbImgs[lbIdx]||'';
   const nw=img.naturalWidth,nh=img.naturalHeight;
   const vpW=window.innerWidth,vpH=window.innerHeight;
-  // Visible area in natural pixels from image top-left, accounting for actual image base position
+  const mmW=mini.clientWidth||160, mmH=mini.clientHeight||120;
+  // Image rect as actually displayed inside minimap (object-fit:contain, centered)
+  const sc=Math.min(mmW/nw,mmH/nh);
+  const dw=nw*sc, dh=nh*sc, ox=(mmW-dw)/2, oy=(mmH-dh)/2;
+  // Visible region in image natural px (relative to image top-left)
   const visL=nw/2-lbBaseCX/lbZoom-lbPanX, visT=nh/2-lbBaseCY/lbZoom-lbPanY;
   const visW=vpW/lbZoom, visH=vpH/lbZoom;
-  const pL=Math.max(0,Math.min(100,visL/nw*100));
-  const pT=Math.max(0,Math.min(100,visT/nh*100));
-  const pW=Math.max(2,Math.min(100-pL,visW/nw*100));
-  const pH=Math.max(2,Math.min(100-pT,visH/nh*100));
+  // Center of visible region mapped to minimap px
+  const mx=ox+(visL+visW/2)/nw*dw, my=oy+(visT+visH/2)/nh*dh;
+  // Raw visible half-extents in minimap px, capped at half of displayed image
+  const halfW=Math.min(visW/nw*dw/2,dw/2), halfH=Math.min(visH/nh*dh/2,dh/2);
+  let hw=halfW, hh=halfH;
+  // When genuinely zoomed into the image (visible region smaller than image in both
+  // dimensions), keep the box at the window aspect ratio — not too long / not too narrow
+  if(visW/nw*dw/2<dw/2&&visH/nh*dh/2<dh/2){
+    const asp=vpW/vpH;
+    if(hw/hh>asp) hh=hw/asp; else hw=hh*asp;
+    if(hw>halfW){hw=halfW;hh=hw/asp;}
+    if(hh>halfH){hh=halfH;hw=hh*asp;}
+  }
+  const MIN=5;
+  if(hw<MIN||hh<MIN){const k=Math.max(MIN/hw,MIN/hh);hw=Math.min(halfW,hw*k);hh=Math.min(halfH,hh*k);}
+  const x=Math.max(0,Math.min(mmW-hw*2,mx-hw));
+  const y=Math.max(0,Math.min(mmH-hh*2,my-hh));
   const vp=document.getElementById('lbVport');
-  vp.style.left=pL+'%';vp.style.top=pT+'%';
-  vp.style.width=pW+'%';vp.style.height=pH+'%';
+  vp.style.left=(x/mmW*100)+'%';vp.style.top=(y/mmH*100)+'%';
+  vp.style.width=(hw*2/mmW*100)+'%';vp.style.height=(hh*2/mmH*100)+'%';
 }
 // Minimap drag to quick-navigate (bird's-eye view)
 (function(){
   let mmDragging=false,mmStartX=0,mmStartY=0,mmStartPX=0,mmStartPY=0;
   const mm=document.getElementById('lbMinimap');
   const vp=document.getElementById('lbVport');
-  function mmToPan(pL,pT){
+  function mmToPan(pctL,pctT){
     const img=document.getElementById('lbi');if(!img||!img.naturalWidth)return;
     const nw=img.naturalWidth,nh=img.naturalHeight;
-    const vpW=window.innerWidth,vpH=window.innerHeight;
-    lbPanX=nw/2-lbBaseCX/lbZoom-(pL/100)*nw;
-    lbPanY=nh/2-lbBaseCY/lbZoom-(pT/100)*nh;
+    const mm=document.getElementById('lbMinimap');
+    const mmW=mm.clientWidth||160,mmH=mm.clientHeight||120;
+    // Image rect as displayed inside minimap (same contain mapping as updateLbMinimap)
+    const sc=Math.min(mmW/nw,mmH/nh);
+    const dw=nw*sc,dh=nh*sc,ox=(mmW-dw)/2,oy=(mmH-dh)/2;
+    // Minimap % → image px (clamped to image bounds)
+    const mx=pctL/100*mmW, my=pctT/100*mmH;
+    const ix=Math.max(0,Math.min(nw,(mx-ox)/dw*nw));
+    const iy=Math.max(0,Math.min(nh,(my-oy)/dh*nh));
+    lbPanX=nw/2-lbBaseCX/lbZoom-ix;
+    lbPanY=nh/2-lbBaseCY/lbZoom-iy;
     clampLbPan();
     img.style.transform='scale('+lbZoom+') translate('+lbPanX+'px,'+lbPanY+'px)';
     updateLbMinimap();
@@ -2844,8 +2962,8 @@ function lbEnablePan(){
     document.onmousemove=function(ev2){
       if(!lbDragging)return;
       lbDidDrag=true;
-      lbPanX=lbDragStartX-(ev2.clientX-lbDragSX)/lbZoom;
-      lbPanY=lbDragStartY-(ev2.clientY-lbDragSY)/lbZoom;
+      lbPanX=lbDragStartX+(ev2.clientX-lbDragSX)/lbZoom;
+      lbPanY=lbDragStartY+(ev2.clientY-lbDragSY)/lbZoom;
       clampLbPan();
       img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
       updateLbMinimap();
@@ -2870,8 +2988,8 @@ function lbEnablePan(){
     ev.preventDefault();
     const t=ev.touches[0];
     lbDidDrag=true;
-    lbPanX=lbDragStartX-(t.clientX-lbDragSX)/lbZoom;
-    lbPanY=lbDragStartY-(t.clientY-lbDragSY)/lbZoom;
+    lbPanX=lbDragStartX+(t.clientX-lbDragSX)/lbZoom;
+    lbPanY=lbDragStartY+(t.clientY-lbDragSY)/lbZoom;
     clampLbPan();
     img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
     updateLbMinimap();
@@ -3442,8 +3560,10 @@ idbInit().then(()=>{
 
 function startApp(){
   migrateImages();
-  // Restore filter state BEFORE first render to prevent overwrite
-  if(S._filterSort&&S._filterSort!=='time_desc'){const fs=document.getElementById('fsort');if(fs)fs.value=S._filterSort}
+  // Normalize legacy sort values (old "category" had no direction suffix)
+  if(S._filterSort==='category') S._filterSort='category_asc';
+  // Restore sort tabs & filter state BEFORE first render to prevent overwrite
+  renderSortTabs();
   if(S._filterQuery){const q=document.getElementById('q');if(q)q.value=S._filterQuery}
   renderAll();
   autoExtractPersons();
