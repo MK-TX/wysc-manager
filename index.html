@@ -213,6 +213,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .fg .hint{font-size:12px;color:var(--text2);margin-top:3px}
 .fr{display:flex;gap:10px}.fr .fg{flex:1}
 .rg{display:flex;flex-wrap:wrap;gap:6px}
+.cat-grid{display:flex;flex-wrap:wrap;gap:4px}.cat-grid label{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border:1px solid var(--border);border-radius:4px;font-size:13px;cursor:pointer;user-select:none;background:#fff;transition:all .15s}.cat-grid label:has(input:checked){border-color:var(--accent);background:#eef2ff;font-weight:600}.cat-grid input{margin:0}
 .rg label,.chg label{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:400;cursor:pointer;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);transition:all .15s}
 .rg label:has(input:checked),.chg label:has(input:checked){background:var(--primary-light);border-color:var(--primary);color:var(--primary-dark)}
 .rg input,.chg input{margin:0}
@@ -418,7 +419,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 
       <!-- 属性分类 -->
       <div class="fg"><label>属性分类 <span class="rq">*</span></label>
-        <select id="fc" onchange="onCat()"><option value="">请选择</option></select>
+        <div class="cat-grid" id="fc"></div>
         <div id="catsub" style="display:none;margin-top:6px"><select id="fcsub" onchange="onCatSub()"><option value="">请选择子类</option></select></div>
         <input type="text" id="fccs" placeholder="自定义子分类" style="display:none;margin-top:6px">
         <input type="text" id="fbl" placeholder="绑定的立绘名称" style="display:none;margin-top:6px">
@@ -492,10 +493,10 @@ input,select,textarea{font-family:inherit;font-size:16px}
             <label style="margin-bottom:6px;font-weight:600">通加限制类型</label>
             <div class="rg"><label><input type="radio" name="tjl" value="limited" onchange="onTjl()"> 有限制</label><label><input type="radio" name="tjl" value="unlimited" onchange="onTjl()"> 无限制</label></div>
             <div id="tlg" style="display:none;margin-top:10px">
-              <div class="fg" style="margin-bottom:8px"><label style="margin-bottom:4px">通加类型</label><div class="rg"><label><input type="radio" name="tjt" value="可穿无脸通加"> 可穿无脸通加</label><label><input type="radio" name="tjt" value="可穿不可作"> 可穿不可作</label></div></div>
+              <div class="fg" style="margin-bottom:8px"><label style="margin-bottom:4px">通加类型</label><div class="rg"><label><input type="radio" name="tjt" value="可穿可作"> 可穿可作</label><label><input type="radio" name="tjt" value="可穿无脸通加"> 可穿无脸通加</label><label><input type="radio" name="tjt" value="可穿不可作"> 可穿不可作</label></div></div>
               <div class="fg"><label style="margin-bottom:4px">适用范围</label><div class="rg"><label><input type="radio" name="tjs" value="古现都可"> 古现都可</label><label><input type="radio" name="tjs" value="只可穿古通加"> 只可穿古通加</label><label><input type="radio" name="tjs" value="只可穿现通加"> 只可穿现通加</label></div></div>
             </div>
-            <div id="tuh" style="display:none"><p class="hint" style="color:var(--success);font-weight:600">无限制：可穿可作无限制</p></div>
+            <div id="tuh" style="display:none"><p class="hint" style="color:var(--success);font-weight:600">无限制：可穿可作无古现限制</p></div>
           </div>
         </div>
       </div>
@@ -849,33 +850,39 @@ function getImages(i){ return (i.images&&i.images.length)?i.images:[]; }
 function getFirstImage(i){ const imgs=getImages(i); return imgs.length>0?imgs[0]:''; }
 
 // ---- Category display helpers ----
+// getCats extracts category array from comma-separated string (multi-cat support)
+function getCats(i){return (i.category||'').split(',').map(s=>s.trim()).filter(Boolean)}
+function getCheckedCats(){return Array.from(document.querySelectorAll('input[name="fck"]:checked')).map(c=>c.value)}
 // artistPrefix returns the label prefix based on category
 function getArtistPrefix(cat){
-  if(['立绘','卤蛋','CG','Q版','素材','场景'].includes(cat)) return '画师';
-  if(cat==='美工') return '美工';
+  const first=(cat||'').split(',')[0].trim();
+  if(['立绘','卤蛋','CG','Q版','素材','场景'].includes(first)) return '画师';
+  if(first==='美工') return '美工';
   // 特效、音乐、黑科技、其他
   return '来源';
 }
 
 // getCatTags returns array of {text,color} for separate tags
 function getCatTags(i){
-  const c=i.category||'';
+  const cats=getCats(i);
   const tags=[];
-  if(c){
+  cats.forEach(c=>{
     tags.push({text:c,color:CCOL[c]||'#94a3b8',isMain:true});
-    if(SUBS[c]&&i.subCategory){
-      const sub=i.subCategory==='其他'?(i.customSubCategory||'其他'):i.subCategory;
-      if(sub) tags.push({text:sub,color:CCOL[c]||'#94a3b8',isMain:false});
-    }
-    if(c==='Q版'&&i.subCategory==='绑定Q'&&i.boundLihui){
-      tags.push({text:'绑定：'+i.boundLihui,color:'#5b21b6',isMain:false});
-    }
+  });
+  // Sub-category only for first cat with subs
+  const first=cats[0]||'';
+  if(SUBS[first]&&i.subCategory){
+    const sub=i.subCategory==='其他'?(i.customSubCategory||'其他'):i.subCategory;
+    if(sub) tags.push({text:sub,color:CCOL[first]||'#94a3b8',isMain:false});
+  }
+  if(first==='Q版'&&i.subCategory==='绑定Q'&&i.boundLihui){
+    tags.push({text:'绑定：'+i.boundLihui,color:'#5b21b6',isMain:false});
   }
   return tags;
 }
 
 function getCatD(i){
-  const c=i.category||'';
+  const c=getCats(i)[0]||'';
   if(c==='美工') return '美工·'+(i.subCategory==='其他'?(i.customSubCategory||'其他'):i.subCategory||'');
   if(c==='Q版') return 'Q版·'+(i.subCategory==='其他'?(i.customSubCategory||'其他'):i.subCategory||'');
   if(c==='音乐') return '音乐·'+(i.subCategory==='其他'?(i.customSubCategory||'其他'):i.subCategory||'');
@@ -959,7 +966,7 @@ function getScopeTag(i){
   }
   return '';
 }
-function hasTongjia(i){ return i.category==='立绘'||i.category==='卤蛋'; }
+function hasTongjia(i){ const cats=getCats(i);return cats.includes('立绘')||cats.includes('卤蛋'); }
 
 // ---- Sidebar ----
 function getSourcesInGroup(groupName){
@@ -1522,7 +1529,7 @@ function renderOV(){
 function renderDonut(){
   const el=document.getElementById('ch1'),cats={};
   let items=getItemsForView();
-  items.forEach(i=>{const c=i.category||'其他';cats[c]=(cats[c]||0)+1});
+  items.forEach(i=>{getCats(i).forEach(c=>{cats[c]=(cats[c]||0)+1});if(getCats(i).length===0)cats['其他']=(cats['其他']||0)+1});
   const data=Object.entries(cats).map(([k,v])=>({label:k,value:v,color:CCOL[k]||'#94a3b8'}));
   if(data.length===0){el.innerHTML='<div class="emp">暂无数据</div>';return}
   data.sort((a,b)=>b.value-a.value);
@@ -1604,7 +1611,7 @@ function renderCard(i){
   if(tjTag) uniTagsHtml+=`<span class="mcbg">${eh(tjTag)}</span>`;
   const scopeTag=getScopeTag(i);
   if(scopeTag) uniTagsHtml+=`<span class="mcbg">${eh(scopeTag)}</span>`;
-  if(i.category==='加装'&&i.jzRestrict&&i.jzRestrict.length){
+  if(getCats(i).includes('加装')&&i.jzRestrict&&i.jzRestrict.length){
     i.jzRestrict.forEach(r=>{
       if(r==='无限制') return;
       if(r==='店专属'&&i.jzShop) uniTagsHtml+=`<span class="mcbg">绑定${eh(i.jzShop.replace(/店$/,'')+'店')}</span>`;
@@ -1704,7 +1711,7 @@ function renderMaterials(){
   // Persist filter state
   S._filterCat=fcat;S._filterUsed=fused;S._filterSort=fsort;S._filterQuery=document.getElementById('q').value||'';
   sv();
-  if(fcat!=='all') items=items.filter(i=>(i.category||'')===fcat);
+  if(fcat!=='all') items=items.filter(i=>getCats(i).includes(fcat));
   if(fused==='unused') items=items.filter(i=>!i.isUsed);
   if(fused==='used') items=items.filter(i=>i.isUsed);
   if(q) items=items.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.artist||'').toLowerCase().includes(q)||(i.note||'').toLowerCase().includes(q)||getCatD(i).toLowerCase().includes(q)||getPSD(i).toLowerCase().includes(q));
@@ -1738,7 +1745,7 @@ function renderMaterials(){
 
 function updateCatFilter(){
   const el=document.getElementById('fcat'),cats=new Set();
-  getItemsForView().forEach(i=>{if(i.category)cats.add(i.category)});
+  getItemsForView().forEach(i=>{getCats(i).forEach(c=>cats.add(c))});
   el.innerHTML='<option value="all">全部分类</option>'+[...cats].sort((a,b)=>a.localeCompare(b,'zh')).map(c=>`<option value="${eh(c)}">${eh(c)}</option>`).join('');
 }
 function updateDataBanner(){
@@ -1833,13 +1840,14 @@ function openEditItem(id){
   onOwnerType();populateOwnerSelect();
   document.getElementById('fowner').value=editOwnerName;
   document.getElementById('fn').value=i.name||'';
-  document.getElementById('fc').value=i.category;onCat();
-  if(SUBS[i.category]){document.getElementById('fcsub').value=i.subCategory||'';onCatSub();
+  renderCatGrid(getCats(i));onCatCheck();
+  const editCats=getCats(i);
+  if(editCats.some(c=>SUBS[c])){document.getElementById('fcsub').value=i.subCategory||'';onCatSub();
     if(i.subCategory==='其他'){document.getElementById('fccs').style.display='';document.getElementById('fccs').value=i.customSubCategory||''}
-    if(i.category==='Q版'&&i.subCategory==='绑定Q'){document.getElementById('fbl').style.display='';document.getElementById('fbl').value=i.boundLihui||''}
+    if(editCats.includes('Q版')&&i.subCategory==='绑定Q'){document.getElementById('fbl').style.display='';document.getElementById('fbl').value=i.boundLihui||''}
   }
-  if(i.category==='其他'){document.getElementById('fcc').style.display='';document.getElementById('fcc').value=i.customCategory||''}
-  if(i.category==='加装'&&i.jzRestrict&&i.jzRestrict.length){
+  if(editCats.includes('其他')){document.getElementById('fcc').style.display='';document.getElementById('fcc').value=i.customCategory||''}
+  if(editCats.includes('加装')&&i.jzRestrict&&i.jzRestrict.length){
     i.jzRestrict.forEach(v=>{const cb=document.querySelector(`input[name="jzr"][value="${v}"]`);if(cb)cb.checked=true});
     if(i.jzShop){document.getElementById('fjzshop').style.display='';document.getElementById('fjzshop').value=i.jzShop}
     if(i.jzLihui){document.getElementById('fjzlihui').style.display='';document.getElementById('fjzlihui').value=i.jzLihui}
@@ -1876,7 +1884,7 @@ function openEditItem(id){
     if(i.tongjiaLimit){const tlr=document.querySelector(`input[name="tjl"][value="${i.tongjiaLimit}"]`);if(tlr){tlr.checked=true;onTjl()}}
     if(i.tongjiaType){const ttr=document.querySelector(`input[name="tjt"][value="${i.tongjiaType}"]`);if(ttr)ttr.checked=true}
     if(i.tongjiaScope){const tsr=document.querySelector(`input[name="tjs"][value="${i.tongjiaScope}"]`);if(tsr)tsr.checked=true}
-    if(i.category==='卤蛋'&&!i.tongjiaRule){
+    if(getCats(i).includes('卤蛋')&&!i.tongjiaRule){
       const tjr=document.querySelector('input[name="tj"][value="可穿通加"]'); if(tjr){tjr.checked=true;onTj()}
       const tlr=document.querySelector('input[name="tjl"][value="unlimited"]'); if(tlr){tlr.checked=true;onTjl()}
     }
@@ -1929,7 +1937,7 @@ function closeItemModal(){document.getElementById('imo').style.display='none';S.
 function clearItemForm(){
   document.getElementById('fn').value='';
   S.imgData=[]; renderImgGrid();
-  document.getElementById('fc').value='';document.getElementById('catsub').style.display='none';document.getElementById('fcsub').value='';
+  renderCatGrid([]);document.getElementById('catsub').style.display='none';document.getElementById('fcsub').value='';
   document.getElementById('fccs').style.display='none';document.getElementById('fccs').value='';
   document.getElementById('fbl').style.display='none';document.getElementById('fbl').value='';
   document.getElementById('fcc').style.display='none';document.getElementById('fcc').value='';
@@ -1970,7 +1978,7 @@ function clearItemForm(){
 
 function saveItem(){
   const name=document.getElementById('fn').value.trim();if(!name){st('请输入素材名称');return}
-  const cat=document.getElementById('fc').value;if(!cat){st('请选择属性分类');return}
+  const cats=getCheckedCats();const cat=cats.join(',');if(cats.length===0){st('请选择属性分类');return}
   const ot=document.querySelector('input[name="fot"]:checked')?.value||'shop';
   let on=document.getElementById('fowner').value;
   if(on==='__new__'){on=document.getElementById('fownerNew').value.trim();if(!on){st('请输入名称');return}}
@@ -1982,10 +1990,10 @@ function saveItem(){
   const pp=ps==='购入'?(document.querySelector('input[name="pp"]:checked')?.value||''):(ps==='赞助'?(document.querySelector('input[name="pz"]:checked')?.value||''):'');
   const isTrans=document.querySelector('input[name="ftransfer"]:checked')?.value||'否';
   let subCat='',csub='',cCat='',bnd='';
-  if(SUBS[cat]){subCat=document.getElementById('fcsub').value;if(subCat==='其他')csub=document.getElementById('fccs').value.trim();if(cat==='Q版'&&subCat==='绑定Q')bnd=document.getElementById('fbl').value.trim()}
-  if(cat==='其他')cCat=document.getElementById('fcc').value.trim();
+  if(cats.some(c=>SUBS[c])){subCat=document.getElementById('fcsub').value;if(subCat==='其他')csub=document.getElementById('fccs').value.trim();if(cats.includes('Q版')&&subCat==='绑定Q')bnd=document.getElementById('fbl').value.trim()}
+  if(cats.includes('其他'))cCat=document.getElementById('fcc').value.trim();
   let jzRestrict=[],jzShop='',jzLihui='',jzCustom='';
-  if(cat==='加装'){
+  if(cats.includes('加装')){
     jzRestrict=Array.from(document.querySelectorAll('input[name="jzr"]:checked')).map(c=>c.value);
     if(jzRestrict.includes('店专属')) jzShop=document.getElementById('fjzshop').value.trim();
     if(jzRestrict.includes('绑定立绘')) jzLihui=document.getElementById('fjzlihui').value.trim();
@@ -1994,14 +2002,14 @@ function saveItem(){
   let tr='',tjl='',tjt='',tjs='';
   if(hasTongjia({category:cat})){
     tr=document.querySelector('input[name="tj"]:checked')?.value||'';
-    if(cat==='卤蛋'&&!tr){tr='可穿通加';tjl='unlimited';tjt='可穿可作'}
+    if(cats.includes('卤蛋')&&!tr){tr='可穿通加';tjl='unlimited';tjt='可穿可作'}
     if(tr==='可穿通加'){
       tjl=document.querySelector('input[name="tjl"]:checked')?.value||'';
       if(tjl==='limited'){tjt=document.querySelector('input[name="tjt"]:checked')?.value||'';tjs=document.querySelector('input[name="tjs"]:checked')?.value||''}
       else if(tjl==='unlimited') tjt='可穿可作';
     }
   }
-  if(cat==='卤蛋'&&!tr){tr='可穿通加';tjl='unlimited';tjt='可穿可作'}
+  if(cats.includes('卤蛋')&&!tr){tr='可穿通加';tjl='unlimited';tjt='可穿可作'}
   const tRule=document.querySelector('input[name="fr"]:checked')?.value||'';
   let transferSub='';
   let frVipNote='',frOtherNote='';
@@ -2256,38 +2264,55 @@ function autoFillRules(){
   }
   if(filled.length>0) st(`已从「${artist}」的已有记录自动填充：${filled.join('、')}`);
 }
-function onCat(){
-  const v=document.getElementById('fc').value;
-  const sub=document.getElementById('catsub'),fcc=document.getElementById('fcc'),fccs=document.getElementById('fccs'),fbl=document.getElementById('fbl'),tjg=document.getElementById('tjg'),jzg=document.getElementById('jzg');
-  sub.style.display='none';fcc.style.display='none';fccs.style.display='none';fbl.style.display='none';tjg.style.display='none';jzg.style.display='none';
-  if(SUBS[v]){sub.style.display='';const sel=document.getElementById('fcsub');sel.innerHTML='<option value="">请选择子类</option>'+SUBS[v].map(s=>`<option value="${s}">${s}</option>`).join('');sel.value=''}
-  if(v==='其他') fcc.style.display='';
-  if(v==='加装'){ jzg.style.display=''; const ulc=document.querySelector('input[name="jzr"][value="无限制"]'); if(ulc){ulc.checked=true;onJz();} }
-  if(v==='立绘'||v==='卤蛋'){
+// Render multi-cat checkbox grid
+function renderCatGrid(checkedArr){
+  const el=document.getElementById('fc');
+  const set=(checkedArr||[]).length===0?new Set():new Set(checkedArr);
+  el.innerHTML=MAIN_CATS.map(c=>
+    `<label><input type="checkbox" name="fck" value="${c}" onchange="onCatCheck()"${set.has(c)?' checked':''}> ${c}</label>`
+  ).join('');
+}
+// Called when any major category checkbox changes
+function onCatCheck(){
+  const cats=getCheckedCats();
+  const sub=document.getElementById('catsub'),fcc=document.getElementById('fcc'),
+        fccs=document.getElementById('fccs'),fbl=document.getElementById('fbl'),
+        tjg=document.getElementById('tjg'),jzg=document.getElementById('jzg');
+  sub.style.display='none';fcc.style.display='none';fccs.style.display='none';
+  fbl.style.display='none';tjg.style.display='none';jzg.style.display='none';
+  // Find first cat with SUBS for sub-category dropdown
+  const firstSubCat=cats.find(c=>SUBS[c]);
+  if(firstSubCat){
+    sub.style.display='';
+    const sel=document.getElementById('fcsub');sel.innerHTML='<option value="">请选择子类</option>'+SUBS[firstSubCat].map(s=>`<option value="${s}">${s}</option>`).join('');sel.value='';
+  }
+  if(cats.includes('其他')) fcc.style.display='';
+  if(cats.includes('加装')){ jzg.style.display=''; const ulc=document.querySelector('input[name="jzr"][value="无限制"]'); if(ulc&&!document.querySelector('input[name="jzr"]:checked')){ulc.checked=true;onJz();} }
+  if(cats.includes('立绘')||cats.includes('卤蛋')){
     tjg.style.display='';
-    if(v==='卤蛋'){
-      const tjr=document.querySelector('input[name="tj"][value="可穿通加"]'); if(tjr) tjr.checked=true;
+    if(cats.includes('卤蛋')){
+      const tjr=document.querySelector('input[name="tj"][value="可穿通加"]'); if(tjr&&!document.querySelector('input[name="tj"]:checked')) tjr.checked=true;
       onTj();
-      const tlr=document.querySelector('input[name="tjl"][value="unlimited"]'); if(tlr) tlr.checked=true;
+      const tlr=document.querySelector('input[name="tjl"][value="unlimited"]'); if(tlr&&!document.querySelector('input[name="tjl"]:checked')) tlr.checked=true;
       onTjl();
     }
   }
-  // Update artist label
-  if(['美工','特效','音乐','黑科技'].includes(v)){
-    document.querySelector('#fa').previousElementSibling.textContent='画师/美工/来源名字';
-  }else{
-    document.querySelector('#fa').previousElementSibling.textContent='画师/美工名字';
-  }
+  // Update artist label: use label prefix based on first category with a mapping
+  const first=cats[0]||'';
+  const sourceCats=['美工','特效','音乐','黑科技'];
+  document.querySelector('#fa').previousElementSibling.textContent=sourceCats.includes(first)?'画师/美工/来源名字':'画师/美工名字';
   // Default usage limit: 立绘/卤蛋 → limited, others → unlimited
-  if(v){
-    const defaultUL=(v==='立绘'||v==='卤蛋')?'limited':'unlimited';
+  if(cats.length>0){
+    const isLimited=cats.includes('立绘')||cats.includes('卤蛋');
+    const defaultUL=isLimited?'limited':'unlimited';
     const ulr=document.querySelector(`input[name="ful"][value="${defaultUL}"]`);
     if(ulr) ulr.checked=true;
     onUsageLimit();
   }
 }
 function onCatSub(){
-  const cat=document.getElementById('fc').value,sub=document.getElementById('fcsub').value;
+  const cats=getCheckedCats();const cat=cats[0]||'';
+  const sub=document.getElementById('fcsub').value;
   document.getElementById('fccs').style.display=sub==='其他'?'':'none';
   document.getElementById('fbl').style.display=(cat==='Q版'&&sub==='绑定Q')?'':'none';
 }
@@ -2311,8 +2336,9 @@ function onJz(){
   const checks=Array.from(document.querySelectorAll('input[name="jzr"]'));
   const ul=checks.find(c=>c.value==='无限制');
   const others=checks.filter(c=>c.value!=='无限制');
-  if(ul.checked){ others.forEach(c=>c.checked=false); }
-  else { ul.checked=false; }
+  const anyOther=others.some(c=>c.checked);
+  if(ul.checked&&anyOther){ul.checked=false}   // user picked specific, uncheck 无限制
+  else if(ul.checked){others.forEach(c=>c.checked=false)}  // 无限制 only, clear others
   document.getElementById('fjzshop').style.display=checks.find(c=>c.value==='店专属').checked?'':'none';
   document.getElementById('fjzlihui').style.display=checks.find(c=>c.value==='绑定立绘').checked?'':'none';
   document.getElementById('fjzcustom').style.display=checks.find(c=>c.value==='自定义').checked?'':'none';
@@ -2406,12 +2432,12 @@ function handlePayFile(file){
 function clearPayImage(){S.payImgData='';document.getElementById('payIp').style.display='';document.getElementById('payIpr').style.display='none';document.getElementById('payIcl').style.display='none';document.getElementById('payDelBtn').style.display='none';document.getElementById('payImgi').value=''}
 
 // ---- Lightbox ----
-let lbImgs=[],lbIdx=0,lbItemName='';
+let lbImgs=[],lbIdx=0,lbItemName='',lbItemArtist='';
 let lbZoom=1,lbPanX=0,lbPanY=0,lbDragging=false,lbDragSX=0,lbDragSY=0,lbDragStartX=0,lbDragStartY=0,lbDidDrag=false;
 let lbPinchDist=0,lbPinchStartZoom=1,lbIsPinching=false;
 function openLb(cid){
   const i=S.items.find(x=>x.id===cid);if(!i)return;
-  lbImgs=getImages(i);lbIdx=0;lbItemName=i.name||'';
+  lbImgs=getImages(i);lbIdx=0;lbItemName=i.name||'';lbItemArtist=i.artist||'';
   if(lbImgs.length===0) return;
   lbResetZoom();
   showLbImg();
@@ -2429,6 +2455,7 @@ document.getElementById('lbx').addEventListener('wheel',function(e){
     lbResetZoom();
   }else{
     if(oldZoom<=1){lbPanX=0;lbPanY=0}
+    clampLbPan();
     lbApplyZoom();
     if(oldZoom<=1)lbEnablePan();
   }
@@ -2488,6 +2515,7 @@ function lbApplyZoom(){
     img.style.maxWidth='none';
     img.style.maxHeight='none';
     img.style.width='auto';
+    clampLbPan();
     img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
     updateLbMinimap();
   }
@@ -2506,69 +2534,85 @@ function closeLb(){document.getElementById('lbx').style.display='none';lbImgs=[]
 function updateLbMinimap(){
   const img=document.getElementById('lbi');
   const mini=document.getElementById('lbMinimap');
-  if(lbZoom<=1){mini.style.display='none';return}
+  if(lbZoom<=1||!img.naturalWidth){mini.style.display='none';return}
   mini.style.display='block';
   document.getElementById('lbMiniImg').src=lbImgs[lbIdx]||'';
-  // Wait for image layout, then compute viewport rect
-  setTimeout(()=>{
-    const ir=img.getBoundingClientRect();
-    const vpW=window.innerWidth, vpH=window.innerHeight;
-    const vsL=Math.max(0,-ir.left), vsT=Math.max(0,-ir.top);
-    const vsR=Math.min(ir.width, vpW-ir.left), vsB=Math.min(ir.height, vpH-ir.top);
-    if(ir.width<=0||ir.height<=0)return;
-    const pL=(vsL/ir.width)*100, pT=(vsT/ir.height)*100;
-    const pW=((vsR-vsL)/ir.width)*100, pH=((vsB-vsT)/ir.height)*100;
-    const vp=document.getElementById('lbVport');
-    vp.style.left=Math.max(0,Math.min(100,pL))+'%';
-    vp.style.top=Math.max(0,Math.min(100,pT))+'%';
-    vp.style.width=Math.max(2,Math.min(100-pL,pW))+'%';
-    vp.style.height=Math.max(2,Math.min(100-pT,pH))+'%';
-  },30);
+  const nw=img.naturalWidth,nh=img.naturalHeight;
+  const vpW=window.innerWidth,vpH=window.innerHeight;
+  // Visible area in natural pixels from image top-left:
+  // center = nw/2 + lbPanX (in natural px), visible left = center - vpW/(2*lbZoom)
+  const visL=nw/2+lbPanX-vpW/(2*lbZoom), visT=nh/2+lbPanY-vpH/(2*lbZoom);
+  const visW=vpW/lbZoom, visH=vpH/lbZoom;
+  const pL=Math.max(0,Math.min(100,visL/nw*100));
+  const pT=Math.max(0,Math.min(100,visT/nh*100));
+  const pW=Math.max(2,Math.min(100-pL,visW/nw*100));
+  const pH=Math.max(2,Math.min(100-pT,visH/nh*100));
+  const vp=document.getElementById('lbVport');
+  vp.style.left=pL+'%';vp.style.top=pT+'%';
+  vp.style.width=pW+'%';vp.style.height=pH+'%';
 }
 // Minimap drag to quick-navigate (bird's-eye view)
 (function(){
-  let mmDragging=false,mmStartX=0,mmStartY=0,mmStartPctX=0,mmStartPctY=0;
+  let mmDragging=false,mmStartX=0,mmStartY=0,mmStartPX=0,mmStartPY=0;
   const mm=document.getElementById('lbMinimap');
   const vp=document.getElementById('lbVport');
+  function mmToPan(pL,pT){
+    const img=document.getElementById('lbi');if(!img||!img.naturalWidth)return;
+    const nw=img.naturalWidth,nh=img.naturalHeight;
+    const vpW=window.innerWidth,vpH=window.innerHeight;
+    lbPanX=(pL/100)*nw-nw/2+vpW/(2*lbZoom);
+    lbPanY=(pT/100)*nh-nh/2+vpH/(2*lbZoom);
+    clampLbPan();
+    img.style.transform='scale('+lbZoom+') translate('+lbPanX+'px,'+lbPanY+'px)';
+    updateLbMinimap();
+  }
   // Drag the viewport rectangle on the minimap
   vp.addEventListener('mousedown',function(e){
     if(lbZoom<=1)return;
     e.preventDefault();e.stopPropagation();
     mmDragging=true;mmStartX=e.clientX;mmStartY=e.clientY;
-    const mr=mm.getBoundingClientRect();
-    mmStartPctX=parseFloat(vp.style.left)||0;
-    mmStartPctY=parseFloat(vp.style.top)||0;
+    mmStartPX=parseFloat(vp.style.left)||0;
+    mmStartPY=parseFloat(vp.style.top)||0;
     document.onmousemove=function(ev){
       if(!mmDragging)return;
+      const mr=mm.getBoundingClientRect();
       const dx=(ev.clientX-mmStartX)/mr.width*100;
       const dy=(ev.clientY-mmStartY)/mr.height*100;
-      const newL=Math.max(0,Math.min(100-parseFloat(vp.style.width||10),mmStartPctX+dx));
-      const newT=Math.max(0,Math.min(100-parseFloat(vp.style.height||10),mmStartPctY+dy));
-      vp.style.left=newL+'%';vp.style.top=newT+'%';
-      // Sync main image pan
-      const img=document.getElementById('lbi');if(!img||!img.naturalWidth)return;
-      const vpW=window.innerWidth,vpH=window.innerHeight;
-      lbPanX=-(newL/100*img.naturalWidth-vpW/2/lbZoom);
-      lbPanY=-(newT/100*img.naturalHeight-vpH/2/lbZoom);
-      img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
+      const vpWp=parseFloat(vp.style.width)||10, vpHp=parseFloat(vp.style.height)||10;
+      const newL=Math.max(0,Math.min(100-vpWp,mmStartPX+dx));
+      const newT=Math.max(0,Math.min(100-vpHp,mmStartPY+dy));
+      mmToPan(newL,newT);
     };
     document.onmouseup=function(){mmDragging=false;document.onmousemove=null;document.onmouseup=null};
   });
   // Click on minimap background jumps to position
   mm.addEventListener('mousedown',function(e){
     if(lbZoom<=1||mmDragging)return;
-    if(e.target===vp)return; // viewport handles itself
+    if(e.target===vp)return;
     const img=document.getElementById('lbi');if(!img||!img.naturalWidth)return;
     const mr=mm.getBoundingClientRect();
     const pctX=(e.clientX-mr.left)/mr.width;
     const pctY=(e.clientY-mr.top)/mr.height;
-    const vpW=window.innerWidth,vpH=window.innerHeight;
-    lbPanX=-(pctX*img.naturalWidth-vpW/2/lbZoom);
-    lbPanY=-(pctY*img.naturalHeight-vpH/2/lbZoom);
-    img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
-    updateLbMinimap();
+    const vpWp=parseFloat(vp.style.width)||10, vpHp=parseFloat(vp.style.height)||10;
+    const newL=Math.max(0,Math.min(100-vpWp,(pctX*100)-vpWp/2));
+    const newT=Math.max(0,Math.min(100-vpHp,(pctY*100)-vpHp/2));
+    mmToPan(newL,newT);
   });
 })();
+function clampLbPan(){
+  const img=document.getElementById('lbi');if(!img||!img.naturalWidth)return;
+  const nw=img.naturalWidth,nh=img.naturalHeight;
+  const vpW=window.innerWidth,vpH=window.innerHeight;
+  const halfVW=vpW/(2*lbZoom),halfVH=vpH/(2*lbZoom);
+  // Image fits in viewport → always center (pan=0)
+  // Image larger → allow pan to edges, no whitespace beyond image bounds
+  const minX=halfVW>=nw/2?0:(halfVW-nw/2);
+  const maxX=halfVW>=nw/2?0:(nw/2-halfVW);
+  const minY=halfVH>=nh/2?0:(halfVH-nh/2);
+  const maxY=halfVH>=nh/2?0:(nh/2-halfVH);
+  lbPanX=Math.max(minX,Math.min(maxX,lbPanX));
+  lbPanY=Math.max(minY,Math.min(maxY,lbPanY));
+}
 function lbToggleZoom(e){
   if(e)e.stopPropagation();
   // Suppress click after drag
@@ -2596,6 +2640,7 @@ function lbEnablePan(){
       lbDidDrag=true;
       lbPanX=lbDragStartX+(ev2.clientX-lbDragSX)/lbZoom;
       lbPanY=lbDragStartY+(ev2.clientY-lbDragSY)/lbZoom;
+      clampLbPan();
       img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
       updateLbMinimap();
     };
@@ -2621,6 +2666,7 @@ function lbEnablePan(){
     lbDidDrag=true;
     lbPanX=lbDragStartX+(t.clientX-lbDragSX)/lbZoom;
     lbPanY=lbDragStartY+(t.clientY-lbDragSY)/lbZoom;
+    clampLbPan();
     img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
     updateLbMinimap();
   };
@@ -2636,43 +2682,45 @@ function lbContextMenu(e){
 }
 function lbCopy(){
   const url=lbImgs[lbIdx];if(!url)return;
-  // Handle data URLs (base64) directly — fetch won't work for them
-  if(url.startsWith('data:')){
+  document.getElementById('lbCtxMenu').style.display='none';
+  // Try fetch→blob first (works for both http and data URLs)
+  function doCopy(blob){
     try{
-      const parts=url.split(','),mime=parts[0].match(/data:(.*?);/);
-      const type=mime?mime[1]:'image/webp';
-      const byteStr=atob(parts[1]);
-      const ab=new Uint8Array(byteStr.length);
-      for(let i=0;i<byteStr.length;i++)ab[i]=byteStr.charCodeAt(i);
-      const blob=new Blob([ab],{type});
-      navigator.clipboard.write([new ClipboardItem({[blob.type]:blob})]).then(()=>st('图片已复制到剪贴板')).catch(()=>st('复制失败','err'));
+      navigator.clipboard.write([new ClipboardItem({[blob.type]:blob})]).then(
+        ()=>st('图片已复制到剪贴板'),
+        ()=>st('复制失败，请尝试下载','err')
+      );
     }catch(e){st('复制失败','err')}
-    document.getElementById('lbCtxMenu').style.display='none';
-    return;
   }
-  fetch(url).then(r=>r.blob()).then(blob=>{
-    try{
-      navigator.clipboard.write([new ClipboardItem({[blob.type]:blob})]);
-      st('图片已复制到剪贴板');
-    }catch(err){
-      const img=new Image();
-      img.onload=function(){
-        const c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+  // Canvas-based copy (more reliable cross-browser)
+  function canvasCopy(){
+    const img=new Image();
+    img.onload=function(){
+      try{
+        const c=document.createElement('canvas');
+        c.width=img.naturalWidth||img.width;c.height=img.naturalHeight||img.height;
         c.getContext('2d').drawImage(img,0,0);
         c.toBlob(function(b){
-          navigator.clipboard.write([new ClipboardItem({[b.type]:b})]).then(()=>st('图片已复制')).catch(()=>st('复制失败，请尝试下载','err'));
-        });
-      };img.src=url;
-    }
-  }).catch(()=>st('复制失败','err'));
-  document.getElementById('lbCtxMenu').style.display='none';
+          if(!b){st('复制失败','err');return}
+          doCopy(b);
+        },'image/png');
+      }catch(e){st('复制失败','err')}
+    };
+    img.onerror=function(){st('图片加载失败','err')};
+    img.src=url;
+  }
+  if(!url.startsWith('data:')){
+    fetch(url).then(r=>r.blob()).then(b=>doCopy(b)).catch(()=>canvasCopy());
+  }else{
+    canvasCopy();
+  }
 }
 function lbDownload(){
   const url=lbImgs[lbIdx];if(!url)return;
   const a=document.createElement('a');
   a.href=url;
   const ext=url.startsWith('data:')?'.'+((url.match(/data:image\/(\w+)/)||[])[1]||'webp'):'.jpg';
-  a.download=(lbItemName||'图片')+'预览图'+ext;
+  a.download=(lbItemArtist||'未知画师')+'_'+(lbItemName||'未知素材')+ext;
   a.click();
   st('已下载');
   document.getElementById('lbCtxMenu').style.display='none';
