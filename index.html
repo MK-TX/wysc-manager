@@ -2617,7 +2617,7 @@ function clearPayImage(){S.payImgData='';document.getElementById('payIp').style.
 
 // ---- Lightbox ----
 let lbImgs=[],lbIdx=0,lbItemName='',lbItemArtist='';
-let lbZoom=1,lbPanX=0,lbPanY=0,lbDragging=false,lbDragSX=0,lbDragSY=0,lbDragStartX=0,lbDragStartY=0,lbDidDrag=false;
+let lbZoom=1,lbPanX=0,lbPanY=0,lbDragging=false,lbDragSX=0,lbDragSY=0,lbDragStartX=0,lbDragStartY=0,lbDidDrag=false,lbBaseCX=0,lbBaseCY=0;
 let lbPinchDist=0,lbPinchStartZoom=1,lbIsPinching=false;
 function openLb(cid){
   const i=S.items.find(x=>x.id===cid);if(!i)return;
@@ -2699,6 +2699,11 @@ function lbApplyZoom(){
     img.style.maxWidth='none';
     img.style.maxHeight='none';
     img.style.width='auto';
+    // Measure actual image center (may differ from viewport center due to thumbs bar, padding, etc.)
+    const prevT=img.style.transform; img.style.transform='none';
+    const r=img.getBoundingClientRect();
+    lbBaseCX=r.left+r.width/2; lbBaseCY=r.top+r.height/2;
+    img.style.transform=prevT;
     clampLbPan();
     img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
     updateLbMinimap();
@@ -2723,9 +2728,8 @@ function updateLbMinimap(){
   document.getElementById('lbMiniImg').src=lbImgs[lbIdx]||'';
   const nw=img.naturalWidth,nh=img.naturalHeight;
   const vpW=window.innerWidth,vpH=window.innerHeight;
-  // Visible area in natural pixels from image top-left:
-  // center = nw/2 + lbPanX (in natural px), visible left = center - vpW/(2*lbZoom)
-  const visL=nw/2-lbPanX-vpW/(2*lbZoom), visT=nh/2-lbPanY-vpH/(2*lbZoom);
+  // Visible area in natural pixels from image top-left, accounting for actual image base position
+  const visL=nw/2-lbBaseCX/lbZoom-lbPanX, visT=nh/2-lbBaseCY/lbZoom-lbPanY;
   const visW=vpW/lbZoom, visH=vpH/lbZoom;
   const pL=Math.max(0,Math.min(100,visL/nw*100));
   const pT=Math.max(0,Math.min(100,visT/nh*100));
@@ -2744,8 +2748,8 @@ function updateLbMinimap(){
     const img=document.getElementById('lbi');if(!img||!img.naturalWidth)return;
     const nw=img.naturalWidth,nh=img.naturalHeight;
     const vpW=window.innerWidth,vpH=window.innerHeight;
-    lbPanX=nw/2-(pL/100)*nw-vpW/(2*lbZoom);
-    lbPanY=nh/2-(pT/100)*nh-vpH/(2*lbZoom);
+    lbPanX=nw/2-lbBaseCX/lbZoom-(pL/100)*nw;
+    lbPanY=nh/2-lbBaseCY/lbZoom-(pT/100)*nh;
     clampLbPan();
     img.style.transform='scale('+lbZoom+') translate('+lbPanX+'px,'+lbPanY+'px)';
     updateLbMinimap();
@@ -2788,12 +2792,12 @@ function clampLbPan(){
   const nw=img.naturalWidth,nh=img.naturalHeight;
   const vpW=window.innerWidth,vpH=window.innerHeight;
   const halfVW=vpW/(2*lbZoom),halfVH=vpH/(2*lbZoom);
-  // Image fits in viewport → always center (pan=0)
-  // Image larger → allow pan to edges, no whitespace beyond image bounds
-  const minX=halfVW>=nw/2?0:(halfVW-nw/2);
-  const maxX=halfVW>=nw/2?0:(nw/2-halfVW);
-  const minY=halfVH>=nh/2?0:(halfVH-nh/2);
-  const maxY=halfVH>=nh/2?0:(nh/2-halfVH);
+  // Use measured base center (accounts for thumbs/padding/flex offsets)
+  // Image fits → always center; image larger → allow pan to edges with no whitespace
+  const maxX=halfVW>=nw/2?0:(nw/2-lbBaseCX/lbZoom);
+  const minX=halfVW>=nw/2?0:((vpW-lbBaseCX)/lbZoom-nw/2);
+  const maxY=halfVH>=nh/2?0:(nh/2-lbBaseCY/lbZoom);
+  const minY=halfVH>=nh/2?0:(vpH-lbBaseCY)/lbZoom-nh/2;
   lbPanX=Math.max(minX,Math.min(maxX,lbPanX));
   lbPanY=Math.max(minY,Math.min(maxY,lbPanY));
 }
