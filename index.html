@@ -316,16 +316,17 @@ input,select,textarea{font-family:inherit;font-size:16px}
   .main-content{padding-bottom:env(safe-area-inset-bottom)}
 }
 /* Filter Modal */
-.filter-modal{background:var(--card);border-radius:var(--radius);max-width:600px;width:95vw;max-height:85vh;overflow-y:auto}
-.filter-modal h3{font-size:16px;padding:16px 20px 0;margin:0}
-.filter-modal .fm-body{padding:16px 20px;display:flex;flex-direction:column;gap:16px}
+.filter-modal{background:var(--card);border-radius:var(--radius);max-width:600px;width:95vw;max-height:80vh;display:flex;flex-direction:column}
+.filter-modal .fm-hd{padding:16px 20px 0;flex-shrink:0}
+.filter-modal h3{font-size:16px;margin:0}
+.filter-modal .fm-body{padding:16px 20px;overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:16px}
 .filter-modal .fm-sec{}
 .filter-modal .fm-sec h4{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
 .filter-modal .fm-chips{display:flex;flex-wrap:wrap;gap:6px}
 .filter-modal .fm-chip{padding:5px 12px;border-radius:16px;font-size:12px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:var(--card);color:var(--text);user-select:none}
 .filter-modal .fm-chip:hover{border-color:var(--primary);background:var(--primary-light)}
 .filter-modal .fm-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.filter-modal .fm-ft{display:flex;gap:8px;padding:12px 20px 16px;border-top:1px solid var(--border);justify-content:flex-end}
+.filter-modal .fm-ft{display:flex;gap:8px;padding:12px 20px 16px;border-top:1px solid var(--border);justify-content:flex-end;flex-shrink:0}
 .filter-modal .fm-count{font-size:12px;color:var(--text2);margin-left:auto;align-self:center}
 </style>
 </head>
@@ -390,7 +391,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 <!-- Filter Modal -->
 <div class="mo" id="fmo" style="display:none" onclick="if(event.target===this)closeFilterModal()">
   <div class="filter-modal">
-    <div class="mdh"><h3>筛选条件</h3><button class="btn-icon" onclick="closeFilterModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mdh fm-hd"><h3>筛选条件</h3><button class="btn-icon" onclick="closeFilterModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="fm-body">
       <div class="fm-sec"><h4>画师/美工</h4><div class="fm-chips" id="fmArtist"></div></div>
       <div class="fm-sec"><h4>售卖类型</h4><div class="fm-chips" id="fmSaleType"></div></div>
@@ -452,7 +453,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
       <!-- 属性分类 -->
       <div class="fg"><label>属性分类 <span class="rq">*</span></label>
         <div class="cat-grid" id="fc"></div>
-        <div id="catsub" style="display:none;margin-top:6px"><select id="fcsub" onchange="onCatSub()"><option value="">请选择子类</option></select></div>
+        <div id="catsub" style="display:none;margin-top:6px"><label style="font-size:12px;color:var(--text2);margin-bottom:4px;display:block">选择子类</label><div class="cat-grid" id="fcsubGrid"></div></div>
         <input type="text" id="fccs" placeholder="自定义子分类" style="display:none;margin-top:6px">
         <input type="text" id="fbl" placeholder="绑定的立绘名称" style="display:none;margin-top:6px">
         <input type="text" id="fcc" placeholder="自定义分类名称" style="display:none;margin-top:6px">
@@ -902,13 +903,15 @@ function getCatTags(i){
   cats.forEach(c=>{
     tags.push({text:c,color:CCOL[c]||'#94a3b8',isMain:true});
   });
-  // Sub-category only for first cat with subs
-  const first=cats[0]||'';
-  if(SUBS[first]&&i.subCategory){
-    const sub=i.subCategory==='其他'?(i.customSubCategory||'其他'):i.subCategory;
-    if(sub) tags.push({text:sub,color:CCOL[first]||'#94a3b8',isMain:false});
+  // Sub-category tags (multiple from all selected main cats)
+  if(i.subCategory){
+    const subs=(i.subCategory||'').split(',').map(s=>s.trim()).filter(Boolean);
+    subs.forEach(s=>{
+      if(s==='其他'){ tags.push({text:i.customSubCategory||'其他',color:CCOL[cats[0]]||'#94a3b8',isMain:false}); }
+      else { tags.push({text:s,color:CCOL[cats[0]]||'#94a3b8',isMain:false}); }
+    });
   }
-  if(first==='Q版'&&i.subCategory==='绑定Q'&&i.boundLihui){
+  if(cats.includes('Q版')&&(i.subCategory||'').includes('绑定Q')&&i.boundLihui){
     tags.push({text:'绑定：'+i.boundLihui,color:'#5b21b6',isMain:false});
   }
   return tags;
@@ -916,9 +919,10 @@ function getCatTags(i){
 
 function getCatD(i){
   const c=getCats(i)[0]||'';
-  if(c==='美工') return '美工·'+(i.subCategory==='其他'?(i.customSubCategory||'其他'):i.subCategory||'');
-  if(c==='Q版') return 'Q版·'+(i.subCategory==='其他'?(i.customSubCategory||'其他'):i.subCategory||'');
-  if(c==='音乐') return '音乐·'+(i.subCategory==='其他'?(i.customSubCategory||'其他'):i.subCategory||'');
+  const subList=(i.subCategory||'').split(',').map(s=>s.trim()).filter(Boolean);
+  if(c==='美工') return '美工·'+subList.join('·');
+  if(c==='Q版') return 'Q版·'+subList.join('·');
+  if(c==='音乐') return '音乐·'+subList.join('·');
   if(c==='其他'&&i.customCategory) return i.customCategory;
   return c||'';
 }
@@ -926,8 +930,17 @@ function getCatD(i){
 function getTjD(i){
   if(i.tongjiaRule==='不可穿通加') return {t:'不可穿通加',c:'#ef4444'};
   if(i.tongjiaRule==='可穿通加'){
-    if(i.tongjiaLimit==='unlimited') return {t:'可穿可作',c:'#10b981'};
-    if(i.tongjiaLimit==='limited'){ let t=i.tongjiaType||'可穿通加'; if(i.tongjiaScope) t+='·'+i.tongjiaScope; return {t,c:'#f59e0b'}; }
+    if(i.tongjiaLimit==='unlimited') return {t:'可穿可作无古现限制',c:'#10b981'};
+    if(i.tongjiaLimit==='limited'){
+      const parts=[];
+      if(i.tongjiaType==='可穿无脸通加') parts.push('可穿无脸通加');
+      else if(i.tongjiaType==='可穿不可作') parts.push('可穿不可作');
+      else parts.push(i.tongjiaType||'可穿通加');
+      if(i.tongjiaScope==='只可穿古通加') parts.push('限古通加');
+      else if(i.tongjiaScope==='只可穿现通加') parts.push('限现通加');
+      else if(i.tongjiaScope==='古现都可') parts.push('无古现限制');
+      return {t:parts.join('·'),c:'#f59e0b'};
+    }
   }
   return null;
 }
@@ -983,20 +996,22 @@ function getUsageTag(i){
 }
 function getTjTag(i){
   if(i.tongjiaRule==='可穿通加'){
-    if(i.tongjiaLimit==='unlimited') return '可穿可作通加';
+    if(i.tongjiaLimit==='unlimited') return '可穿可作无古现限制';
     if(i.tongjiaLimit==='limited'){
-      if(i.tongjiaType==='可穿无脸通加') return '可穿无脸通加';
-      if(i.tongjiaType==='可穿不可作') return '可穿不可作通加';
-      return '可穿通加';
+      const parts=[];
+      if(i.tongjiaType==='可穿无脸通加') parts.push('可穿无脸通加');
+      else if(i.tongjiaType==='可穿不可作') parts.push('可穿不可作');
+      else parts.push(i.tongjiaType||'可穿通加');
+      if(i.tongjiaScope==='只可穿古通加') parts.push('限古通加');
+      else if(i.tongjiaScope==='只可穿现通加') parts.push('限现通加');
+      else if(i.tongjiaScope==='古现都可') parts.push('无古现限制');
+      return parts.join('·');
     }
   }
   return '';
 }
 function getScopeTag(i){
-  if(i.tongjiaRule==='可穿通加'&&i.tongjiaLimit==='limited'){
-    if(i.tongjiaScope==='只可穿古通加') return '限古通加';
-    if(i.tongjiaScope==='只可穿现通加') return '限现通加';
-  }
+  // Merged into getTjTag now — keep for backward compat but return empty
   return '';
 }
 function hasTongjia(i){ const cats=getCats(i);return cats.includes('立绘')||cats.includes('卤蛋'); }
@@ -1787,7 +1802,7 @@ function renderMaterials(){
 function updateCatFilter(){
   const el=document.getElementById('fcat'),cats=new Set();
   getItemsForView().forEach(i=>{getCats(i).forEach(c=>cats.add(c))});
-  el.innerHTML='<option value="all">全部分类</option>'+[...cats].sort((a,b)=>a.localeCompare(b,'zh')).map(c=>`<option value="${eh(c)}">${eh(c)}</option>`).join('');
+  el.innerHTML='<option value="all">筛选条件</option>'+[...cats].sort((a,b)=>a.localeCompare(b,'zh')).map(c=>`<option value="${eh(c)}">${eh(c)}</option>`).join('');
 }
 // ---- Filter Modal (Advanced Filter) ----
 let S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[]};
@@ -1885,7 +1900,7 @@ function applyFilterToItems(items){
   });
 }
 function getTongjiaRule(i){
-  if(!i.tongjiaRule) return '无';
+  if(!i.tongjiaRule) return '';
   return i.tongjiaRule;
 }
 function updateDataBanner(){
@@ -1982,9 +1997,17 @@ function openEditItem(id){
   document.getElementById('fn').value=i.name||'';
   renderCatGrid(getCats(i));onCatCheck();
   const editCats=getCats(i);
-  if(editCats.some(c=>SUBS[c])){document.getElementById('fcsub').value=i.subCategory||'';onCatSub();
-    if(i.subCategory==='其他'){document.getElementById('fccs').style.display='';document.getElementById('fccs').value=i.customSubCategory||''}
-    if(editCats.includes('Q版')&&i.subCategory==='绑定Q'){document.getElementById('fbl').style.display='';document.getElementById('fbl').value=i.boundLihui||''}
+  // Restore sub-category checkboxes
+  if(i.subCategory){
+    const subList=(i.subCategory||'').split(',');
+    setTimeout(()=>{
+      subList.forEach(s=>{
+        const cb=document.querySelector(`input[name="fcsk"][value="${s.trim()}"]`);
+        if(cb){cb.checked=true;onCatSubCheck()}
+      });
+    },50);
+    if(subList.includes('其他')){document.getElementById('fccs').style.display='';document.getElementById('fccs').value=i.customSubCategory||''}
+    if(editCats.includes('Q版')&&subList.includes('绑定Q')){document.getElementById('fbl').style.display='';document.getElementById('fbl').value=i.boundLihui||''}
   }
   if(editCats.includes('其他')){document.getElementById('fcc').style.display='';document.getElementById('fcc').value=i.customCategory||''}
   if(editCats.includes('加装')&&i.jzRestrict&&i.jzRestrict.length){
@@ -2077,7 +2100,7 @@ function closeItemModal(){document.getElementById('imo').style.display='none';S.
 function clearItemForm(){
   document.getElementById('fn').value='';
   S.imgData=[]; renderImgGrid();
-  renderCatGrid([]);document.getElementById('catsub').style.display='none';document.getElementById('fcsub').value='';
+  renderCatGrid([]);document.getElementById('catsub').style.display='none';document.getElementById('fcsubGrid').innerHTML='';
   document.getElementById('fccs').style.display='none';document.getElementById('fccs').value='';
   document.getElementById('fbl').style.display='none';document.getElementById('fbl').value='';
   document.getElementById('fcc').style.display='none';document.getElementById('fcc').value='';
@@ -2130,7 +2153,8 @@ function saveItem(){
   const pp=ps==='购入'?(document.querySelector('input[name="pp"]:checked')?.value||''):(ps==='赞助'?(document.querySelector('input[name="pz"]:checked')?.value||''):'');
   const isTrans=document.querySelector('input[name="ftransfer"]:checked')?.value||'否';
   let subCat='',csub='',cCat='',bnd='';
-  if(cats.some(c=>SUBS[c])){subCat=document.getElementById('fcsub').value;if(subCat==='其他')csub=document.getElementById('fccs').value.trim();if(cats.includes('Q版')&&subCat==='绑定Q')bnd=document.getElementById('fbl').value.trim()}
+  const checkedSubs=getCheckedSubs();
+  if(checkedSubs.length>0){subCat=checkedSubs.join(',');if(checkedSubs.includes('其他'))csub=document.getElementById('fccs').value.trim();if(cats.includes('Q版')&&checkedSubs.includes('绑定Q'))bnd=document.getElementById('fbl').value.trim()}
   if(cats.includes('其他'))cCat=document.getElementById('fcc').value.trim();
   let jzRestrict=[],jzShop='',jzLihui='',jzCustom='';
   if(cats.includes('加装')){
@@ -2420,12 +2444,17 @@ function onCatCheck(){
         tjg=document.getElementById('tjg'),jzg=document.getElementById('jzg');
   sub.style.display='none';fcc.style.display='none';fccs.style.display='none';
   fbl.style.display='none';tjg.style.display='none';jzg.style.display='none';
-  // Find first cat with SUBS for sub-category dropdown
-  const firstSubCat=cats.find(c=>SUBS[c]);
-  if(firstSubCat){
+  // Build sub-category checkboxes: collect all subs from all checked main cats
+  const allSubs=new Set();
+  cats.forEach(c=>{ if(SUBS[c]) SUBS[c].forEach(s=>allSubs.add(s)); });
+  const subArr=[...allSubs];
+  if(subArr.length>0){
     sub.style.display='';
-    const sel=document.getElementById('fcsub');sel.innerHTML='<option value="">请选择子类</option>'+SUBS[firstSubCat].map(s=>`<option value="${s}">${s}</option>`).join('');sel.value='';
+    const grid=document.getElementById('fcsubGrid');
+    grid.innerHTML=subArr.map(s=>`<label><input type="checkbox" name="fcsk" value="${s}" onchange="onCatSubCheck()"> ${s}</label>`).join('');
   }
+  if(cats.includes('其他')) fcc.style.display='';
+  if(cats.includes('加装')){ jzg.style.display=''; const ulc=document.querySelector('input[name="jzr"][value="无限制"]'); if(ulc&&!document.querySelector('input[name="jzr"]:checked')){ulc.checked=true;onJz();} }
   if(cats.includes('其他')) fcc.style.display='';
   if(cats.includes('加装')){ jzg.style.display=''; const ulc=document.querySelector('input[name="jzr"][value="无限制"]'); if(ulc&&!document.querySelector('input[name="jzr"]:checked')){ulc.checked=true;onJz();} }
   if(cats.includes('立绘')||cats.includes('卤蛋')){
@@ -2450,12 +2479,14 @@ function onCatCheck(){
     onUsageLimit();
   }
 }
-function onCatSub(){
-  const cats=getCheckedCats();const cat=cats[0]||'';
-  const sub=document.getElementById('fcsub').value;
-  document.getElementById('fccs').style.display=sub==='其他'?'':'none';
-  document.getElementById('fbl').style.display=(cat==='Q版'&&sub==='绑定Q')?'':'none';
+function onCatSubCheck(){
+  const checked=Array.from(document.querySelectorAll('input[name="fcsk"]:checked')).map(c=>c.value);
+  document.getElementById('fccs').style.display=checked.includes('其他')?'':'none';
+  const cats=getCheckedCats();
+  document.getElementById('fbl').style.display=(cats.includes('Q版')&&checked.includes('绑定Q'))?'':'none';
 }
+function getCheckedSubs(){return Array.from(document.querySelectorAll('input[name="fcsk"]:checked')).map(c=>c.value)}
+function onCatSub(){} // keep as no-op for backward compat
 function onTj(){
   const v=document.querySelector('input[name="tj"]:checked')?.value;
   document.getElementById('tjs').style.display=v==='可穿通加'?'':'none';
