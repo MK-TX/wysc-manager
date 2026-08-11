@@ -1795,23 +1795,18 @@ function renderMaterials(){
 
 // ---- Filter Modal (Advanced Filter) ----
 let S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[],status:[]};
-const artists = new Set(), saleTypes = new Set(), cats = new Set(), sources = new Set(), tongjias = new Set();
-items.forEach(i => {
-  if (i.artist) splitArtists(i.artist).forEach(a => artists.add(a));
-  if (i.saleType) saleTypes.add(i.saleType);
-  getCats(i).forEach(c => cats.add(c));
-  let psLabel = '';
-  if (i.purchaseSource === '购入' && i.purchaseSub) {
-    psLabel = i.purchaseSub + '购入';
-  } else if (i.purchaseSource === '赞助') {
-    psLabel = (i.purchaseSub === '被赞助') ? '被赞助' : '赞助';
-  } else if (i.purchaseSource) {
-    psLabel = i.purchaseSource;
-  }
-  if (psLabel) sources.add(psLabel);
-  const tj = getTongjiaRule(i);
-  if (tj) tongjias.add(tj);
-});
+function openFilterModal(){
+  const items=getItemsForView();
+  // Collect all unique values
+  const artists=new Set(), saleTypes=new Set(), cats=new Set(), sources=new Set(), tongjias=new Set();
+  items.forEach(i=>{
+    if(i.artist) splitArtists(i.artist).forEach(a=>artists.add(a));
+    if(i.saleType) saleTypes.add(i.saleType);
+    getCats(i).forEach(c=>cats.add(c));
+    if(i.ownerName) sources.add(i.ownerName);
+    const tj=getTongjiaRule(i);
+    if(tj) tongjias.add(tj);
+  });
   // Dynamic status options
   const statusOptions=[];
   const hasUsed=items.some(i=>i.isUsed);
@@ -2736,14 +2731,11 @@ function updateLbMinimap(){
   const mm=document.getElementById('lbMinimap');
   const vp=document.getElementById('lbVport');
   function mmToPan(pL,pT){
-    const img = document.getElementById('lbi');
-    if (!img || !img.naturalWidth) return;
-    const nw = img.naturalWidth,
-      nh = img.naturalHeight;
-    const vpW = window.innerWidth,
-      vpH = window.innerHeight;
-    lbPanX = nw / 2 - (pL / 100) * nw + vpW / (2 * lbZoom);
-    lbPanY = nh / 2 - (pT / 100) * nh + vpH / (2 * lbZoom);
+    const img=document.getElementById('lbi');if(!img||!img.naturalWidth)return;
+    const nw=img.naturalWidth,nh=img.naturalHeight;
+    const vpW=window.innerWidth,vpH=window.innerHeight;
+    lbPanX=(pL/100)*nw-nw/2+vpW/(2*lbZoom);
+    lbPanY=(pT/100)*nh-nh/2+vpH/(2*lbZoom);
     clampLbPan();
     img.style.transform='scale('+lbZoom+') translate('+lbPanX+'px,'+lbPanY+'px)';
     updateLbMinimap();
