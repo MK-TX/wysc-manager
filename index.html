@@ -316,7 +316,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
   .main-content{padding-bottom:env(safe-area-inset-bottom)}
 }
 /* Filter Modal */
-.filter-modal{background:var(--card);border-radius:var(--radius);max-width:600px;width:95vw;max-height:80vh;display:flex;flex-direction:column;margin:0}
+.filter-modal{background:var(--card);border-radius:var(--radius);max-width:600px;width:95vw;max-height:85vh;display:flex;flex-direction:column;margin:0}
 .filter-modal .fm-hd{padding:16px 20px 0;flex-shrink:0}
 .filter-modal h3{font-size:16px;margin:0}
 .filter-modal .fm-body{padding:16px 20px;overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:16px}
@@ -371,8 +371,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
       <div class="mat-hd">
         <div class="mht"><span id="mttl">未分类店铺</span><span class="src-badge" id="msub"></span></div>
         <div class="mat-fl">
-          <button class="btn btn-sm" id="fcatBtn" onclick="openFilterModal()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>筛选条件</button>
-          <select id="fused" onchange="renderMaterials()"><option value="all">全部状态</option><option value="pending_sponsor">待赞助</option><option value="unused">未使用</option><option value="used">已使用</option></select>
+          <button class="btn btn-sm" id="fcatBtn" onclick="openFilterModal()">筛选条件 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button>
           <select id="fsort" onchange="renderMaterials()">
             <option value="time_desc">时间最新</option><option value="time_asc">时间最早</option>
             <option value="price_desc">价格↓</option><option value="price_asc">价格↑</option>
@@ -398,6 +397,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
       <div class="fm-sec"><h4>属性分类</h4><div class="fm-chips" id="fmCategory"></div></div>
       <div class="fm-sec"><h4>购买来源</h4><div class="fm-chips" id="fmSource"></div></div>
       <div class="fm-sec"><h4>通加规则</h4><div class="fm-chips" id="fmTongjia"></div></div>
+      <div class="fm-sec" id="fmStatusSec"><h4>状态</h4><div class="fm-chips" id="fmStatus"></div></div>
     </div>
     <div class="fm-ft">
       <span class="fm-count" id="fmCount"></span>
@@ -505,15 +505,6 @@ input,select,textarea{font-family:inherit;font-size:16px}
         <input type="text" id="fpsc" placeholder="自定义购买来源" style="display:none;margin-top:6px">
       </div>
 
-      <!-- 是否转让 -->
-      <div class="fg"><label>是否转让</label>
-        <div class="rg">
-          <label><input type="radio" name="ftransfer" value="是" onchange="onTransfer()"> 是</label>
-          <label><input type="radio" name="ftransfer" value="否" checked onchange="onTransfer()"> 否</label>
-        </div>
-        <input type="text" id="ftransferid" placeholder="转让人ID（选填）" style="display:none;margin-top:6px">
-      </div>
-
       <!-- 通加规则 -->
       <div class="fg" id="tjg" style="display:none">
         <label>通加规则 <span class="rq">*</span></label>
@@ -559,6 +550,15 @@ input,select,textarea{font-family:inherit;font-size:16px}
             <input type="text" id="frothernote" placeholder="其他备注（选填）" style="display:none;margin-top:6px">
           </div>
         </div>
+      </div>
+
+      <!-- 是否已转让 -->
+      <div class="fg" id="ftg" style="display:none"><label>是否已转让</label>
+        <div class="rg">
+          <label><input type="radio" name="ftransfer" value="是" onchange="onTransfer()"> 是</label>
+          <label><input type="radio" name="ftransfer" value="否" checked onchange="onTransfer()"> 否</label>
+        </div>
+        <input type="text" id="ftransferid" placeholder="转让人ID（选填）" style="display:none;margin-top:6px">
       </div>
 
       <!-- 价格 + 日期 + 双倍积分 -->
@@ -1757,17 +1757,13 @@ function getItemsForView(){
 
 function renderMaterials(){
   let items=getItemsForView();
-  const fused=document.getElementById('fused').value;
   const fsort=document.getElementById('fsort').value;
   const q=(document.getElementById('q').value||'').toLowerCase();
   // Persist filter state
-  S._filterUsed=fused;S._filterSort=fsort;S._filterQuery=document.getElementById('q').value||'';
+  S._filterSort=fsort;S._filterQuery=document.getElementById('q').value||'';
   sv();
-  // Apply multi-filter if active
+  // Apply multi-filter if active (includes status filter from filter modal)
   if(hasActiveFilter()) items=applyFilterToItems(items);
-  if(fused==='pending_sponsor') items=items.filter(i=>{const psd=getPSD(i);return psd&&/余\d+待赞助/.test(psd)});
-  if(fused==='unused') items=items.filter(i=>!i.isUsed);
-  if(fused==='used') items=items.filter(i=>i.isUsed);
   if(q) items=items.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.artist||'').toLowerCase().includes(q)||(i.note||'').toLowerCase().includes(q)||getCatD(i).toLowerCase().includes(q)||getPSD(i).toLowerCase().includes(q));
   switch(fsort){
     case 'time_desc': items.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));break;
@@ -1798,7 +1794,7 @@ function renderMaterials(){
 }
 
 // ---- Filter Modal (Advanced Filter) ----
-let S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[]};
+let S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[],status:[]};
 function openFilterModal(){
   const items=getItemsForView();
   // Collect all unique values
@@ -1811,6 +1807,19 @@ function openFilterModal(){
     const tj=getTongjiaRule(i);
     if(tj) tongjias.add(tj);
   });
+  // Dynamic status options
+  const statusOptions=[];
+  const hasUsed=items.some(i=>i.isUsed);
+  const hasUnused=items.some(i=>!i.isUsed);
+  const hasSponsor=items.some(i=>{const psd=getPSD(i);return psd&&/余\d+待赞助/.test(psd)});
+  const hasPendingSponsor=items.some(i=>{const psd=getPSD(i);return psd&&/余\d+待赞助/.test(psd)});
+  if(hasPendingSponsor) statusOptions.push({val:'pending_sponsor',label:'待赞助'});
+  if(hasUnused&&hasUsed){statusOptions.push({val:'unused',label:'未使用'});statusOptions.push({val:'used',label:'已使用'})}
+  else if(hasUnused&&!hasUsed) statusOptions.push({val:'unused',label:'未使用'});
+  else if(!hasUnused&&hasUsed) statusOptions.push({val:'used',label:'已使用'});
+  const statusSec=document.getElementById('fmStatusSec');
+  if(statusOptions.length===0){statusSec.style.display='none'}
+  else{statusSec.style.display='';renderStatusChips(statusOptions)}
   // Render chips
   renderFilterChips('fmArtist',[...artists].sort((a,b)=>a.localeCompare(b,'zh')),'artist');
   renderFilterChips('fmSaleType',[...saleTypes].sort((a,b)=>a.localeCompare(b,'zh')),'saleType');
@@ -1828,6 +1837,13 @@ function renderFilterChips(containerId,values,dim){
     return `<span class="fm-chip${active}" onclick="toggleFilterChip(event,'${dim}','${eh(v)}')">${eh(v)}</span>`;
   }).join('');
 }
+function renderStatusChips(options){
+  const el=document.getElementById('fmStatus');
+  el.innerHTML=options.map(o=>{
+    const active=S_filter.status.includes(o.val)?' active':'';
+    return `<span class="fm-chip${active}" onclick="toggleFilterChip(event,'status','${o.val}')">${o.label}</span>`;
+  }).join('');
+}
 function toggleFilterChip(e,dim,val){
   e.currentTarget.classList.toggle('active');
   const arr=S_filter[dim];
@@ -1836,7 +1852,7 @@ function toggleFilterChip(e,dim,val){
   updateFilterCount();
 }
 function updateFilterCount(){
-  const total=S_filter.artist.length+S_filter.saleType.length+S_filter.category.length+S_filter.source.length+S_filter.tongjia.length;
+  const total=S_filter.artist.length+S_filter.saleType.length+S_filter.category.length+S_filter.source.length+S_filter.tongjia.length+S_filter.status.length;
   document.getElementById('fmCount').textContent=total>0?`已选 ${total} 项`:'';
 }
 function applyFilter(){
@@ -1844,7 +1860,7 @@ function applyFilter(){
   renderMaterials();
 }
 function resetFilter(){
-  S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[]};
+  S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[],status:[]};
   // Reset all chips
   document.querySelectorAll('#fmo .fm-chip.active').forEach(c=>c.classList.remove('active'));
   updateFilterCount();
@@ -1853,7 +1869,7 @@ function closeFilterModal(){
   document.getElementById('fmo').style.display='none';
 }
 function hasActiveFilter(){
-  return S_filter.artist.length>0||S_filter.saleType.length>0||S_filter.category.length>0||S_filter.source.length>0||S_filter.tongjia.length>0;
+  return S_filter.artist.length>0||S_filter.saleType.length>0||S_filter.category.length>0||S_filter.source.length>0||S_filter.tongjia.length>0||S_filter.status.length>0;
 }
 function applyFilterToItems(items){
   if(!hasActiveFilter()) return items;
@@ -1871,6 +1887,15 @@ function applyFilterToItems(items){
     if(S_filter.tongjia.length>0){
       const tj=getTongjiaRule(i);
       if(!S_filter.tongjia.includes(tj)) return false;
+    }
+    if(S_filter.status.length>0){
+      let matchStatus=false;
+      if(S_filter.status.includes('pending_sponsor')){
+        const psd=getPSD(i);if(psd&&/余\d+待赞助/.test(psd)) matchStatus=true;
+      }
+      if(S_filter.status.includes('unused')&&!i.isUsed) matchStatus=true;
+      if(S_filter.status.includes('used')&&i.isUsed) matchStatus=true;
+      if(!matchStatus) return false;
     }
     return true;
   });
@@ -2101,6 +2126,7 @@ function clearItemForm(){
   document.getElementById('frvipnote').style.display='none';document.getElementById('frvipnote').value='';
   document.getElementById('frothernote').style.display='none';document.getElementById('frothernote').value='';
   document.getElementById('frSub').style.display='none';document.getElementById('frSubQuit').style.display='none';document.getElementById('frSubNoQuit').style.display='none';
+  document.getElementById('ftg').style.display='none';
   document.querySelectorAll('input[name="fst"]').forEach(r=>r.checked=false);
   document.getElementById('fa').value='';document.getElementById('fp').value='';document.getElementById('fpd').value='';
   document.getElementById('fdp').checked=false;document.getElementById('fct').checked=true;
@@ -2324,32 +2350,35 @@ function onTransfer(){
   document.getElementById('fulg').style.display=isTransfer?'none':'';
   // "已使用次数" + sub-options: depend on both transfer and usage limit
   onUsageLimit();
-  // Auto-set transfer rule to "不可转" when transferred
   if(isTransfer){
-    const nr=document.querySelector('input[name="fr"][value="不可转"]');
-    if(nr) nr.checked=true;
     // Default uncheck "计入消费" → shows "已转" tag (not counted)
     document.getElementById('fct').checked=false;
   }else{
     // Restore default checked state
     document.getElementById('fct').checked=true;
   }
-  onTransferRule();
 }
 function onTransferRule(){
   const v=document.querySelector('input[name="fr"]:checked')?.value||'';
   const sub=document.getElementById('frSub');
   const quit=document.getElementById('frSubQuit');
   const noquit=document.getElementById('frSubNoQuit');
+  const ftg=document.getElementById('ftg');
   if(v==='退圈可转'){
     sub.style.display='';quit.style.display='';noquit.style.display='none';
-    // Default 私转
+    ftg.style.display='';
     const ps=document.querySelector('input[name="frsq"][value="私转"]');
     if(ps&&!document.querySelector('input[name="frsq"]:checked'))ps.checked=true;
   }else if(v==='不退圈可转'){
     sub.style.display='';quit.style.display='none';noquit.style.display='';onFrNoQuit();
+    ftg.style.display='';
   }else{
     sub.style.display='none';quit.style.display='none';noquit.style.display='none';
+    ftg.style.display='none';
+    // Reset transfer radio to 否 when hiding
+    const nr=document.querySelector('input[name="ftransfer"][value="否"]');
+    if(nr)nr.checked=true;
+    document.getElementById('ftransferid').style.display='none';
   }
 }
 function onFrNoQuit(){
@@ -2785,8 +2814,8 @@ function lbEnablePan(){
     document.onmousemove=function(ev2){
       if(!lbDragging)return;
       lbDidDrag=true;
-      lbPanX=lbDragStartX+(ev2.clientX-lbDragSX)/lbZoom;
-      lbPanY=lbDragStartY+(ev2.clientY-lbDragSY)/lbZoom;
+      lbPanX=lbDragStartX-(ev2.clientX-lbDragSX)/lbZoom;
+      lbPanY=lbDragStartY-(ev2.clientY-lbDragSY)/lbZoom;
       clampLbPan();
       img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
       updateLbMinimap();
@@ -2811,8 +2840,8 @@ function lbEnablePan(){
     ev.preventDefault();
     const t=ev.touches[0];
     lbDidDrag=true;
-    lbPanX=lbDragStartX+(t.clientX-lbDragSX)/lbZoom;
-    lbPanY=lbDragStartY+(t.clientY-lbDragSY)/lbZoom;
+    lbPanX=lbDragStartX-(t.clientX-lbDragSX)/lbZoom;
+    lbPanY=lbDragStartY-(t.clientY-lbDragSY)/lbZoom;
     clampLbPan();
     img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
     updateLbMinimap();
@@ -3383,7 +3412,6 @@ idbInit().then(()=>{
 function startApp(){
   migrateImages();
   // Restore filter state BEFORE first render to prevent overwrite
-  if(S._filterUsed&&S._filterUsed!=='all'){const fu=document.getElementById('fused');if(fu)fu.value=S._filterUsed}
   if(S._filterSort&&S._filterSort!=='time_desc'){const fs=document.getElementById('fsort');if(fs)fs.value=S._filterSort}
   if(S._filterQuery){const q=document.getElementById('q');if(q)q.value=S._filterQuery}
   renderAll();
