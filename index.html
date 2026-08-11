@@ -847,7 +847,7 @@ function ld(){
     selectedGroup = st.selectedGroup !== undefined ? st.selectedGroup : 'all';
     S._filterCat=st.filterCat||'all'; S._filterUsed=st.filterUsed||'all';
     S._filterSort=st.filterSort||'time_desc'; S._filterQuery=st.filterQuery||'';
-    if(st.S_filter) S_filter=st.S_filter;
+    if(st.S_filter){ S_filter=st.S_filter; if(!S_filter.status) S_filter.status=[]; }
     // If localStorage has data, we need to migrate to IDB
     if(S.shops.length||S.persons.length||S.items.length) _ldFromLS=true;
   }catch(e){ S.shops=[]; S.persons=[]; S.items=[]; S.pinned={}; S.groups={shop:[],person:[]}; S.sourceGroup={}; S.groupCollapsed={shop:{},person:{}}; }
@@ -3394,6 +3394,7 @@ idbInit().then(()=>{
     selectedGroup = state.selectedGroup !== undefined ? state.selectedGroup : 'all';
     S._filterCat=state.filterCat||'all'; S._filterUsed=state.filterUsed||'all';
     S._filterSort=state.filterSort||'time_desc'; S._filterQuery=state.filterQuery||'';
+    if(state.S_filter){ S_filter=state.S_filter; if(!S_filter.status) S_filter.status=[]; }
   }
   if(pinned!==null) S.pinned=pinned;
   if(groups!==null) S.groups=groups;
