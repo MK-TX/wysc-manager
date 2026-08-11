@@ -198,7 +198,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 
 
 /* Modal */
-.mo{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px}
+.mo{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:center;justify-content:center;overflow-y:auto;padding:20px}
 .md{background:var(--card);border-radius:var(--radius);width:100%;max-width:600px;margin:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
 .mdh{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);border-radius:var(--radius) var(--radius) 0 0;z-index:1}
 .mdh h3{font-size:15px;font-weight:600}
@@ -316,7 +316,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
   .main-content{padding-bottom:env(safe-area-inset-bottom)}
 }
 /* Filter Modal */
-.filter-modal{background:var(--card);border-radius:var(--radius);max-width:600px;width:95vw;max-height:80vh;display:flex;flex-direction:column}
+.filter-modal{background:var(--card);border-radius:var(--radius);max-width:600px;width:95vw;max-height:80vh;display:flex;flex-direction:column;margin:0}
 .filter-modal .fm-hd{padding:16px 20px 0;flex-shrink:0}
 .filter-modal h3{font-size:16px;margin:0}
 .filter-modal .fm-body{padding:16px 20px;overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:16px}
@@ -371,7 +371,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
       <div class="mat-hd">
         <div class="mht"><span id="mttl">未分类店铺</span><span class="src-badge" id="msub"></span></div>
         <div class="mat-fl">
-          <select id="fcat" onchange="onCatFilterChange()"><option value="all">全部分类</option></select>
+          <button class="btn btn-sm" id="fcatBtn" onclick="openFilterModal()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>筛选条件</button>
           <select id="fused" onchange="renderMaterials()"><option value="all">全部状态</option><option value="pending_sponsor">待赞助</option><option value="unused">未使用</option><option value="used">已使用</option></select>
           <select id="fsort" onchange="renderMaterials()">
             <option value="time_desc">时间最新</option><option value="time_asc">时间最早</option>
@@ -1588,7 +1588,7 @@ function renderDonut(){
   const total=data.reduce((s,d)=>s+d.value,0),r=60,cx=80,cy=80,circ=2*Math.PI*r;
   let off=0;
   const segs=data.map(d=>{const len=(d.value/total)*circ;const s=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="22" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"/>`;off+=len;return s}).join('');
-  const leg=data.map(d=>`<div class="litem" onclick="document.getElementById('fcat').value='${d.label}';renderMaterials()"><span class="ldot" style="background:${d.color}"></span><span class="llb">${eh(d.label)}</span><span class="lvl">${d.value}</span></div>`).join('');
+  const leg=data.map(d=>`<div class="litem" onclick="S_filter.category=['${d.label}'];applyFilter()"><span class="ldot" style="background:${d.color}"></span><span class="llb">${eh(d.label)}</span><span class="lvl">${d.value}</span></div>`).join('');
   el.innerHTML=`<div class="chart-wrap"><svg width="160" height="160" viewBox="0 0 160 160">${segs}<text x="${cx}" y="${cy-5}" text-anchor="middle" font-size="22" font-weight="700" fill="#1e293b">${total}</text><text x="${cx}" y="${cy+15}" text-anchor="middle" font-size="11" fill="#64748b">素材总数</text></svg><div class="legend">${leg}</div></div>`;
 }
 
@@ -1757,16 +1757,14 @@ function getItemsForView(){
 
 function renderMaterials(){
   let items=getItemsForView();
-  const fcat=document.getElementById('fcat').value;
   const fused=document.getElementById('fused').value;
   const fsort=document.getElementById('fsort').value;
   const q=(document.getElementById('q').value||'').toLowerCase();
   // Persist filter state
-  S._filterCat=fcat;S._filterUsed=fused;S._filterSort=fsort;S._filterQuery=document.getElementById('q').value||'';
+  S._filterUsed=fused;S._filterSort=fsort;S._filterQuery=document.getElementById('q').value||'';
   sv();
-  if(fcat!=='all') items=items.filter(i=>getCats(i).includes(fcat));
-  // Apply multi-filter when fcat is 'all' and filters are active
-  if(fcat==='all'&&hasActiveFilter()) items=applyFilterToItems(items);
+  // Apply multi-filter if active
+  if(hasActiveFilter()) items=applyFilterToItems(items);
   if(fused==='pending_sponsor') items=items.filter(i=>{const psd=getPSD(i);return psd&&/余\d+待赞助/.test(psd)});
   if(fused==='unused') items=items.filter(i=>!i.isUsed);
   if(fused==='used') items=items.filter(i=>i.isUsed);
@@ -1799,23 +1797,8 @@ function renderMaterials(){
   toggleStatsRow();
 }
 
-function updateCatFilter(){
-  const el=document.getElementById('fcat'),cats=new Set();
-  getItemsForView().forEach(i=>{getCats(i).forEach(c=>cats.add(c))});
-  el.innerHTML='<option value="all">筛选条件</option>'+[...cats].sort((a,b)=>a.localeCompare(b,'zh')).map(c=>`<option value="${eh(c)}">${eh(c)}</option>`).join('');
-}
 // ---- Filter Modal (Advanced Filter) ----
 let S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[]};
-function onCatFilterChange(){
-  const v=document.getElementById('fcat').value;
-  if(v==='all'){
-    openFilterModal();
-  }else{
-    // Single category selected — clear multi-filter and apply directly
-    S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[]};
-    renderMaterials();
-  }
-}
 function openFilterModal(){
   const items=getItemsForView();
   // Collect all unique values
@@ -1858,8 +1841,6 @@ function updateFilterCount(){
 }
 function applyFilter(){
   document.getElementById('fmo').style.display='none';
-  // Reset fcat to 'all' so it doesn't conflict
-  document.getElementById('fcat').value='all';
   renderMaterials();
 }
 function resetFilter(){
@@ -1870,11 +1851,6 @@ function resetFilter(){
 }
 function closeFilterModal(){
   document.getElementById('fmo').style.display='none';
-  // Restore fcat to last persisted value or 'all'
-  const fcat=document.getElementById('fcat');
-  if(fcat.value==='all'&&!hasActiveFilter()){
-    // keep as all
-  }
 }
 function hasActiveFilter(){
   return S_filter.artist.length>0||S_filter.saleType.length>0||S_filter.category.length>0||S_filter.source.length>0||S_filter.tongjia.length>0;
@@ -1923,7 +1899,7 @@ function updateDataBanner(){
   }
 }
 function renderAll(nokf){
-  renderSidebar();renderOV();renderDonut();renderBars();renderMaterials();updateDataBanner();if(!nokf)updateCatFilter();
+  renderSidebar();renderOV();renderDonut();renderBars();renderMaterials();updateDataBanner();
   const fc=document.getElementById('fc');
   fc.innerHTML='<option value="">请选择</option>'+MAIN_CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
   autoExtractPersons();
@@ -2809,8 +2785,8 @@ function lbEnablePan(){
     document.onmousemove=function(ev2){
       if(!lbDragging)return;
       lbDidDrag=true;
-      lbPanX=lbDragStartX-(ev2.clientX-lbDragSX)/lbZoom;
-      lbPanY=lbDragStartY-(ev2.clientY-lbDragSY)/lbZoom;
+      lbPanX=lbDragStartX+(ev2.clientX-lbDragSX)/lbZoom;
+      lbPanY=lbDragStartY+(ev2.clientY-lbDragSY)/lbZoom;
       clampLbPan();
       img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
       updateLbMinimap();
@@ -2835,8 +2811,8 @@ function lbEnablePan(){
     ev.preventDefault();
     const t=ev.touches[0];
     lbDidDrag=true;
-    lbPanX=lbDragStartX-(t.clientX-lbDragSX)/lbZoom;
-    lbPanY=lbDragStartY-(t.clientY-lbDragSY)/lbZoom;
+    lbPanX=lbDragStartX+(t.clientX-lbDragSX)/lbZoom;
+    lbPanY=lbDragStartY+(t.clientY-lbDragSY)/lbZoom;
     clampLbPan();
     img.style.transform=`scale(${lbZoom}) translate(${lbPanX}px,${lbPanY}px)`;
     updateLbMinimap();
@@ -3407,7 +3383,6 @@ idbInit().then(()=>{
 function startApp(){
   migrateImages();
   // Restore filter state BEFORE first render to prevent overwrite
-  if(S._filterCat&&S._filterCat!=='all'){const fc=document.getElementById('fcat');if(fc)fc.value=S._filterCat}
   if(S._filterUsed&&S._filterUsed!=='all'){const fu=document.getElementById('fused');if(fu)fu.value=S._filterUsed}
   if(S._filterSort&&S._filterSort!=='time_desc'){const fs=document.getElementById('fsort');if(fs)fs.value=S._filterSort}
   if(S._filterQuery){const q=document.getElementById('q');if(q)q.value=S._filterQuery}
