@@ -328,6 +328,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .pay-rec-box .fg:last-child{margin-bottom:0}
 #payImgGrid .iu-box{height:180px}
 #payImgGrid .iu-box img{object-fit:contain}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 
 @media(max-width:768px){
   .app-header{padding:8px 12px}.app-header h1{font-size:15px}
@@ -380,6 +381,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
     <button class="btn" onclick="document.getElementById('ji').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>导入恢复</span></button>
     <button class="btn" onclick="handleXImportClick()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13v-2h6v2"/><path d="M12 9v6"/></svg><span>Excel导入</span></button>
 
+    <button class="btn" onclick="openBackupModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>自动备份</span></button>
+
     <button class="btn btn-danger" onclick="confirmClearAll()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg><span>清空数据</span></button>
   </div>
 </header>
@@ -428,7 +431,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
   <div class="filter-modal">
     <div class="mdh fm-hd"><h3>筛选条件</h3><button class="btn-icon" onclick="closeFilterModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="fm-body">
-      <div class="fm-sec"><h4>画师/美工</h4><div class="fm-chips" id="fmArtist"></div></div>
+      <div class="fm-sec"><h4 id="fmArtistLabel">画师/美工</h4><div class="fm-chips" id="fmArtist"></div></div>
       <div class="fm-sec"><h4>售卖类型</h4><div class="fm-chips" id="fmSaleType"></div></div>
       <div class="fm-sec"><h4>属性分类</h4><div class="fm-chips" id="fmCategory"></div>
         <div id="fmSubRow" style="display:none;margin-top:8px"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">子项</div><div class="fm-chips" id="fmSubCategory"></div></div>
@@ -467,7 +470,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
         <div class="fm-chips" id="exBaseFields">
           <span class="fm-chip active" data-field="ownerName">所属</span>
           <span class="fm-chip active" data-field="name">素材名称</span>
-          <span class="fm-chip active" data-field="artist">画师/美工</span>
+          <span class="fm-chip active" data-field="artist">所属</span>
           <span class="fm-chip active" data-field="price">价格</span>
           <span class="fm-chip active" data-field="category">分类</span>
           <span class="fm-chip active" data-field="purchaseSource">购买来源</span>
@@ -481,7 +484,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
           <span class="fm-chip active" data-field="isTransfer">是否转让</span>
           <span class="fm-chip active" data-field="isDoublePoints">双倍积分</span>
         </div>
-        <div style="font-size:11px;color:var(--text2);margin-top:4px">蓝色=已选中，灰色=未选中。店铺导出列顺序：所属 | 素材名称 | 画师/美工 | 价格 | 分类 | 购买来源 | 通加规则 | 转让规则 | 使用次数规则 | 售卖类型 | 购买日期 | 备注 | 使用状态 | 是否转让 | 双倍积分。个人导出：无所属列，画师/美工为第一列，按画师/美工名排序。</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">蓝色=已选中，灰色=未选中。店铺导出列顺序：所属 | 素材名称 | 所属(画师/美工) | 价格 | 分类 | 购买来源 | 通加规则 | 转让规则 | 使用次数规则 | 售卖类型 | 购买日期 | 备注 | 使用状态 | 是否转让 | 双倍积分。个人导出：无所属列，所属(画师/美工)为第一列，按所属排序。</div>
       </div>
     </div>
     <div class="fm-ft">
@@ -508,7 +511,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
           <input type="text" id="be_name_val" placeholder="新的素材名称" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
         </div>
         <div class="fm-sec">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_artist"> <strong>画师/美工</strong></label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_artist"> <strong id="be_artist_label">画师/美工</strong></label>
           <input type="text" id="be_artist_val" placeholder="新的画师/美工名（多人用逗号隔开）" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
         </div>
         <div class="fm-sec">
@@ -643,8 +646,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
       <!-- 素材名称 -->
       <div class="fg"><label>素材名称</label><input type="text" id="fn" placeholder="填写立绘/素材名字"></div>
 
-      <!-- 画师/美工 -->
-      <div class="fg"><label>画师/美工/来源名字</label><input type="text" id="fa" placeholder="多人用逗号/顿号/x/X/+隔开" onblur="autoFillRules()"></div>
+      <!-- 画师/美工 / 所属 -->
+      <div class="fg"><label id="fa_label">画师/美工/来源名字</label><input type="text" id="fa" placeholder="多人用逗号/顿号/x/X/+隔开" onblur="autoFillRules()"></div>
 
       <!-- 售卖类型 -->
       <div class="fg"><label>售卖类型</label>
@@ -919,6 +922,45 @@ input,select,textarea{font-family:inherit;font-size:16px}
   </div>
 </div>
 
+<!-- Backup Modal -->
+<div class="mo" id="bkmo" style="display:none" onclick="if(event.target===this)closeBackupModal()">
+  <div class="md" style="max-width:480px">
+    <div class="mdh"><h3>自动备份设置</h3><button class="btn-icon" onclick="closeBackupModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="mdb">
+      <div class="fg">
+        <label>备份文件夹</label>
+        <div id="bkFolderStatus" style="padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:#f8fafc;margin-bottom:8px">
+          <span style="color:var(--text2)">未设置备份文件夹</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" id="bkSetBtn" onclick="setBackupFolder()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>设置备份文件夹</button>
+          <button class="btn btn-sm" id="bkChangeBtn" style="display:none" onclick="setBackupFolder()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>更换文件夹</button>
+        </div>
+        <div class="hint">授权后，每次关闭页面时自动保存备份到该文件夹，最多保留5个备份文件</div>
+      </div>
+      <div class="fg" id="bkInfoSection" style="display:none">
+        <label>备份信息</label>
+        <div style="padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;background:#f8fafc;line-height:1.8">
+          <div>上次备份：<span id="bkLastTime" style="color:var(--text2)">从未备份</span></div>
+          <div>备份文件数：<span id="bkFileCount" style="color:var(--text2)">0</span> / 5</div>
+          <div>备份方式：<span id="bkMethod" style="color:var(--text2)">-</span></div>
+        </div>
+      </div>
+      <div class="fg">
+        <label>手动操作</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="doBackupNow()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>立即备份</button>
+          <button class="btn btn-sm" onclick="restoreFromBackup()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>从备份恢复</button>
+        </div>
+      </div>
+      <div class="sg" style="background:var(--primary-light);border-color:var(--primary);font-size:12px;color:var(--primary-dark)">
+        <strong>说明：</strong>关闭页面时自动备份到本地文件夹。如果浏览器数据丢失，可通过"从备份恢复"选择备份文件恢复数据。IndexedDB 内也有冗余备份，启动时自动检测恢复。
+      </div>
+    </div>
+    <div class="mdf"><button class="btn" onclick="closeBackupModal()">关闭</button></div>
+  </div>
+</div>
+
 <!-- Right-click context menu -->
 <div class="ctx-menu" id="ctxMenu" style="display:none"></div>
 
@@ -1142,6 +1184,22 @@ function saveFilterState(){
     S_filter,filterCat:S._filterCat||'all',filterUsed:S._filterUsed||'all'
   }))}catch(e){}
 }
+// Lightweight view-state save — only persists selType/selName/selectedGroup.
+// Used by view switches (selectSource/selectGroup/selectUngrouped/switchSidebarTab)
+// to avoid the full sv() which serializes groups/sourceGroup/groupCollapsed every time.
+function saveViewState(){
+  const st={selType:S.selType,selName:S.selName,selectedGroup,filterCat:S._filterCat||'all',filterUsed:S._filterUsed||'all',filterSort:S._filterSort||'time_desc',filterQuery:S._filterQuery||'',S_filter};
+  idbSet('state',st);
+  try{localStorage.setItem(PREFIX+'state',JSON.stringify(st))}catch(e){}
+}
+// Deferred stats rendering — prevents renderStats() from blocking the main thread
+// during view switches. The material grid (most important) renders first, then
+// stats update on the next animation frame.
+let _statsRafId=null;
+function deferStats(){
+  if(_statsRafId)cancelAnimationFrame(_statsRafId);
+  _statsRafId=requestAnimationFrame(()=>{_statsRafId=null;renderStats()});
+}
 // RAF batch: coalesce rapid-fire renderAll calls into a single frame
 let _rafId=null;
 function rafRenderAll(){
@@ -1184,6 +1242,24 @@ if(typeof IntersectionObserver!=='undefined'){
     });
   },{rootMargin:'400px'});
 }
+// ---- Modal state sync: disconnect card image IO when any modal is open ----
+// Stops background image lazy-loading while a modal is open, reducing CPU/GPU load.
+// Does NOT hide app-body (that caused the "white background" visual bug).
+let _moObserver=null;
+function _syncModalState(){
+  const modals=document.querySelectorAll('.mo');
+  const open=Array.from(modals).some(m=>m.style.display!=='none');
+  if(open){
+    if(_cardImgIO) _cardImgIO.disconnect();
+  }else{
+    observeCardImages();
+  }
+}
+(function(){
+  const modals=document.querySelectorAll('.mo');
+  _moObserver=new MutationObserver(()=>_syncModalState());
+  modals.forEach(mo=>_moObserver.observe(mo,{attributes:true,attributeFilter:['style']}));
+})();
 // Synchronously fill real images for cards currently in the visible viewport.
 // This eliminates the white flash: after innerHTML rebuild + scroll restore, visible
 // cards would otherwise show gray placeholders for one frame until IntersectionObserver fires.
@@ -1236,6 +1312,7 @@ function clearDerivedCaches(){
   _catCache=new WeakMap(); _catDCache=new WeakMap(); _catTagsCache=new WeakMap();
   _psdCache=new WeakMap(); _trbCache=new WeakMap(); _usageCache=new WeakMap();
   _tjCache=new WeakMap(); _effPriceCache=new WeakMap(); _tsCache=new WeakMap();
+  invalidateSidebarCounts();
 }
 function getCats(i){
   let c=_catCache.get(i);
@@ -1436,8 +1513,10 @@ function switchSidebarTab(type){
   S.selType=type; S.selName='all'; selectedGroup='all';
   document.getElementById('stab-shop').classList.toggle('active',type==='shop');
   document.getElementById('stab-person').classList.toggle('active',type==='person');
+  // Dynamic search placeholder
+  document.getElementById('q').placeholder=type==='person'?'搜索素材/所属...':'搜索素材/画师...';
   invalidateViewCache();
-  sv(); renderSidebar(); renderStats(); renderMaterials(false,true);
+  saveViewState(); renderSidebar(); deferStats(); renderMaterials(false,true);
 }
 function getSidebarList(){
   return S.selType==='shop'?S.shops:S.persons;
@@ -1555,7 +1634,7 @@ function deleteSidebarSource(name){
   confirm(`删除「${name}」${n>0?`将同时删除其下 ${n} 条素材`:''}，确定？`,()=>{
     const idx=list.indexOf(name); if(idx>=0) list.splice(idx,1);
     S.items=S.items.filter(i=>!(i.ownerType===S.selType&&i.ownerName===name));
-    if(S.selName===name) S.selName='all';
+    if(S.selName===name){S.selName='all';selectedGroup='all';}
     const pk=S.selType+'_'+name; if(S.pinned[pk]) delete S.pinned[pk];
     // Clean sourceGroup
     const sg=gref(S.selType,name); if(S.sourceGroup[sg]) delete S.sourceGroup[sg];
@@ -1567,13 +1646,13 @@ function selectGroup(groupName){
   multiSelectSources.clear();
   selectedGroup=groupName; S.selName='all';
   invalidateViewCache();
-  sv(); renderSidebar(); renderStats(); renderMaterials(false,true);
+  saveViewState(); renderSidebar(); deferStats(); renderMaterials(false,true);
 }
 function selectUngrouped(){
   multiSelectSources.clear();
   selectedGroup='all'; S.selName='all';
   invalidateViewCache();
-  sv(); renderSidebar(); renderStats(); renderMaterials(false,true);
+  saveViewState(); renderSidebar(); deferStats(); renderMaterials(false,true);
 }
 
 // ---- Sidebar drag reorder ----
@@ -1587,14 +1666,11 @@ function selectSource(e,name){
     if(e.currentTarget) e.currentTarget.classList.toggle('multiselect',multiSelectSources.has(name));
     return;
   }
-  // Clear any previous multi-select
-  if(multiSelectSources.size>0){
-    multiSelectSources.clear();
-    renderSidebar();
-  }
+  // Clear any previous multi-select (the renderSidebar() below will rebuild without it)
+  multiSelectSources.clear();
   S.selName=name; selectedGroup=null;
   invalidateViewCache();
-  sv(); renderSidebar(); renderStats(); renderMaterials(false,true);
+  saveViewState(); renderSidebar(); deferStats(); renderMaterials(false,true);
 }
 function sdragStart(e,idx,name){
   dragSrc=name; dragIdx=idx; dragBefore=true;
@@ -1904,25 +1980,36 @@ function countItemsForSource(sourceName){
   return S.items.filter(i=>i.ownerType===S.selType&&i.ownerName===sourceName).length;
 }
 // Perf: single pass over all items → {shopTotal, personOwned, matchedFromShop, countMap}
+// Cached sidebar counts — avoids re-iterating ALL items on every view switch.
+// Invalidated when items/shops/persons change (clearDerivedCaches / renderAll).
+let _sidebarCountsCache={type:null,data:null};
+function invalidateSidebarCounts(){_sidebarCountsCache={type:null,data:null};}
 function buildSidebarCounts(){
+  if(_sidebarCountsCache.type===S.selType&&_sidebarCountsCache.data)return _sidebarCountsCache.data;
   const type=S.selType;
   const countMap=new Map();
   let shopTotal=0,personOwned=0,matchedFromShop=0;
   S.items.forEach(it=>{
     if(it.ownerType==='shop'){
       shopTotal++;
+      if(it.artist){
+        const names=splitArtists(it.artist);
+        // matchedFromShop: shop items whose artist includes a known person (counted regardless of tab)
+        if(names.some(n=>S.persons.includes(n))) matchedFromShop++;
+      }
       if(type==='shop') countMap.set(it.ownerName,(countMap.get(it.ownerName)||0)+1);
       else if(it.artist){
         const names=splitArtists(it.artist);
         names.forEach(n=>{ if(n) countMap.set(n,(countMap.get(n)||0)+1); });
-        if(names.some(n=>S.persons.includes(n))) matchedFromShop++;
       }
     }else{
       personOwned++;
       if(type==='person') countMap.set(it.ownerName,(countMap.get(it.ownerName)||0)+1);
     }
   });
-  return {shopTotal,personOwned,matchedFromShop,countMap};
+  const data={shopTotal,personOwned,matchedFromShop,countMap};
+  _sidebarCountsCache={type:S.selType,data};
+  return data;
 }
 
 function renderSidebar(){
@@ -1939,6 +2026,8 @@ function renderSidebar(){
   const glist=S.groups[S.selType]||[];
   const ungrouped=getUngroupedSources();
   const allList=getSidebarList();
+  // Precompute index map for O(1) lookup (replaces allList.indexOf(n) per item)
+  const listIdxMap=new Map();allList.forEach((n,i)=>listIdxMap.set(n,i));
   const srcCount=n=>(counts.countMap.get(n)||0);
 
   // Calculate ungrouped items count
@@ -1965,7 +2054,7 @@ function renderSidebar(){
     sortedUngrouped.forEach(n=>{
       const cnt=srcCount(n);
       const isPinned=S.pinned[S.selType+'_'+n];
-      const listIdx=allList.indexOf(n);
+      const listIdx=listIdxMap.get(n)||0;
       h+=`<div class="sidebar-item ${S.selName===n&&selectedGroup===null?'active':''}${isPinned?' pinned':''}${multiSelectSources.has(n)?' multiselect':''}" onclick="selectSource(event,'${eh(n)}')" oncontextmenu="showCtxMenu(event,'${eh(n)}')" draggable="true" ondragstart="sdragStart(event,${listIdx},'${eh(n)}')" ondragover="sdragOver(event,${listIdx},'${eh(n)}')" ondragleave="sdragLeave(event)" ondrop="sdragDrop(event,${listIdx},'${eh(n)}')" ondragend="sdragEnd(event)">
         <span class="sgrip" title="拖动排序">${I.grip}</span>
         <svg class="si-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><span class="sn">${eh(n)}</span><span class="sc">${cnt}</span>
@@ -2005,7 +2094,7 @@ function renderSidebar(){
     sortedSources.forEach(n=>{
       const cnt=srcCount(n);
       const isPinned=S.pinned[S.selType+'_'+n];
-      const listIdx=allList.indexOf(n);
+      const listIdx=listIdxMap.get(n)||0;
       h+=`<div class="sidebar-item ${S.selName===n&&selectedGroup===null?'active':''}${isPinned?' pinned':''}${multiSelectSources.has(n)?' multiselect':''}" onclick="selectSource(event,'${eh(n)}')" oncontextmenu="showCtxMenu(event,'${eh(n)}')" draggable="true" ondragstart="sdragStart(event,${listIdx},'${eh(n)}')" ondragover="sdragOver(event,${listIdx},'${eh(n)}')" ondragleave="sdragLeave(event)" ondrop="sdragDrop(event,${listIdx},'${eh(n)}')" ondragend="sdragEnd(event)">
         <span class="sgrip" title="拖动排序">${I.grip}</span>
         <svg class="si-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><span class="sn">${eh(n)}</span><span class="sc">${cnt}</span>
@@ -2111,7 +2200,9 @@ function renderCard(i,eager){
   const catTags=getCatTags(i);
   const tr=getTRBadge(i);
   const usageTag=getUsageTag(i);
-  const showOwner=selectedGroup==='all'||(selectedGroup===null&&S.selName==='all');
+  // Show owner name at top only for shop tab in ungrouped/all views.
+  // Person tab: never show owner at top (artist line below handles attribution).
+  const showOwner=S.selType==='shop'&&(selectedGroup==='all'||(selectedGroup===null&&S.selName==='all'));
   const cid=i.id;
   const imgs=getImages(i);
   const mainImg=imgs.length>0?imgs[0]:'';
@@ -2170,7 +2261,12 @@ function renderCard(i,eager){
     <div class="mcb" onclick="onCardAreaClick(event,'${cid}')">
       ${showOwner?`<div class="mcsrc">${i.ownerType==='shop'?I.shop:I.user}${eh(i.ownerName)}</div>`:''}
       <div class="mc-name">${eh(i.name||'未命名')}${i.price?`<span class="mcp">¥${getEffPrice(i)}${i.sponsorCount&&i.sponsorCount>1?`<span style="font-size:11px;color:var(--text2);font-weight:400">(${i.price}×${i.sponsorCount})</span>`:''}</span>`:''}</div>
-      <div class="mca">${artistPrefix}：${eh(i.artist||'未知')}</div>
+      ${(() => {
+        const isSinglePerson=S.selType==='person'&&selectedGroup===null&&S.selName!=='all';
+        if(isSinglePerson) return ''; // Single person view: no artist line
+        const dn=i.ownerType==='person'?(i.ownerName||''):(i.artist||'');
+        return dn?`<div class="mca">${artistPrefix}：${eh(dn)}</div>`:'';
+      })()}
       <div class="mct">
         ${catTagsHtml?`<div class="tag-row">${catTagsHtml}</div>`:''}
         ${uniTagsHtml?`<div class="tag-row">${uniTagsHtml}</div>`:''}
@@ -2239,6 +2335,13 @@ function getItemsForView(){
         (i.ownerType==='person'&&ungrouped.includes(i.ownerName))||
         (i.ownerType==='shop'&&i.artist&&splitArtists(i.artist).some(n=>ungrouped.includes(n)))
       );
+    }
+  }else if(S.selName==='all'){
+    // No specific source selected and no group — show all items of current type
+    if(S.selType==='shop'){
+      items=items.filter(i=>i.ownerType==='shop');
+    }else{
+      items=items.filter(i=>i.ownerType==='shop'||i.ownerType==='person');
     }
   }else{
     // A specific source is selected
@@ -2370,8 +2473,11 @@ function renderMaterials(preserveScroll,resetTop){
     observeCardImages();
   }else{
     const firstBatch=items.length<=firstBatchCount?items:items.slice(0,firstBatchCount);
-    // First batch uses eager=true → real images directly, no placeholder flash
-    el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${firstBatch.map(i=>renderCard(i,true)).join('')}</div>`;
+    // First batch uses lazy placeholders (tiny SVG data URLs) to keep the innerHTML
+    // string small. Visible cards are filled synchronously by fillVisibleCardImages()
+    // below — same frame, no flash. This avoids embedding 48 base64 images (~MBs) in
+    // the HTML string which is the main bottleneck when switching views.
+    el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${firstBatch.map(i=>renderCard(i,false)).join('')}</div>`;
     observeCardImages();
     // Schedule remaining items in background batches (lazy loading)
     if(firstBatchCount<items.length){
@@ -2438,6 +2544,9 @@ function _renderNextBatch(){
 let S_filter={artist:[],saleType:[],category:[],subCategory:[],styleTag:[],source:[],tongjia:[],status:[]};
 function openFilterModal(){
   const items=getItemsForView();
+  // Dynamic label: "所属" for person tab, "画师/美工" for shop tab
+  const artistLabel=document.getElementById('fmArtistLabel');
+  if(artistLabel) artistLabel.textContent=S.selType==='person'?'所属':'画师/美工';
   // Collect all unique values
   const artists=new Set(), saleTypes=new Set(), cats=new Set(), sources=new Set(), tongjias=new Set(), styleTags=new Set();
   items.forEach(i=>{
@@ -2610,6 +2719,7 @@ function updateDataBanner(){
 }
 function renderAll(nokf,preserveScroll){
   invalidateViewCache();
+  invalidateSidebarCounts();
   renderSidebar();
   renderStats(); // combined OV + donut + bars in a single pass over view items
   renderMaterials(preserveScroll);
@@ -2646,9 +2756,25 @@ function onOwnerType(){
   document.getElementById('fctLbl').textContent=ot==='shop'?'店铺':'个人';
   document.getElementById('fctWrap').querySelector('label').title=ot==='shop'?'计入店铺消费金额':'计入个人消费金额';
   document.getElementById('fct').checked=true;
+  // For person type: artist = ownerName (redundant), so hide the artist field
+  const faWrap=document.getElementById('fa').closest('.fg');
+  if(faWrap) faWrap.style.display=ot==='person'?'none':'';
+  if(ot==='person') document.getElementById('fa').value='';
 }
 document.getElementById('fowner').addEventListener('change',function(){
   document.getElementById('fownerNew').style.display=this.value==='__new__'?'':'none';
+  // For person type: owner name = artist name, so auto-fill transfer rules etc.
+  const ot=document.querySelector('input[name="fot"]:checked')?.value||'shop';
+  if(ot==='person'&&this.value&&this.value!=='__new__'){
+    autoFillRules(this.value);
+  }
+});
+// Also auto-fill when user types a new person name and leaves the field
+document.getElementById('fownerNew').addEventListener('blur',function(){
+  const ot=document.querySelector('input[name="fot"]:checked')?.value||'shop';
+  if(ot==='person'&&this.value.trim()){
+    autoFillRules(this.value.trim());
+  }
 });
 
 function openItemModal(){
@@ -2659,6 +2785,10 @@ function openItemModal(){
   document.querySelector(`input[name="fot"][value="${ot}"]`).checked=true;
   onOwnerType();
   if(S.selName!=='all'){document.getElementById('fowner').value=S.selName}
+  // For person type with pre-selected owner, auto-fill transfer rules
+  if(ot==='person'&&S.selName!=='all'&&S.selName){
+    setTimeout(()=>autoFillRules(S.selName),50);
+  }
   document.querySelector('input[name="ftransfer"][value="否"]').checked=true;
   const fulDefault=document.querySelector('input[name="ful"][value="limited"]');
   if(fulDefault){fulDefault.checked=true;markAuto(fulDefault);}
@@ -2766,7 +2896,7 @@ function openEditItem(id){
     }
   }
   if(i.saleType){const str=document.querySelector(`input[name="fst"][value="${i.saleType}"]`);if(str)str.checked=true}
-  document.getElementById('fa').value=i.artist||'';
+  document.getElementById('fa').value=(editOwnerType==='person')?'':(i.artist||'');
   document.getElementById('fp').value=i.price||'';
   document.getElementById('fpd').value=i.purchaseDate||'';
   document.getElementById('fdp').checked=i.isDoublePoints===true;
@@ -2854,6 +2984,8 @@ function saveItem(){
   const hasPS=!!document.querySelector('input[name="ps"]:checked');
   // All fields optional, but at least one must be filled
   if(!name&&!cat&&!on&&!artistVal&&!priceVal&&!noteVal&&!hasPS){st('请至少填写一项内容');return}
+  // Owner name is required — without it the item won't appear in any view
+  if(!on){st('请选择或新建'+(ot==='shop'?'店铺':'个人')+'名称');return}
   if(on&&on!=='__new__'&&!((ot==='shop'?S.shops:S.persons).includes(on))){
     if(ot==='shop') S.shops.push(on); else S.persons.push(on);
   }
@@ -2912,7 +3044,7 @@ function saveItem(){
     tongjiaRule:tr,tongjiaLimit:tjl,tongjiaType:tjt,tongjiaScope:tjs,
     transferRule:tRule,transferSub:transferSub,frVipNote:frVipNote,frOtherNote:frOtherNote,
     saleType:saleType,
-    artist:artistVal,
+    artist:ot==='person'?'':artistVal,
     price:parseFloat(document.getElementById('fp').value)||0,
     purchaseDate:document.getElementById('fpd').value,
     isDoublePoints:document.getElementById('fdp').checked,
@@ -3137,6 +3269,16 @@ function openBatchEdit(){
   document.querySelectorAll('#batchEditForm input[type="checkbox"]').forEach(c=>c.checked=false);
   document.querySelectorAll('#batchEditForm input[type="text"],#batchEditForm input[type="number"],#batchEditForm input[type="date"],#batchEditForm textarea').forEach(c=>c.value='');
   document.querySelectorAll('#batchEditForm input[type="radio"]').forEach(c=>c.checked=false);
+  // Dynamic label: "所属" for person tab, "画师/美工" for shop tab
+  const beArtistLbl=document.getElementById('be_artist_label');
+  const beArtistVal=document.getElementById('be_artist_val');
+  if(S.selType==='person'){
+    beArtistLbl.textContent='所属';
+    beArtistVal.placeholder='新的所属名（多人用逗号隔开）';
+  }else{
+    beArtistLbl.textContent='画师/美工';
+    beArtistVal.placeholder='新的画师/美工名（多人用逗号隔开）';
+  }
   document.getElementById('batchEditCount').textContent=selectedItems.size;
   bindBatchEditAutoCheck();
   document.getElementById('batchEditModal').style.display='flex';
@@ -3239,7 +3381,11 @@ function applyBatchEdit(){
   let count=0;
   S.items.forEach(i=>{
     if(selectedItems.has(i.id)){
-      keys.forEach(k=>{i[k]=updates[k]});
+      keys.forEach(k=>{
+        // Don't set artist for person-owned items (artist = ownerName, redundant)
+        if(k==='artist'&&i.ownerType==='person') return;
+        i[k]=updates[k];
+      });
       count++;
     }
   });
@@ -3374,12 +3520,22 @@ function inputIsAuto(id){
   f.addEventListener('change',unmark);
   f.addEventListener('input',unmark);
 })();
-function autoFillRules(){
-  const artist=document.getElementById('fa').value.trim();
+function autoFillRules(artistOverride){
+  const ot=document.querySelector('input[name="fot"]:checked')?.value||'shop';
+  const artist=(artistOverride||document.getElementById('fa').value.trim()||'').trim();
   if(!artist) return;
   const formCats=getCheckedCats();
-  // Same-artist records (excluding the one being edited)
-  const match=S.items.filter(i=>splitArtists(i.artist).includes(artist)&&(!S.editItem||i.id!==S.editItem.id));
+  // Same-artist/owner records (excluding the one being edited)
+  // For person type: match by ownerName OR artist (person items have empty artist but ownerName=person name;
+  // shop items synced to person have artist containing the person name)
+  let match;
+  if(ot==='person'){
+    match=S.items.filter(i=>(
+      i.ownerName===artist||splitArtists(i.artist).includes(artist)
+    )&&(!S.editItem||i.id!==S.editItem.id));
+  }else{
+    match=S.items.filter(i=>splitArtists(i.artist).includes(artist)&&(!S.editItem||i.id!==S.editItem.id));
+  }
   if(match.length===0) return;
   const filled=[];
 
@@ -3623,37 +3779,87 @@ function processImageFiles(files){
     return file.type.startsWith('image/')||/\.(jpg|jpeg|png|gif|webp|bmp|ico|svg|tiff|tif)$/i.test(file.name);
   });
   if(validFiles.length===0) return;
-  let done=0;
   const total=validFiles.length;
-  validFiles.forEach(file=>{
+  let done=0;
+  // Show progress in the upload box
+  const addBox=document.getElementById('imgAdd');
+  let progressEl=null;
+  if(addBox){
+    addBox.onclick=null;
+    addBox.innerHTML='<div class="iph" style="color:var(--primary)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg><div style="font-size:13px;font-weight:600">处理中... 0/'+total+'</div></div>';
+    progressEl=addBox.querySelector('div.iph div');
+  }
+  function updateProgress(){
+    if(progressEl) progressEl.textContent='\u5904\u7406\u4e2d... '+done+'/'+total;
+  }
+  function processNext(idx){
+    if(idx>=total){renderImgGrid();return}
+    const file=validFiles[idx];
     const isGif=file.type==='image/gif'||/\.gif$/i.test(file.name);
-    if(isGif){
-      // GIF: store directly to preserve animation (canvas re-encoding would destroy frames)
-      const reader=new FileReader();
-      reader.onload=function(ev){
-        S.imgData.push(ev.target.result);
-        if(++done===total) renderImgGrid();
-      };reader.readAsDataURL(file);
-      return;
+    function onDone(){
+      done++;updateProgress();
+      // Yield to browser between images to prevent UI freeze
+      setTimeout(()=>processNext(idx+1),0);
     }
-    const reader=new FileReader();
-    reader.onload=function(ev){
+    function fallbackCompress(dataUrl){
       const img=new Image();
       img.onload=function(){
         const c=document.createElement('canvas'),maxW=1600;let w=img.width,h=img.height;
         if(w>maxW){h=(h*maxW)/w;w=maxW}c.width=w;c.height=h;
         c.getContext('2d').drawImage(img,0,0,w,h);
         S.imgData.push(c.toDataURL('image/jpeg',0.85));
-        if(++done===total) renderImgGrid();
-      };img.src=ev.target.result;
-    };reader.readAsDataURL(file);
-  });
+        onDone();
+      };img.src=dataUrl;
+    }
+    if(isGif){
+      // GIF: store directly to preserve animation
+      const reader=new FileReader();
+      reader.onload=function(ev){S.imgData.push(ev.target.result);onDone()};
+      reader.readAsDataURL(file);
+      return;
+    }
+    // Use createImageBitmap for off-main-thread decoding (much faster, less UI jank)
+    if(typeof createImageBitmap==='function'){
+      createImageBitmap(file).then(bitmap=>{
+        try{
+          const maxW=1600;let w=bitmap.width,h=bitmap.height;
+          if(w>maxW){h=Math.round(h*maxW/w);w=maxW}
+          const c=document.createElement('canvas');
+          c.width=w;c.height=h;
+          c.getContext('2d').drawImage(bitmap,0,0,w,h);
+          if(bitmap.close)bitmap.close();
+          S.imgData.push(c.toDataURL('image/jpeg',0.85));
+          onDone();
+        }catch(e){
+          if(bitmap.close)bitmap.close();
+          // Fallback: read as data URL then compress
+          const reader=new FileReader();
+          reader.onload=function(ev){fallbackCompress(ev.target.result)};
+          reader.readAsDataURL(file);
+        }
+      }).catch(()=>{
+        const reader=new FileReader();
+        reader.onload=function(ev){fallbackCompress(ev.target.result)};
+        reader.readAsDataURL(file);
+      });
+    }else{
+      const reader=new FileReader();
+      reader.onload=function(ev){fallbackCompress(ev.target.result)};
+      reader.readAsDataURL(file);
+    }
+  }
+  processNext(0);
 }
+// Persistent file input — reusing the same element avoids GC pauses that cause dialog lag
+let _pickImgInput=null;
 function pickImages(){
-  const inp=document.createElement('input');
-  inp.type='file';inp.multiple=true;
-  inp.onchange=function(e){if(e.target.files.length>0) processImageFiles(e.target.files)};
-  inp.click();
+  if(!_pickImgInput){
+    _pickImgInput=document.createElement('input');
+    _pickImgInput.type='file';_pickImgInput.multiple=true;
+  }
+  _pickImgInput.value=''; // reset so re-selecting same file works
+  _pickImgInput.onchange=function(e){if(e.target.files.length>0) processImageFiles(e.target.files)};
+  _pickImgInput.click();
 }
 function handleImages(e){
   if(e.target.files.length>0) processImageFiles(e.target.files);
@@ -3662,11 +3868,15 @@ function handleImages(e){
 function removeImg(idx){
   S.imgData.splice(idx,1);renderImgGrid();
 }
+let _pickPayInput=null;
 function pickPayImages(){
-  const inp=document.createElement('input');
-  inp.type='file';inp.multiple=true;
-  inp.onchange=function(e){if(e.target.files.length>0) processPayFiles(e.target.files)};
-  inp.click();
+  if(!_pickPayInput){
+    _pickPayInput=document.createElement('input');
+    _pickPayInput.type='file';_pickPayInput.multiple=true;
+  }
+  _pickPayInput.value='';
+  _pickPayInput.onchange=function(e){if(e.target.files.length>0) processPayFiles(e.target.files)};
+  _pickPayInput.click();
 }
 function handlePayImage(e){
   if(e.target.files.length>0) processPayFiles(e.target.files);
@@ -4637,7 +4847,7 @@ function parseTraditionalSheetAuto(rows,sheetName){
     // Handle multiple artists separated by 、 or , — create one item per artist
     const artistList=artist?artist.split(/[、,]/).map(a=>a.trim()).filter(a=>a):[''];
     for(const a of artistList){
-      items.push({name,ownerName:finalOwner,ownerType:otype,price,artist:a,
+      items.push({name,ownerName:finalOwner,ownerType:otype,price,artist:otype==='person'?'':a,
         category:finalCategory,subCategory:finalSubCategory,
         purchaseSource,purchaseSub,purchaseDate,note:fullNote,
         usageLimitType,usageTotal,isTransfer,sheetName,styleTag});
@@ -4652,7 +4862,7 @@ function buildSmartPreviewHTML(items,sheetSummary){
   html+='<div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">';
   sheetSummary.forEach(s=>{html+=s+'<br>'});
   html+='<b>共 '+items.length+' 条数据</b></div>';
-  html+='<div class="xi-preview"><table><thead><tr><th>所属名称</th><th>类型</th><th>素材名称</th><th>画师</th><th>价格</th><th>分类</th><th>购买渠道</th><th>日期</th><th>使用限制</th><th>备注</th></tr></thead><tbody>';
+  html+='<div class="xi-preview"><table><thead><tr><th>所属名称</th><th>类型</th><th>素材名称</th><th>所属</th><th>价格</th><th>分类</th><th>购买渠道</th><th>日期</th><th>使用限制</th><th>备注</th></tr></thead><tbody>';
   preview.forEach(item=>{
     const ulDesc=item.usageLimitType==='unlimited'?'不限':(item.usageLimitType==='limited'?(item.usageTotal>1?`限${item.usageTotal}次`:'限次'):'');
     html+=`<tr><td>${eh(item.ownerName)}</td><td>${item.ownerType==='shop'?'店铺':'个人'}</td><td>${eh(item.name)}</td><td>${eh(item.artist||'')}</td><td style="text-align:right">${item.price||''}</td><td>${eh(item.category||'')}${item.subCategory?'/'+eh(item.subCategory):''}</td><td>${eh(item.purchaseSub||'')}</td><td>${eh(item.purchaseDate||'')}</td><td>${ulDesc}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${eh(item.note||'')}">${eh(item.note||'')}</td></tr>`;
@@ -4677,7 +4887,7 @@ function confirmSmartImport(){
       sponsorId:'',isSponsored:false,sponsorCount:1,sponsoredDone:0,
       isTransfer:item.isTransfer||'否',transferId:'',tongjiaRule:'',tongjiaLimit:'',tongjiaType:'',tongjiaScope:'',
       transferRule:'',transferSub:'',saleType:'',
-      artist:cleanArtist,price:item.price||0,purchaseDate:item.purchaseDate||'',isDoublePoints:false,
+      artist:item.ownerType==='person'?'':cleanArtist,price:item.price||0,purchaseDate:item.purchaseDate||'',isDoublePoints:false,
       countInShop:true,countInPerson:true,
       usageLimitType:item.usageLimitType||'unlimited',usageLimitSubtype:'total',usageTotal:item.usageTotal||1,usageLead:1,usageSupport:1,usageOtherNote:'',
       usedCount:0,isUsed:false,note:item.note||'',createdAt:new Date().toISOString(),paymentImage:[],paymentNote:''
@@ -4982,7 +5192,7 @@ function runExcelImport(){
         tongjiaRule:tjR,tongjiaLimit:'',tongjiaType:tjT,tongjiaScope:tjS,
         transferRule:finalTr,transferSub:'',
         saleType:'',
-        artist:art,price,purchaseDate:pDate,isDoublePoints:dp,
+        artist:otype==='person'?'':art,price,purchaseDate:pDate,isDoublePoints:dp,
         countInShop:otype==='shop'?(finalPs==='赞助'&&finalPsub==='被赞助'?false:cis):true,
         countInPerson:otype==='person'?(finalPs==='赞助'&&finalPsub==='被赞助'?false:cis):true,
         usageLimitType:finalUlt,usageLimitSubtype:finalUlst,
@@ -5090,7 +5300,7 @@ function getFieldValue(item,field){
 
 function getFieldLabel(field){
   const labels={
-    ownerName:'所属',name:'素材名称',artist:'画师/美工',price:'价格',category:'分类',
+    ownerName:'所属',name:'素材名称',artist:'所属',price:'价格',category:'分类',
     purchaseSource:'购买来源',tongjiaRule:'通加规则',transferRule:'转让规则',usageLimit:'使用次数规则',
     saleType:'售卖类型',purchaseDate:'购买日期',note:'备注',isUsed:'使用状态',isTransfer:'是否转让',isDoublePoints:'双倍积分'
   };
@@ -5434,7 +5644,11 @@ function importJSON(e){
   });
 }
 function confirmClearAll(){
-  confirm(`清空全部（${S.shops.length}个店铺、${S.persons.length}个个人、${S.items.length}条素材）？不可恢复！`,()=>{S.shops=[];S.persons=[];S.items=[];S.selType='shop';S.selName='all';S.pinned={};S.groups={shop:[],person:[]};S.sourceGroup={};selectedGroup='all';svNow();renderAll();st('已全部清空')});
+  confirm(`清空全部（${S.shops.length}个店铺、${S.persons.length}个个人、${S.items.length}条素材）？不可恢复！`,()=>{
+    // Write pre-clear backup to IDB (survives the clear, can be recovered on next startup)
+    if(S.items.length>0) idbSet('idbBackup',getBackupData());
+    S.shops=[];S.persons=[];S.items=[];S.selType='shop';S.selName='all';S.pinned={};S.groups={shop:[],person:[]};S.sourceGroup={};selectedGroup='all';svNow();renderAll();st('已全部清空（备份数据已保留，可通过自动备份恢复）')
+  });
 }
 
 // ---- Confirm/Toast ----
@@ -5443,7 +5657,7 @@ function closeConfirm(){document.getElementById('co').style.display='none'}
 function st(msg,type){const el=document.getElementById('tst');el.textContent=msg;el.style.display='block';el.style.background=type==='err'?'var(--danger)':'#1e293b';clearTimeout(el._t);el._t=setTimeout(()=>{el.style.display='none'},2500)}
 
 // ---- Keyboard ----
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeItemModal();closeLb();closeConfirm();closeExcelImport();hideCtxMenu();closeSourceModal();closeGroupModal();closeFilterModal();closeExportModal();closeBatchEdit();if(multiSelectMode)exitMultiSelect()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeItemModal();closeLb();closeConfirm();closeExcelImport();hideCtxMenu();closeSourceModal();closeGroupModal();closeFilterModal();closeExportModal();closeBatchEdit();closeBackupModal();if(multiSelectMode)exitMultiSelect()}});
 
 // ---- Drag & drop for import ----
 document.getElementById('xidrop').addEventListener('dragover',e=>{e.preventDefault();e.currentTarget.style.borderColor='var(--primary)'});
@@ -5455,6 +5669,238 @@ document.getElementById('xidrop').addEventListener('drop',e=>{
   const dt=new DataTransfer();dt.items.add(file);inp.files=dt.files;
   handleXFile({target:inp});
 });
+
+// ---- Auto Backup System ----
+// Multi-layer backup: IndexedDB snapshot + File System Access API (local folder)
+// Triggered on page close (beforeunload/pagehide). Max 5 backup files (circular buffer).
+let _backupDirHandle=null;
+const MAX_BACKUPS=5;
+let _backupTriggered=false;
+
+async function initBackup(){
+  // Load saved directory handle from IDB
+  try{
+    const handle=await idbGet('backupDirHandle');
+    if(handle){
+      _backupDirHandle=handle;
+      // Verify permission silently
+      try{
+        const perm=await handle.queryPermission({mode:'readwrite'});
+        if(perm!=='granted'){
+          // Permission expired — will re-request on next user interaction
+        }
+      }catch(e){}
+    }
+  }catch(e){console.warn('Backup init failed',e)}
+}
+
+async function setBackupFolder(){
+  if(typeof window.showDirectoryPicker!=='function'){
+    // Fallback: use auto-download method
+    confirm('当前浏览器不支持文件夹选择（可能因为以 file:// 方式打开）。\n是否改用"自动下载"备份方式？\n（每次关闭页面时自动下载一个备份文件到下载目录）',()=>{
+      idbSet('backupMethod','download');
+      updateBackupUI();
+      st('已切换为自动下载备份方式');
+    });
+    return;
+  }
+  try{
+    const handle=await window.showDirectoryPicker({mode:'readwrite'});
+    _backupDirHandle=handle;
+    idbSet('backupDirHandle',handle);
+    idbSet('backupMethod','folder');
+    st('备份文件夹已设置：'+handle.name);
+    updateBackupUI();
+  }catch(e){
+    if(e.name!=='AbortError') st('设置失败：'+e.message,'err');
+  }
+}
+
+function getBackupData(){
+  return {
+    shops:S.shops,persons:S.persons,items:S.items,
+    groups:S.groups,sourceGroup:S.sourceGroup,
+    groupCollapsed:S.groupCollapsed,
+    exportedAt:new Date().toISOString()
+  };
+}
+
+async function writeBackup(){
+  const data=getBackupData();
+  const jsonStr=JSON.stringify(data);
+  // 1. Always write IDB snapshot (separate key, survives "清空数据")
+  //    — but skip if current data is empty (preserve last good backup)
+  if(data.items&&data.items.length>0){
+    idbSet('idbBackup',data);
+  }
+  // 2. Try file system backup
+  if(_backupDirHandle){
+    try{
+      const perm=await _backupDirHandle.queryPermission({mode:'readwrite'});
+      if(perm!=='granted'){
+        // Try requesting (works if triggered by user gesture; silently fails on beforeunload)
+        try{
+          const req=await _backupDirHandle.requestPermission({mode:'readwrite'});
+          if(req!=='granted'){idbSet('lastBackupTime',new Date().toISOString());return true}
+        }catch(e2){idbSet('lastBackupTime',new Date().toISOString());return true}
+      }
+      // Circular buffer: slot 0..4 → 文游素材备份_1..5.json
+      const counter=(await idbGet('backupCounter'))||0;
+      const slot=counter%MAX_BACKUPS;
+      const filename='\u6587\u6e38\u7d20\u6750\u5907\u4efd_'+(slot+1)+'.json';
+      const fileHandle=await _backupDirHandle.getFileHandle(filename,{create:true});
+      const writable=await fileHandle.createWritable();
+      await writable.write(jsonStr);
+      await writable.close();
+      idbSet('backupCounter',counter+1);
+      idbSet('lastBackupTime',new Date().toISOString());
+      return true;
+    }catch(e){
+      console.warn('File backup failed:',e);
+      idbSet('lastBackupTime',new Date().toISOString());
+      return false;
+    }
+  }
+  // No folder set — IDB backup already done above
+  idbSet('lastBackupTime',new Date().toISOString());
+  return true;
+}
+
+function triggerBackupOnUnload(){
+  if(_backupTriggered) return;
+  _backupTriggered=true;
+  writeBackup(); // fire and forget; IDB write is reliable, file write is best-effort
+}
+
+async function doBackupNow(){
+  st('正在备份...');
+  const ok=await writeBackup();
+  if(ok){
+    const method=await idbGet('backupMethod');
+    if(!_backupDirHandle&&method!=='download'){
+      // No folder and no download method — offer download
+      triggerDownloadBackup(JSON.stringify(getBackupData()));
+    }
+    st('备份成功');
+    updateBackupUI();
+  }else{
+    st('备份失败，请检查文件夹权限','err');
+  }
+}
+
+function triggerDownloadBackup(jsonStr){
+  const blob=new Blob([jsonStr],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='\u6587\u6e38\u7d20\u6750\u5907\u4efd_'+new Date().toISOString().split('T')[0]+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+
+function restoreFromBackup(){
+  const input=document.createElement('input');
+  input.type='file';input.accept='.json';
+  input.onchange=function(e){
+    const file=e.target.files[0];if(!file)return;
+    confirm('导入备份将覆盖当前所有数据，确定继续？',()=>{
+      const reader=new FileReader();
+      reader.onload=function(ev){
+        try{
+          const data=JSON.parse(ev.target.result);
+          if(data.shops)S.shops=data.shops;
+          if(data.persons)S.persons=data.persons;
+          if(data.items)S.items=data.items;
+          if(data.groups)S.groups=data.groups;
+          if(data.sourceGroup)S.sourceGroup=data.sourceGroup;
+          if(data.groupCollapsed)S.groupCollapsed=data.groupCollapsed;
+          migrateImages();
+          svNow();renderAll();autoExtractPersons();
+          st('备份恢复成功：'+(data.items?data.items.length:0)+' 条素材');
+          closeBackupModal();
+        }catch(err){st('恢复失败：文件格式不正确','err')}
+      };
+      reader.readAsText(file);
+    });
+  };
+  input.click();
+}
+
+function openBackupModal(){
+  document.getElementById('bkmo').style.display='flex';
+  updateBackupUI();
+}
+function closeBackupModal(){
+  document.getElementById('bkmo').style.display='none';
+}
+
+async function updateBackupUI(){
+  const method=await idbGet('backupMethod');
+  const lastTime=await idbGet('lastBackupTime');
+  const status=document.getElementById('bkFolderStatus');
+  const setBtn=document.getElementById('bkSetBtn');
+  const changeBtn=document.getElementById('bkChangeBtn');
+  const infoSection=document.getElementById('bkInfoSection');
+  const methodEl=document.getElementById('bkMethod');
+  if(_backupDirHandle){
+    let permStatus='';
+    try{
+      const perm=await _backupDirHandle.queryPermission({mode:'readwrite'});
+      if(perm!=='granted') permStatus=' <span style="color:var(--warning);font-size:11px">（需重新授权）</span>';
+    }catch(e){}
+    status.innerHTML='<span style="color:var(--success);font-weight:600">\u2713 已设置</span>：'+_backupDirHandle.name+permStatus;
+    setBtn.style.display='none';
+    changeBtn.style.display='';
+    infoSection.style.display='';
+    methodEl.textContent='本地文件夹（关闭页面时自动备份）';
+    methodEl.style.color='var(--success)';
+    // Count backup files
+    try{
+      let count=0;
+      for await(const entry of _backupDirHandle.values()){
+        if(entry.name.startsWith('\u6587\u6e38\u7d20\u6750\u5907\u4efd_')&&entry.name.endsWith('.json')) count++;
+      }
+      document.getElementById('bkFileCount').textContent=count;
+    }catch(e){
+      document.getElementById('bkFileCount').textContent='?';
+    }
+  }else if(method==='download'){
+    status.innerHTML='<span style="color:var(--warning);font-weight:600">自动下载</span>：关闭页面时自动下载备份文件';
+    setBtn.style.display='';changeBtn.style.display='none';
+    infoSection.style.display='';
+    methodEl.textContent='自动下载到下载文件夹';
+    methodEl.style.color='var(--warning)';
+    document.getElementById('bkFileCount').textContent='-';
+  }else{
+    status.innerHTML='<span style="color:var(--text2)">未设置备份文件夹</span>';
+    setBtn.style.display='';changeBtn.style.display='none';
+    infoSection.style.display='none';
+  }
+  if(lastTime){
+    document.getElementById('bkLastTime').textContent=new Date(lastTime).toLocaleString('zh-CN');
+  }else{
+    document.getElementById('bkLastTime').textContent='从未备份';
+  }
+}
+
+async function checkIDBBackupOnStartup(){
+  // If primary data is empty, check for IDB backup snapshot
+  if(S.items.length===0&&S.shops.length===0&&S.persons.length===0){
+    const backup=await idbGet('idbBackup');
+    if(backup&&backup.items&&backup.items.length>0){
+      confirm('检测到 IndexedDB 中有备份数据（'+backup.items.length+' 条素材），是否恢复？',()=>{
+        S.shops=backup.shops||[];
+        S.persons=backup.persons||[];
+        S.items=backup.items||[];
+        if(backup.groups)S.groups=backup.groups;
+        if(backup.sourceGroup)S.sourceGroup=backup.sourceGroup;
+        if(backup.groupCollapsed)S.groupCollapsed=backup.groupCollapsed;
+        migrateImages();
+        svNow();renderAll();autoExtractPersons();
+        st('已从 IndexedDB 备份恢复 '+S.items.length+' 条素材');
+      });
+    }
+  }
+}
 
 // ---- Init ----
 // Request persistent storage to prevent browser from evicting data
@@ -5494,6 +5940,8 @@ idbInit().then(()=>{
     sv(); // This saves everything to IDB and cleans up localStorage
   }
   startApp();
+  initBackup();
+  checkIDBBackupOnStartup();
 }).catch(()=>{
   // IndexedDB failed entirely, use localStorage fallback
   startApp();
@@ -5501,6 +5949,12 @@ idbInit().then(()=>{
 
 function startApp(){
   migrateImages();
+  // Migrate: clear artist field for person-owned items (artist = ownerName, redundant)
+  let artistMigrated=false;
+  S.items.forEach(i=>{
+    if(i.ownerType==='person'&&i.artist){i.artist='';artistMigrated=true;}
+  });
+  if(artistMigrated) sv();
   // Migrate legacy styleTag values: '古现' and '通用' → '古现/通用'
   let migrated=false;
   S.items.forEach(i=>{
@@ -5520,8 +5974,8 @@ function startApp(){
   setInterval(updateDataBanner,30000);
 }
 // Flush pending saves when leaving the page
-window.addEventListener('beforeunload',()=>{svNow()});
-window.addEventListener('pagehide',()=>{svNow()});
+window.addEventListener('beforeunload',()=>{svNow();triggerBackupOnUnload()});
+window.addEventListener('pagehide',()=>{svNow();triggerBackupOnUnload()});
 </script>
 </body>
 </html>
