@@ -1141,13 +1141,66 @@ function eh(s){const d=document.createElement('div');d.textContent=s;return d.in
 function ph(text,color){
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="400" height="300" fill="${color}" opacity="0.12"/><rect width="400" height="300" fill="none" stroke="${color}" stroke-width="2" stroke-dasharray="8,4"/><text x="200" y="150" text-anchor="middle" dominant-baseline="middle" font-size="32" fill="${color}" font-family="sans-serif" font-weight="700">${text}</text></svg>`)}`;
 }
+// ---- Perf: lazy card images ----
+// Images are stored as base64 data URLs; embedding them all in innerHTML makes the DOM
+// string huge when there are many items. Cards render a tiny placeholder and the real
+// (base64) image is only injected when the card scrolls near the viewport.
+const _cardPh=ph('','#cbd5e1');
+let _idMap=null;
+function itemById(id){
+  if(!_idMap){_idMap=new Map();S.items.forEach(it=>_idMap.set(it.id,it));}
+  return _idMap.get(id)||null;
+}
+function invalidateIdMap(){_idMap=null;}
+let _cardImgIO=null;
+if(typeof IntersectionObserver!=='undefined'){
+  _cardImgIO=new IntersectionObserver(entries=>{
+    entries.forEach(en=>{
+      if(!en.isIntersecting) return;
+      const img=en.target;
+      const cid=img.getAttribute('data-cid');
+      if(!cid) return;
+      const it=itemById(cid);
+      if(!it) return;
+      const idx=parseInt(img.getAttribute('data-idx')||'0',10)||0;
+      const imgs=getImages(it);
+      if(imgs[idx]&&img.src!==imgs[idx]) img.src=imgs[idx];
+    });
+  },{rootMargin:'400px'});
+}
 
 function getImages(i){ return (i.images&&i.images.length)?i.images:[]; }
 function getFirstImage(i){ const imgs=getImages(i); return imgs.length>0?imgs[0]:''; }
 
-// ---- Category display helpers ----
-// getCats extracts category array from comma-separated string (multi-cat support)
-function getCats(i){return (i.category||'').split(',').map(s=>s.trim()).filter(Boolean)}
+// ---- Perf: WeakMap memoization for derived fields ----
+// Items are usually updated by REPLACING the object (S.items[idx]=item) or adding a new one,
+// so a WeakMap keyed by the item object never goes stale for existing objects.
+// EXCEPTION: batch edit mutates items in place (i[k]=updates[k]) → clearDerivedCaches() is
+// called right after it so caches never serve stale values.
+let _catCache=new WeakMap();
+let _catDCache=new WeakMap();
+let _catTagsCache=new WeakMap();
+let _psdCache=new WeakMap();
+let _trbCache=new WeakMap();
+let _usageCache=new WeakMap();
+let _tjCache=new WeakMap();
+let _effPriceCache=new WeakMap();
+let _tsCache=new WeakMap();
+function clearDerivedCaches(){
+  _catCache=new WeakMap(); _catDCache=new WeakMap(); _catTagsCache=new WeakMap();
+  _psdCache=new WeakMap(); _trbCache=new WeakMap(); _usageCache=new WeakMap();
+  _tjCache=new WeakMap(); _effPriceCache=new WeakMap(); _tsCache=new WeakMap();
+}
+function getCats(i){
+  let c=_catCache.get(i);
+  if(!c){c=(i.category||'').split(',').map(s=>s.trim()).filter(Boolean);_catCache.set(i,c);}
+  return c;
+}
+function itemTs(i){
+  let t=_tsCache.get(i);
+  if(t===undefined){t=new Date(i.createdAt||0).getTime()||0;_tsCache.set(i,t);}
+  return t;
+}
 function getCheckedCats(){return Array.from(document.querySelectorAll('input[name="fck"]:checked')).map(c=>c.value)}
 // artistPrefix returns the label prefix based on category
 function getArtistPrefix(cat){
@@ -1160,8 +1213,10 @@ function getArtistPrefix(cat){
 
 // getCatTags returns array of {text,color} for separate tags
 function getCatTags(i){
+  let tags=_catTagsCache.get(i);
+  if(tags) return tags;
+  tags=[];
   const cats=getCats(i);
-  const tags=[];
   cats.forEach(c=>{
     tags.push({text:c,color:CCOL[c]||'#94a3b8',isMain:true});
   });
@@ -1176,17 +1231,22 @@ function getCatTags(i){
   if(cats.includes('Q版')&&(i.subCategory||'').includes('绑定Q')&&i.boundLihui){
     tags.push({text:'绑定：'+i.boundLihui,color:'#5b21b6',isMain:false});
   }
+  _catTagsCache.set(i,tags);
   return tags;
 }
 
 function getCatD(i){
+  let d=_catDCache.get(i);
+  if(d!==undefined) return d;
   const c=getCats(i)[0]||'';
   const subList=(i.subCategory||'').split(',').map(s=>s.trim()).filter(Boolean);
-  if(c==='美工') return '美工·'+subList.join('·');
-  if(c==='Q版') return 'Q版·'+subList.join('·');
-  if(c==='音乐') return '音乐·'+subList.join('·');
-  if(c==='其他'&&i.customCategory) return i.customCategory;
-  return c||'';
+  if(c==='美工') d='美工·'+subList.join('·');
+  else if(c==='Q版') d='Q版·'+subList.join('·');
+  else if(c==='音乐') d='音乐·'+subList.join('·');
+  else if(c==='其他'&&i.customCategory) d=i.customCategory;
+  else d=c||'';
+  _catDCache.set(i,d);
+  return d;
 }
 
 function getTjD(i){
@@ -1206,40 +1266,53 @@ function getTjD(i){
   }
   return null;
 }
-function getEffPrice(i){return (i.price||0)*(i.sponsorCount||1);}
+function getEffPrice(i){
+  let v=_effPriceCache.get(i);
+  if(v===undefined){v=(i.price||0)*(i.sponsorCount||1);_effPriceCache.set(i,v);}
+  return v;
+}
 function splitArtists(str){return (str||'').split(/[,，、xX+]/).map(s=>s.trim()).filter(Boolean)}
 function stripBrackets(s){return (s||'').replace(/[【】\[\]]/g,'').trim()}
 function getPSD(i){
+  let t=_psdCache.get(i);
+  if(t!==undefined) return t;
   const m={'微店':'微店购入','淘宝':'淘宝购入','私戳':'私戳购入','填表':'填表购入'};
-  if(i.purchaseSource==='购入') return m[i.purchaseSub]||(i.purchaseSub||'购入');
-  if(i.purchaseSource==='赞助'){
-    if(i.purchaseSub==='被赞助') return '被赞助';
-    const sc=i.sponsorCount&&i.sponsorCount>1?`×${i.sponsorCount}`:'';
-    const done=i.sponsoredDone||0, rem=(i.sponsorCount||1)-done;
-    let t=`赞助购入${sc}`;
-    if(rem>0) t+=`\x00余${rem}待赞助`;
-    return t;
+  if(i.purchaseSource==='购入') t=m[i.purchaseSub]||(i.purchaseSub||'购入');
+  else if(i.purchaseSource==='赞助'){
+    if(i.purchaseSub==='被赞助') t='被赞助';
+    else{
+      const sc=i.sponsorCount&&i.sponsorCount>1?`×${i.sponsorCount}`:'';
+      const done=i.sponsoredDone||0, rem=(i.sponsorCount||1)-done;
+      t=`赞助购入${sc}`;
+      if(rem>0) t+=`\x00余${rem}待赞助`;
+    }
   }
-  if(i.purchaseSource==='接转') return '接转';
-  if(i.purchaseSource==='回购') return '回购';
-  if(i.purchaseSource==='定制') return '定制';
-  if(i.purchaseSource==='其他') return i.customPurchaseSource||'其他';
-  return '';
+  else if(i.purchaseSource==='接转') t='接转';
+  else if(i.purchaseSource==='回购') t='回购';
+  else if(i.purchaseSource==='定制') t='定制';
+  else if(i.purchaseSource==='其他') t=i.customPurchaseSource||'其他';
+  else t='';
+  _psdCache.set(i,t);
+  return t;
 }
 function getTRBadge(i){
+  let r=_trbCache.get(i);
+  if(r) return r;
   const v=i.transferRule||'不可转';
   const sub=i.transferSub||'';
-  if(v==='退圈可转') return {cls:'',t:'退圈可转'+(sub?`(${sub})`:'')};
-  if(v==='不退圈可转'){
+  if(v==='退圈可转') r={cls:'',t:'退圈可转'+(sub?`(${sub})`:'')};
+  else if(v==='不退圈可转'){
     const parts=(sub?sub.split(','):[]).map(s=>{
       s=s.trim();
       if(s==='VIP转让'&&i.frVipNote) return `VIP转让(${i.frVipNote})`;
       if(s==='其他'&&i.frOtherNote) return `其他(${i.frOtherNote})`;
       return s;
     });
-    return {cls:'',t:'不退圈可转'+(parts.length?`(${parts.join(',')})`:'')};
+    r={cls:'',t:'不退圈可转'+(parts.length?`(${parts.join(',')})`:'')};
   }
-  return {cls:'',t:'不可转'};
+  else r={cls:'',t:'不可转'};
+  _trbCache.set(i,r);
+  return r;
 }
 function getUsageD(i){
   if(i.usageLimitType==='unlimited') return '不限制';
@@ -1250,17 +1323,23 @@ function getUsageD(i){
   return `共${i.usageTotal||1}次`;
 }
 function getUsageTag(i){
-  if(i.usageLimitType==='unlimited') return '';
-  if(!i.usageLimitSubtype||i.usageLimitSubtype==='total') return `限制共${i.usageTotal||1}次`;
-  if(i.usageLimitSubtype==='leadSupport') return `限制主${i.usageLead||1}次NPC${i.usageSupport||1}次`;
-  if(i.usageLimitSubtype==='leadUnlimited') return `限制主${i.usageLead||1}次NPC不限`;
-  if(i.usageLimitSubtype==='other') return i.usageOtherNote?`限制${i.usageOtherNote}`:'';
-  return `限制共${i.usageTotal||1}次`;
+  let t=_usageCache.get(i);
+  if(t!==undefined) return t;
+  if(i.usageLimitType==='unlimited') t='';
+  else if(!i.usageLimitSubtype||i.usageLimitSubtype==='total') t=`限制共${i.usageTotal||1}次`;
+  else if(i.usageLimitSubtype==='leadSupport') t=`限制主${i.usageLead||1}次NPC${i.usageSupport||1}次`;
+  else if(i.usageLimitSubtype==='leadUnlimited') t=`限制主${i.usageLead||1}次NPC不限`;
+  else if(i.usageLimitSubtype==='other') t=i.usageOtherNote?`限制${i.usageOtherNote}`:'';
+  else t=`限制共${i.usageTotal||1}次`;
+  _usageCache.set(i,t);
+  return t;
 }
 function getTjTag(i){
+  let t=_tjCache.get(i);
+  if(t!==undefined) return t;
   if(i.tongjiaRule==='可穿通加'){
-    if(i.tongjiaLimit==='unlimited') return '可穿可作无古现限制';
-    if(i.tongjiaLimit==='limited'){
+    if(i.tongjiaLimit==='unlimited') t='可穿可作无古现限制';
+    else if(i.tongjiaLimit==='limited'){
       const parts=[];
       if(i.tongjiaType==='可穿无脸通加') parts.push('可穿无脸通加');
       else if(i.tongjiaType==='可穿不可作') parts.push('可穿不可作');
@@ -1268,10 +1347,13 @@ function getTjTag(i){
       if(i.tongjiaScope==='只可穿古通加') parts.push('限古通加');
       else if(i.tongjiaScope==='只可穿现通加') parts.push('限现通加');
       else if(i.tongjiaScope==='古现都可') parts.push('无古现限制');
-      return parts.join('·');
+      t=parts.join('·');
     }
+    else t='';
   }
-  return '';
+  else t='';
+  _tjCache.set(i,t);
+  return t;
 }
 function getScopeTag(i){
   // Merged into getTjTag now — keep for backward compat but return empty
@@ -1309,7 +1391,7 @@ function switchSidebarTab(type){
   document.getElementById('stab-shop').classList.toggle('active',type==='shop');
   document.getElementById('stab-person').classList.toggle('active',type==='person');
   invalidateViewCache();
-  sv(); renderSidebar(); renderOV(); renderMaterials(); renderDonut(); renderBars();
+  sv(); renderSidebar(); renderOV(); renderMaterials(false,true); renderDonut(); renderBars();
 }
 function getSidebarList(){
   return S.selType==='shop'?S.shops:S.persons;
@@ -1439,13 +1521,13 @@ function selectGroup(groupName){
   multiSelectSources.clear();
   selectedGroup=groupName; S.selName='all';
   invalidateViewCache();
-  sv(); renderSidebar(); renderOV(); renderMaterials(); renderDonut(); renderBars();
+  sv(); renderSidebar(); renderOV(); renderMaterials(false,true); renderDonut(); renderBars();
 }
 function selectUngrouped(){
   multiSelectSources.clear();
   selectedGroup='all'; S.selName='all';
   invalidateViewCache();
-  sv(); renderSidebar(); renderOV(); renderMaterials(); renderDonut(); renderBars();
+  sv(); renderSidebar(); renderOV(); renderMaterials(false,true); renderDonut(); renderBars();
 }
 
 // ---- Sidebar drag reorder ----
@@ -1466,7 +1548,7 @@ function selectSource(e,name){
   }
   S.selName=name; selectedGroup=null;
   invalidateViewCache();
-  sv(); renderSidebar(); renderOV(); renderMaterials(); renderDonut(); renderBars();
+  sv(); renderSidebar(); renderOV(); renderMaterials(false,true); renderDonut(); renderBars();
 }
 function sdragStart(e,idx,name){
   dragSrc=name; dragIdx=idx; dragBefore=true;
@@ -1775,12 +1857,34 @@ function countItemsForSource(sourceName){
   }
   return S.items.filter(i=>i.ownerType===S.selType&&i.ownerName===sourceName).length;
 }
+// Perf: single pass over all items → {shopTotal, personOwned, matchedFromShop, countMap}
+function buildSidebarCounts(){
+  const type=S.selType;
+  const countMap=new Map();
+  let shopTotal=0,personOwned=0,matchedFromShop=0;
+  S.items.forEach(it=>{
+    if(it.ownerType==='shop'){
+      shopTotal++;
+      if(type==='shop') countMap.set(it.ownerName,(countMap.get(it.ownerName)||0)+1);
+      else if(it.artist){
+        const names=splitArtists(it.artist);
+        names.forEach(n=>{ if(n) countMap.set(n,(countMap.get(n)||0)+1); });
+        if(names.some(n=>S.persons.includes(n))) matchedFromShop++;
+      }
+    }else{
+      personOwned++;
+      if(type==='person') countMap.set(it.ownerName,(countMap.get(it.ownerName)||0)+1);
+    }
+  });
+  return {shopTotal,personOwned,matchedFromShop,countMap};
+}
 
 function renderSidebar(){
   const el=document.getElementById('sl');
-  const shopTotal=S.items.filter(i=>i.ownerType==='shop').length;
-  const personOwned=S.items.filter(i=>i.ownerType==='person').length;
-  const matchedFromShop=S.items.filter(i=>i.ownerType==='shop'&&i.artist&&splitArtists(i.artist).some(n=>S.persons.includes(n))).length;
+  const counts=buildSidebarCounts();
+  const shopTotal=counts.shopTotal;
+  const personOwned=counts.personOwned;
+  const matchedFromShop=counts.matchedFromShop;
   const personTotal=personOwned+matchedFromShop;
   document.getElementById('stc-shop').textContent=shopTotal+'条';
   document.getElementById('stc-person').textContent=personTotal+'条';
@@ -1789,9 +1893,10 @@ function renderSidebar(){
   const glist=S.groups[S.selType]||[];
   const ungrouped=getUngroupedSources();
   const allList=getSidebarList();
+  const srcCount=n=>(counts.countMap.get(n)||0);
 
   // Calculate ungrouped items count
-  const ungroupedItemCount=ungrouped.reduce((s,n)=>s+countItemsForSource(n),0);
+  const ungroupedItemCount=ungrouped.reduce((s,n)=>s+srcCount(n),0);
   const ungroupedActive=selectedGroup==='all';
 
   let h='';
@@ -1812,7 +1917,7 @@ function renderSidebar(){
     h+=`<div style="padding:4px 10px;font-size:11px;color:var(--text2);opacity:0.6">暂无未分类${S.selType==='shop'?'店铺':'个人'}</div>`;
   }else{
     sortedUngrouped.forEach(n=>{
-      const cnt=countItemsForSource(n);
+      const cnt=srcCount(n);
       const isPinned=S.pinned[S.selType+'_'+n];
       const listIdx=allList.indexOf(n);
       h+=`<div class="sidebar-item ${S.selName===n&&selectedGroup===null?'active':''}${isPinned?' pinned':''}${multiSelectSources.has(n)?' multiselect':''}" onclick="selectSource(event,'${eh(n)}')" oncontextmenu="showCtxMenu(event,'${eh(n)}')" draggable="true" ondragstart="sdragStart(event,${listIdx},'${eh(n)}')" ondragover="sdragOver(event,${listIdx},'${eh(n)}')" ondragleave="sdragLeave(event)" ondrop="sdragDrop(event,${listIdx},'${eh(n)}')" ondragend="sdragEnd(event)">
@@ -1833,7 +1938,7 @@ function renderSidebar(){
     const sources=getSourcesInGroup(g.name);
     const isCollapsed=S.groupCollapsed[S.selType][g.name];
     const groupTotal=sources.length;
-    const groupItems=sources.reduce((s,n)=>s+countItemsForSource(n),0);
+    const groupItems=sources.reduce((s,n)=>s+srcCount(n),0);
     const isGroupActive=selectedGroup===g.name;
     h+=`<div class="sidebar-group">
       <div class="sidebar-group-header ${isGroupActive?'active':''}" onclick="selectGroup('${eh(g.name)}')" oncontextmenu="showGroupCtxMenu(event,'${eh(g.name)}')" draggable="true" ondragstart="gdragStart(event,${gi},'${eh(g.name)}')" ondragover="gdragOver(event,${gi},'${eh(g.name)}')" ondragleave="gdragLeave(event)" ondrop="gdragDrop(event,${gi},'${eh(g.name)}')" ondragend="gdragEnd(event)">
@@ -1852,7 +1957,7 @@ function renderSidebar(){
     });
 
     sortedSources.forEach(n=>{
-      const cnt=countItemsForSource(n);
+      const cnt=srcCount(n);
       const isPinned=S.pinned[S.selType+'_'+n];
       const listIdx=allList.indexOf(n);
       h+=`<div class="sidebar-item ${S.selName===n&&selectedGroup===null?'active':''}${isPinned?' pinned':''}${multiSelectSources.has(n)?' multiselect':''}" onclick="selectSource(event,'${eh(n)}')" oncontextmenu="showCtxMenu(event,'${eh(n)}')" draggable="true" ondragstart="sdragStart(event,${listIdx},'${eh(n)}')" ondragover="sdragOver(event,${listIdx},'${eh(n)}')" ondragleave="sdragLeave(event)" ondrop="sdragDrop(event,${listIdx},'${eh(n)}')" ondragend="sdragEnd(event)">
@@ -2003,9 +2108,13 @@ function renderCard(i){
   if(multiSelectMode) mcClasses.push('mc-multiselect');
   if(isMultiSel) mcClasses.push('mc-selected');
   const mcAttrs=moveMode?` draggable="true" ondragstart="onMoveDragStart(event,'${cid}')" ondragover="onMoveDragOver(event)" ondrop="onMoveDrop(event,'${cid}')" ondragend="onMoveDragEnd(event)" ondragleave="onMoveDragLeave(event)"`:'';
+  // Lazy image: placeholder in HTML, real base64 injected by IntersectionObserver when near viewport
+  const lazyImg=mainImg&&_cardImgIO
+    ? `<img src="${_cardPh}" data-cid="${cid}" data-idx="0" alt="素材图" loading="lazy" decoding="async" id="mcimg_${cid}">`
+    : (mainImg?`<img src="${mainImg}" alt="素材图" loading="lazy" decoding="async" id="mcimg_${cid}">`:'');
   return `<div class="${mcClasses.join(' ')}" data-id="${cid}"${mcAttrs} oncontextmenu="showCardCtx(event,'${cid}')">
     <div class="mci" onclick="onCardAreaClick(event,'${cid}')" id="mci_${cid}">
-      ${mainImg?`<img src="${mainImg}" alt="素材图" loading="lazy" decoding="async" id="mcimg_${cid}">`:`<div class="mpl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
+      ${lazyImg||`<div class="mpl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
       ${imgNav}
     </div>
     <div class="mcb" onclick="onCardAreaClick(event,'${cid}')">
@@ -2031,18 +2140,20 @@ function renderCard(i){
 }
 
 function cardPrevImg(cid){
-  const i=S.items.find(x=>x.id===cid); if(!i) return;
+  const i=itemById(cid); if(!i) return;
   const imgs=getImages(i); if(imgs.length<2) return;
   if(!cardImgIdx[cid]) cardImgIdx[cid]=0;
   cardImgIdx[cid]=(cardImgIdx[cid]-1+imgs.length)%imgs.length;
-  document.getElementById('mcimg_'+cid).src=imgs[cardImgIdx[cid]];
+  const img=document.getElementById('mcimg_'+cid);
+  if(img){img.setAttribute('data-idx',cardImgIdx[cid]);img.src=imgs[cardImgIdx[cid]];}
 }
 function cardNextImg(cid){
-  const i=S.items.find(x=>x.id===cid); if(!i) return;
+  const i=itemById(cid); if(!i) return;
   const imgs=getImages(i); if(imgs.length<2) return;
   if(!cardImgIdx[cid]) cardImgIdx[cid]=0;
   cardImgIdx[cid]=(cardImgIdx[cid]+1)%imgs.length;
-  document.getElementById('mcimg_'+cid).src=imgs[cardImgIdx[cid]];
+  const img=document.getElementById('mcimg_'+cid);
+  if(img){img.setAttribute('data-idx',cardImgIdx[cid]);img.src=imgs[cardImgIdx[cid]];}
 }
 
 // Cache for getItemsForView — invalidated on data/view changes
@@ -2142,15 +2253,26 @@ function debouncedRenderMaterials(){
 // Chunked rendering: render first batch immediately, rest in background
 let _renderBatchTimer=null;
 let _renderBatchItems=null;
-const RENDER_BATCH_SIZE=24;
+const RENDER_BATCH_SIZE=48;
 
 let _pendingScrollRestore=null;
 function getMainScroll(){const mc=document.querySelector('.main-content');return mc?mc.scrollTop:0}
 function restoreMainScroll(y){const mc=document.querySelector('.main-content');if(mc&&y!==null&&y!==undefined) mc.scrollTop=y}
-function renderMaterials(preserveScroll){
+// Stable sort by precomputed keys — avoids recomputing Date/price/category inside the comparator
+function sortByKeys(items,keyFn,desc,compareFn){
+  const keys=items.map((it,i)=>({it,k:keyFn(it,i)}));
+  keys.sort((a,b)=>{
+    const r=compareFn?compareFn(a.k,b.k):(a.k<b.k?-1:(a.k>b.k?1:0));
+    return desc?-r:r;
+  });
+  return keys.map(x=>x.it);
+}
+function renderMaterials(preserveScroll,resetTop){
   let items=getItemsForView().slice(); // Copy to avoid mutating cache
-  // Preserve scroll position when requested (edit/save/copy/delete/move must not jump)
-  const scrollY=preserveScroll?getMainScroll():null;
+  invalidateIdMap(); // items may have changed; rebuild id→item index lazily
+  // Preserve scroll position when requested (edit/save/copy/delete/move must not jump);
+  // resetTop=true forces scroll back to top (switching shop/person tab, group or source)
+  const scrollY=resetTop?0:(preserveScroll?getMainScroll():null);
   const fsort=S._filterSort||'time_desc';
   const q=(document.getElementById('q').value||'').toLowerCase();
   // Persist filter state (lightweight, no full IDB save)
@@ -2159,18 +2281,13 @@ function renderMaterials(preserveScroll){
   // Apply multi-filter if active (includes status filter from filter modal)
   if(hasActiveFilter()) items=applyFilterToItems(items);
   if(q) items=items.filter(i=>(i.name||'').toLowerCase().includes(q)||(i.artist||'').toLowerCase().includes(q)||(i.note||'').toLowerCase().includes(q)||getCatD(i).toLowerCase().includes(q)||getPSD(i).toLowerCase().includes(q));
-  switch(fsort){
-    case 'name_asc': items.sort((a,b)=>(a.name||'').localeCompare(b.name||'','zh'));break;
-    case 'name_desc': items.sort((a,b)=>(b.name||'').localeCompare(a.name||'','zh'));break;
-    case 'time_desc': items.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));break;
-    case 'time_asc': items.sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));break;
-    case 'price_desc': items.sort((a,b)=>getEffPrice(b)-getEffPrice(a));break;
-    case 'price_asc': items.sort((a,b)=>getEffPrice(a)-getEffPrice(b));break;
-    case 'category_asc': case 'category': items.sort((a,b)=>getCatD(a).localeCompare(getCatD(b),'zh'));break;
-    case 'category_desc': items.sort((a,b)=>getCatD(b).localeCompare(getCatD(a),'zh'));break;
-    case 'manual': break;
-    default: items.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
-  }
+  const dirDesc=fsort.endsWith('_desc');
+  const mode=fsort.split('_')[0];
+  if(mode==='name') items=sortByKeys(items,i=>(i.name||''),dirDesc,(a,b)=>a.localeCompare(b,'zh'));
+  else if(mode==='time') items=sortByKeys(items,i=>itemTs(i),dirDesc);
+  else if(mode==='price') items=sortByKeys(items,i=>getEffPrice(i),dirDesc);
+  else if(mode==='category') items=sortByKeys(items,i=>getCatD(i),dirDesc,(a,b)=>a.localeCompare(b,'zh'));
+  else if(mode!=='manual') items=sortByKeys(items,i=>itemTs(i),true); // unknown → newest first
   if(moveMode){
     if(moveOrder.length===0) moveOrder=items.map(i=>i.id);
     const om={};moveOrder.forEach((id,idx)=>om[id]=idx);
@@ -2188,10 +2305,12 @@ function renderMaterials(preserveScroll){
   // In move mode, render all items at once (drag reorder needs complete DOM)
   if(moveMode||items.length<=RENDER_BATCH_SIZE){
     el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${items.map(i=>renderCard(i)).join('')}</div>`;
+    observeCardImages();
   }else{
     // Render first batch immediately for fast initial paint
     const firstBatch=items.slice(0,RENDER_BATCH_SIZE);
     el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${firstBatch.map(i=>renderCard(i)).join('')}</div>`;
+    observeCardImages();
     // Schedule remaining items in background batches
     _renderBatchItems=items;
     _renderBatchOffset=RENDER_BATCH_SIZE;
@@ -2218,6 +2337,13 @@ function renderMaterials(preserveScroll){
 
 // Background batch renderer: appends cards in small chunks via setTimeout
 let _renderBatchOffset=0;
+// Observe lazy card images so IntersectionObserver fills their real src when near viewport
+function observeCardImages(scope){
+  if(!_cardImgIO) return;
+  const root=scope||document.getElementById('matGrid');
+  if(!root) return;
+  root.querySelectorAll('img[data-cid]').forEach(im=>_cardImgIO.observe(im));
+}
 function _renderNextBatch(){
   if(!_renderBatchItems)return;
   const grid=document.getElementById('matGrid');
@@ -2225,7 +2351,14 @@ function _renderNextBatch(){
   const end=Math.min(_renderBatchOffset+RENDER_BATCH_SIZE,_renderBatchItems.length);
   const chunk=_renderBatchItems.slice(_renderBatchOffset,end);
   if(chunk.length>0){
+    const before=grid.children.length;
     grid.insertAdjacentHTML('beforeend',chunk.map(i=>renderCard(i)).join(''));
+    if(_cardImgIO){
+      for(let ci=before;ci<grid.children.length;ci++){
+        const imgs=grid.children[ci].querySelectorAll('img[data-cid]');
+        for(let j=0;j<imgs.length;j++) _cardImgIO.observe(imgs[j]);
+      }
+    }
   }
   _renderBatchOffset=end;
   if(_renderBatchOffset<_renderBatchItems.length){
@@ -3049,6 +3182,7 @@ function applyBatchEdit(){
       count++;
     }
   });
+  clearDerivedCaches(); // items mutated in place → drop memoized derived values
   sv();closeBatchEdit();exitMultiSelect();renderAll(false,true);
   st(`已批量修改 ${count} 个素材（${keys.length} 个字段）`);
 }
