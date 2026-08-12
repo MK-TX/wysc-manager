@@ -13,11 +13,11 @@
   --warning:#f59e0b;--warning-bg:#fffbeb;--success:#10b981;--success-bg:#ecfdf5;
   --radius:12px;--radius-sm:8px;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 button{cursor:pointer;font-family:inherit;font-size:inherit;border:none;background:none}
 input,select,textarea{font-family:inherit;font-size:16px}
 
-.app-header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.app-header{background:var(--card);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100;flex-shrink:0}
 .app-header h1{font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px}
 .app-header h1 svg{width:24px;height:24px;color:var(--primary)}
 .header-actions{display:flex;gap:6px;flex-wrap:wrap}
@@ -38,7 +38,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .data-banner svg{width:16px;height:16px;flex-shrink:0}
 .data-banner .cls{color:#92400e;margin-left:auto;cursor:pointer}
 
-.app-body{display:flex;height:calc(100vh - 56px);overflow:hidden}
+.app-body{display:flex;flex:1;overflow:hidden;min-height:0}
 
 /* Sidebar */
 .sidebar{width:270px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
@@ -47,7 +47,12 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .sidebar-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
 .sidebar-tab:hover{background:#f8fafc}
 .sidebar-tab .stc{font-size:10px;color:var(--text2);font-weight:400;display:block;margin-top:1px}
-.sidebar-list{flex:1;overflow-y:auto;padding:4px}
+.sidebar-list{flex:1;overflow-y:auto;padding:4px;scrollbar-width:thin;scrollbar-color:transparent transparent}
+.sidebar-list::-webkit-scrollbar{width:5px;background:transparent}
+.sidebar-list::-webkit-scrollbar-track{background:transparent}
+.sidebar-list::-webkit-scrollbar-thumb{background:rgba(99,102,241,.25);border-radius:10px;transition:background .2s}
+.sidebar-list:hover::-webkit-scrollbar-thumb{background:rgba(99,102,241,.45)}
+.sidebar-list::-webkit-scrollbar-thumb:hover{background:rgba(99,102,241,.6)}
 .sidebar-group{margin-bottom:2px}
 .sidebar-group-header{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:var(--radius-sm);cursor:pointer;user-select:none;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;transition:background .15s;margin-top:4px}
 .sidebar-group-header:hover{background:#f1f5f9}
@@ -113,7 +118,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .ovv.warn{color:var(--warning)}.ovv.ok{color:var(--success)}.ovv.mny{color:var(--primary)}.ovv.mny2{color:#8b5cf6}
 
 .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}
-.scard{background:var(--card);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border);max-height:260px;overflow:hidden;display:flex;flex-direction:column}
+.scard{background:var(--card);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border);max-height:195px;overflow:hidden;display:flex;flex-direction:column}
 .scard h3{font-size:14px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-shrink:0}
 .scard h3 svg{width:15px;height:15px;color:var(--primary)}
 .scard>div{overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:transparent transparent}
@@ -124,7 +129,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .scard>div::-webkit-scrollbar-thumb:hover{background:rgba(99,102,241,.6)}
 .chart-wrap{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .chart-wrap svg{flex-shrink:0}
-.legend{flex:1;min-width:100px;max-height:180px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:transparent transparent}
+#ch1{overflow:hidden!important}
+.legend{flex:1;min-width:100px;max-height:135px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:transparent transparent}
 .legend::-webkit-scrollbar{width:5px;background:transparent}
 .legend::-webkit-scrollbar-track{background:transparent}
 .legend::-webkit-scrollbar-thumb{background:rgba(99,102,241,.25);border-radius:10px}
@@ -333,7 +339,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 @media(max-width:768px){
   .app-header{padding:8px 12px}.app-header h1{font-size:15px}
   .header-actions .btn span{display:none}.header-actions .btn{padding:8px}
-  .app-body{flex-direction:column;height:auto;min-height:calc(100vh - 52px)}
+  .app-body{flex-direction:column;height:auto;min-height:0;flex:none}
   .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:220px}
   .sidebar-list{display:flex;gap:5px;overflow-x:auto;padding:6px 10px}
   .sidebar-group,.sidebar-item{flex-shrink:0;white-space:nowrap}
@@ -431,14 +437,15 @@ input,select,textarea{font-family:inherit;font-size:16px}
   <div class="filter-modal">
     <div class="mdh fm-hd"><h3>筛选条件</h3><button class="btn-icon" onclick="closeFilterModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="fm-body">
-      <div class="fm-sec"><h4 id="fmArtistLabel">画师/美工</h4><div class="fm-chips" id="fmArtist"></div></div>
-      <div class="fm-sec"><h4>售卖类型</h4><div class="fm-chips" id="fmSaleType"></div></div>
-      <div class="fm-sec"><h4>属性分类</h4><div class="fm-chips" id="fmCategory"></div>
+      <div class="fm-sec" id="fmArtistSec"><h4 id="fmArtistLabel">画师/美工</h4><div class="fm-chips" id="fmArtist"></div></div>
+      <div class="fm-sec" id="fmSaleTypeSec"><h4>售卖类型</h4><div class="fm-chips" id="fmSaleType"></div></div>
+      <div class="fm-sec" id="fmCategorySec"><h4>属性分类</h4><div class="fm-chips" id="fmCategory"></div>
         <div id="fmSubRow" style="display:none;margin-top:8px"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">子项</div><div class="fm-chips" id="fmSubCategory"></div></div>
-        <div id="fmTagRow" style="margin-top:8px"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">选择标签</div><div class="fm-chips" id="fmStyleTag"></div></div>
+        <div id="fmTagRow" style="display:none;margin-top:8px"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">选择标签</div><div class="fm-chips" id="fmStyleTag"></div></div>
       </div>
-      <div class="fm-sec"><h4>购买来源</h4><div class="fm-chips" id="fmSource"></div></div>
-      <div class="fm-sec"><h4>通加规则</h4><div class="fm-chips" id="fmTongjia"></div></div>
+      <div class="fm-sec" id="fmSourceSec"><h4>购买来源</h4><div class="fm-chips" id="fmSource"></div></div>
+      <div class="fm-sec" id="fmTongjiaSec"><h4>通加规则</h4><div class="fm-chips" id="fmTongjia"></div></div>
+      <div class="fm-sec" id="fmTransferRuleSec"><h4>转让规则</h4><div class="fm-chips" id="fmTransferRule"></div></div>
       <div class="fm-sec" id="fmStatusSec"><h4>状态</h4><div class="fm-chips" id="fmStatus"></div></div>
     </div>
     <div class="fm-ft">
@@ -828,12 +835,12 @@ input,select,textarea{font-family:inherit;font-size:16px}
 
       <div class="fg"><label>备注</label><textarea id="fnt" rows="2" placeholder="补充说明..."></textarea></div>
     </div>
-    <div class="mdf"><button class="btn" onclick="closeItemModal()">取消</button><button class="btn btn-danger" id="di" style="margin-right:auto;display:none" onclick="deleteCurrentItem()">删除</button><button class="btn btn-primary" onclick="saveItem()">保存</button></div>
+    <div class="mdf"><button class="btn btn-primary" onclick="saveItem()">保存</button></div>
   </div>
 </div>
 
 <!-- Excel Import Modal -->
-<div class="mo" id="ximo" style="display:none">
+<div class="mo" id="ximo" style="display:none;z-index:210">
   <div class="md" style="max-width:700px">
     <div class="mdh"><h3>Excel / CSV 导入</h3><button class="btn-icon" onclick="closeExcelImport()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="mdb">
@@ -915,7 +922,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 </div>
 
 <!-- Confirm -->
-<div class="mo" id="co" style="display:none">
+<div class="mo" id="co" style="display:none;z-index:220">
   <div class="md cd">
     <div class="mdb"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><p id="ct"></p></div>
     <div class="mdf"><button class="btn" onclick="closeConfirm()">取消</button><button class="btn btn-danger" id="cb">确定</button></div>
@@ -924,25 +931,20 @@ input,select,textarea{font-family:inherit;font-size:16px}
 
 <!-- Backup Modal -->
 <div class="mo" id="bkmo" style="display:none" onclick="if(event.target===this)closeBackupModal()">
-  <div class="md" style="max-width:480px">
+  <div class="md" style="max-width:520px">
     <div class="mdh"><h3>自动备份设置</h3><button class="btn-icon" onclick="closeBackupModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
     <div class="mdb">
       <div class="fg">
-        <label>备份文件夹</label>
+        <label>备份状态</label>
         <div id="bkFolderStatus" style="padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:#f8fafc;margin-bottom:8px">
-          <span style="color:var(--text2)">未设置备份文件夹</span>
+          <span style="color:var(--text2)">正在检查...</span>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-primary btn-sm" id="bkSetBtn" onclick="setBackupFolder()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>设置备份文件夹</button>
-          <button class="btn btn-sm" id="bkChangeBtn" style="display:none" onclick="setBackupFolder()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>更换文件夹</button>
-        </div>
-        <div class="hint">授权后，每次关闭页面时自动保存备份到该文件夹，最多保留5个备份文件</div>
       </div>
       <div class="fg" id="bkInfoSection" style="display:none">
         <label>备份信息</label>
         <div style="padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;background:#f8fafc;line-height:1.8">
           <div>上次备份：<span id="bkLastTime" style="color:var(--text2)">从未备份</span></div>
-          <div>备份文件数：<span id="bkFileCount" style="color:var(--text2)">0</span> / 5</div>
+          <div>素材数量：<span id="bkFileCount" style="color:var(--text2)">0</span> 条</div>
           <div>备份方式：<span id="bkMethod" style="color:var(--text2)">-</span></div>
         </div>
       </div>
@@ -953,11 +955,25 @@ input,select,textarea{font-family:inherit;font-size:16px}
           <button class="btn btn-sm" onclick="restoreFromBackup()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>从备份恢复</button>
         </div>
       </div>
-      <div class="sg" style="background:var(--primary-light);border-color:var(--primary);font-size:12px;color:var(--primary-dark)">
-        <strong>说明：</strong>关闭页面时自动备份到本地文件夹。如果浏览器数据丢失，可通过"从备份恢复"选择备份文件恢复数据。IndexedDB 内也有冗余备份，启动时自动检测恢复。
+      <div class="fg">
+        <label>备份记录 <span id="bkListCount" style="color:var(--text2);font-weight:400;font-size:12px"></span></label>
+        <div id="bkListContainer" style="border:1px solid var(--border);border-radius:var(--radius-sm);max-height:210px;overflow-y:auto;background:#f8fafc">
+          <div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">加载中...</div>
+        </div>
+        <div id="bkListActions" style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="downloadSelectedBackups()">下载选中</button>
+          <button class="btn btn-sm" onclick="downloadAllBackups()">下载全部</button>
+          <button class="btn btn-sm btn-danger" onclick="clearBackupHistory()">清空记录</button>
+        </div>
+      </div>
+      <div class="sg" style="background:#fef3c7;border-color:#f59e0b;font-size:12px;color:#92400e;line-height:1.7">
+        <strong>备份说明：</strong><br>
+        1. Ctrl+S 快捷键手动备份<br>
+        2. 每次操作自动保存到浏览器 IndexedDB（即时，无弹窗）<br>
+        3. 系统自动保留最近 5 条备份记录，可下载单个/多个/全部<br>
+        4. 如果浏览器数据被清空，打开本页面会自动检测并提示恢复；也可以点击"从备份恢复"手动选择下载的备份文件
       </div>
     </div>
-    <div class="mdf"><button class="btn" onclick="closeBackupModal()">关闭</button></div>
   </div>
 </div>
 
@@ -1107,13 +1123,47 @@ function idbSet(key,val){
   if(!idbDB){
     // Not ready yet, try to init then save
     idbInit().then(()=>idbSet(key,val));
-    return;
+    return Promise.resolve();
   }
-  try{
-    const tx=idbDB.transaction('kv','readwrite');
-    tx.objectStore('kv').put(val,key);
-    tx.onerror=()=>{console.warn('IDB save failed for',key)};
-  }catch(e){console.warn('IDB exception',e)}
+  return new Promise((resolve)=>{
+    try{
+      const tx=idbDB.transaction('kv','readwrite');
+      tx.objectStore('kv').put(val,key);
+      tx.oncomplete=()=>resolve();
+      tx.onerror=()=>{console.warn('IDB save failed for',key);resolve()};
+      tx.onabort=()=>{console.warn('IDB save aborted for',key);resolve()};
+    }catch(e){console.warn('IDB exception',e);resolve()}
+  });
+}
+function idbDel(key){
+  if(!idbDB){idbInit().then(()=>idbDel(key));return Promise.resolve()}
+  return new Promise((resolve)=>{
+    try{
+      const tx=idbDB.transaction('kv','readwrite');
+      tx.objectStore('kv').delete(key);
+      tx.oncomplete=()=>resolve();
+      tx.onerror=()=>resolve();
+      tx.onabort=()=>resolve();
+    }catch(e){resolve()}
+  });
+}
+// Batch multiple key-value writes in a single IDB transaction.
+// More reliable during page unload — only one transaction to commit.
+function idbSetMulti(entries){
+  if(!idbDB){
+    idbInit().then(()=>idbSetMulti(entries));
+    return Promise.resolve();
+  }
+  return new Promise((resolve)=>{
+    try{
+      const tx=idbDB.transaction('kv','readwrite');
+      const store=tx.objectStore('kv');
+      entries.forEach(e=>store.put(e.val,e.key));
+      tx.oncomplete=()=>resolve(true);
+      tx.onerror=()=>{console.warn('IDB batch save failed');resolve(false)};
+      tx.onabort=()=>{console.warn('IDB batch save aborted');resolve(false)};
+    }catch(e){console.warn('IDB batch exception',e);resolve(false)}
+  });
 }
 
 // Persistence — all data in IndexedDB (no localStorage size limit)
@@ -1133,14 +1183,16 @@ function ld(){
     selectedGroup = st.selectedGroup !== undefined ? st.selectedGroup : 'all';
     S._filterCat=st.filterCat||'all'; S._filterUsed=st.filterUsed||'all';
     S._filterSort=st.filterSort||'time_desc'; S._filterQuery=st.filterQuery||'';
-    if(st.S_filter){ S_filter=st.S_filter; if(!S_filter.status) S_filter.status=[]; if(!S_filter.subCategory) S_filter.subCategory=[]; if(!S_filter.styleTag) S_filter.styleTag=[]; S_filter.styleTag=S_filter.styleTag.map(t=>(t==='古现'||t==='通用')?'古现/通用':t); }
+    if(st.S_filter){ S_filter=st.S_filter; if(!S_filter.status) S_filter.status=[]; if(!S_filter.subCategory) S_filter.subCategory=[]; if(!S_filter.styleTag) S_filter.styleTag=[]; if(!S_filter.transferRule) S_filter.transferRule=[]; S_filter.styleTag=S_filter.styleTag.map(t=>(t==='古现'||t==='通用')?'古现/通用':t); }
     // If localStorage has data, we need to migrate to IDB
     if(S.shops.length||S.persons.length||S.items.length) _ldFromLS=true;
   }catch(e){ S.shops=[]; S.persons=[]; S.items=[]; S.pinned={}; S.groups={shop:[],person:[]}; S.sourceGroup={}; S.groupCollapsed={shop:{},person:{}}; }
 }
 let _svTimer=null;
 let _svPendingItems=false;
+let _dataDirty=true; // Legacy flag (no longer read after removing visibilitychange auto-backup)
 function sv(){
+  _dataDirty=true;
   // Lightweight data (state/groups/etc) saved immediately; heavy items array debounced
   idbSet('state',{selType:S.selType,selName:S.selName,selectedGroup,filterCat:S._filterCat||'all',filterUsed:S._filterUsed||'all',filterSort:S._filterSort||'time_desc',filterQuery:S._filterQuery||'',S_filter});
   idbSet('pinned',S.pinned);
@@ -1173,9 +1225,15 @@ function _svFlush(){
 }
 function svNow(){
   // Force immediate flush (used by beforeunload / critical operations)
+  // Uses batch IDB transaction for reliability during page unload
   if(_svTimer){clearTimeout(_svTimer);_svTimer=null}
-  _svPendingItems=true;
-  _svFlush();
+  _svPendingItems=false;
+  idbSetMulti([
+    {key:'shops',val:S.shops},
+    {key:'persons',val:S.persons},
+    {key:'items',val:S.items}
+  ]);
+  return true;
 }
 // Lightweight filter-state-only save (skip full IDB write of all items/images)
 function saveFilterState(){
@@ -2221,6 +2279,7 @@ function renderCard(i,eager){
     catTagsHtml+=`<span class="mccat" style="background:#4f46e5;color:#fff">${eh(tagLabel)}</span>`;
   }
   // Unified tags (neutral gray, below category tags)
+  const countVal=i.ownerType==='shop'?(i.countInShop!==false):(i.countInPerson!==false);
   let uniTagsHtml='';
   if(i.saleType) uniTagsHtml+=`<span class="mcbg">${eh(i.saleType)}</span>`;
   const psd=getPSD(i);
@@ -2232,6 +2291,7 @@ function renderCard(i,eager){
   if(tjTag) uniTagsHtml+=`<span class="mcbg">${eh(tjTag)}</span>`;
   const scopeTag=getScopeTag(i);
   if(scopeTag) uniTagsHtml+=`<span class="mcbg">${eh(scopeTag)}</span>`;
+  if(!countVal) uniTagsHtml+=`<span class="mcbg" style="background:#fef3c7;color:#b45309">不计入消费</span>`;
   if(i.note&&i.note.trim()) uniTagsHtml+=`<span class="mcbg note-tag" title="${eh(i.note)}">📝 ${eh(i.note.length>20?i.note.slice(0,20)+'…':i.note)}</span>`;
   if(getCats(i).includes('加装')&&i.jzRestrict&&i.jzRestrict.length){
     i.jzRestrict.forEach(r=>{
@@ -2241,7 +2301,6 @@ function renderCard(i,eager){
       else if(r==='自定义'&&i.jzCustom) uniTagsHtml+=`<span class="mcbg">${eh(i.jzCustom)}</span>`;
     });
   }
-  const countVal=i.ownerType==='shop'?(i.countInShop!==false):(i.countInPerson!==false);
   const isMultiSel=multiSelectMode&&selectedItems.has(cid);
   const mcClasses=['mc'];
   if(moveMode) mcClasses.push('mc-move-hint');
@@ -2541,64 +2600,99 @@ function _renderNextBatch(){
 }
 
 // ---- Filter Modal (Advanced Filter) ----
-let S_filter={artist:[],saleType:[],category:[],subCategory:[],styleTag:[],source:[],tongjia:[],status:[]};
+let _filterViewItems=[];
+let S_filter={artist:[],saleType:[],category:[],subCategory:[],styleTag:[],source:[],tongjia:[],transferRule:[],status:[]};
 function openFilterModal(){
   const items=getItemsForView();
+  _filterViewItems=items;
   // Dynamic label: "所属" for person tab, "画师/美工" for shop tab
   const artistLabel=document.getElementById('fmArtistLabel');
   if(artistLabel) artistLabel.textContent=S.selType==='person'?'所属':'画师/美工';
-  // Collect all unique values
-  const artists=new Set(), saleTypes=new Set(), cats=new Set(), sources=new Set(), tongjias=new Set(), styleTags=new Set();
+  // Collect all unique values from current view items only
+  const artists=new Set(), saleTypes=new Set(), cats=new Set(), sources=new Set(), tongjias=new Set(), styleTags=new Set(), transferRules=new Set();
   items.forEach(i=>{
     if(i.artist) splitArtists(i.artist).forEach(a=>artists.add(a));
     if(i.saleType) saleTypes.add(i.saleType);
     getCats(i).forEach(c=>cats.add(c));
-    // Collect style tags
+    // Collect style tags from items only (no hardcoded)
     if(i.styleTag){
       const tagLabel=i.styleTag==='其他'?(i.customTag||'其他'):i.styleTag;
       styleTags.add(tagLabel);
     }
     const psd=getPSD(i);
     if(psd){
-      // Split by the separator for multi-part labels (赞助购入 has "余N待赞助")
       psd.split('\x00').forEach(p=>{
-        if(p&&!p.startsWith('余')) sources.add(p);
+        if(p&&!p.startsWith('余')){
+          // Normalize 赞助购入×N to 赞助购入
+          sources.add(p.replace(/^赞助购入×\d+$/,'赞助购入'));
+        }
       });
     }
     const tj=getTongjiaRule(i);
     if(tj) tongjias.add(tj);
+    // Collect transfer rules
+    if(i.transferRule){
+      const trMap={'不可转':'不可转让','退圈可转':'可退圈转让','不退圈可转':'可不退圈转让'};
+      const trLabel=trMap[i.transferRule];
+      if(trLabel) transferRules.add(trLabel);
+    }
   });
-  // Always show standard style tag options
-  ['古现/通用','古代','现代','其他'].forEach(t=>styleTags.add(t));
   // Dynamic status options
   const statusOptions=[];
   const hasUsed=items.some(i=>i.isUsed);
   const hasUnused=items.some(i=>!i.isUsed);
-  const hasSponsor=items.some(i=>{const psd=getPSD(i);return psd&&/余\d+待赞助/.test(psd)});
   const hasPendingSponsor=items.some(i=>{const psd=getPSD(i);return psd&&/余\d+待赞助/.test(psd)});
   if(hasPendingSponsor) statusOptions.push({val:'pending_sponsor',label:'待赞助'});
   if(hasUnused&&hasUsed){statusOptions.push({val:'unused',label:'未使用'});statusOptions.push({val:'used',label:'已使用'});}
+  // Render chips and hide sections with no options
+  toggleFilterSec('fmArtistSec',[...artists].sort((a,b)=>a.localeCompare(b,'zh')),'fmArtist','artist');
+  toggleFilterSec('fmSaleTypeSec',[...saleTypes].sort((a,b)=>a.localeCompare(b,'zh')),'fmSaleType','saleType');
+  toggleFilterSec('fmCategorySec',[...cats].sort((a,b)=>a.localeCompare(b,'zh')),'fmCategory','category');
+  toggleFilterSec('fmSourceSec',[...sources].sort((a,b)=>a.localeCompare(b,'zh')),'fmSource','source');
+  toggleFilterSec('fmTongjiaSec',[...tongjias].sort((a,b)=>a.localeCompare(b,'zh')),'fmTongjia','tongjia');
+  toggleFilterSec('fmTransferRuleSec',[...transferRules],'fmTransferRule','transferRule');
+  // Style tags - only from items
+  const tagRow=document.getElementById('fmTagRow');
+  if(styleTags.size>0){
+    tagRow.style.display='';
+    renderFilterChips('fmStyleTag',[...styleTags].sort((a,b)=>a.localeCompare(b,'zh')),'styleTag');
+  }else{
+    tagRow.style.display='none';
+  }
+  // Status
   const statusSec=document.getElementById('fmStatusSec');
   if(statusOptions.length===0){statusSec.style.display='none'}
   else{statusSec.style.display='';renderStatusChips(statusOptions)}
-  // Render chips
-  renderFilterChips('fmArtist',[...artists].sort((a,b)=>a.localeCompare(b,'zh')),'artist');
-  renderFilterChips('fmSaleType',[...saleTypes].sort((a,b)=>a.localeCompare(b,'zh')),'saleType');
-  renderFilterChips('fmCategory',[...cats].sort((a,b)=>a.localeCompare(b,'zh')),'category');
-  renderFilterChips('fmStyleTag',[...styleTags].sort((a,b)=>a.localeCompare(b,'zh')),'styleTag');
-  renderFilterChips('fmSource',[...sources].sort((a,b)=>a.localeCompare(b,'zh')),'source');
-  renderFilterChips('fmTongjia',[...tongjias].sort((a,b)=>a.localeCompare(b,'zh')),'tongjia');
   // Update sub-category row based on selected categories
   updateFilterSubRow();
   updateFilterCount();
   document.getElementById('fmo').style.display='flex';
 }
+function toggleFilterSec(secId,values,containerId,dim){
+  const sec=document.getElementById(secId);
+  if(!sec)return;
+  if(values.length===0){sec.style.display='none'}
+  else{sec.style.display='';renderFilterChips(containerId,values,dim)}
+}
 function updateFilterSubRow(){
   const selectedCats=S_filter.category;
-  const allSubs=new Set();
-  selectedCats.forEach(c=>{ if(SUBS[c]) SUBS[c].forEach(s=>allSubs.add(s)); });
-  const subArr=[...allSubs];
+  const items=_filterViewItems||[];
   const subRow=document.getElementById('fmSubRow');
+  if(selectedCats.length===0){
+    subRow.style.display='none';S_filter.subCategory=[];return;
+  }
+  // Collect subs from items that have at least one of the selected categories
+  const allSubs=new Set();
+  items.forEach(i=>{
+    const iCats=getCats(i);
+    if(!iCats.some(c=>selectedCats.includes(c))) return;
+    if(i.subCategory){
+      (i.subCategory||'').split(',').map(s=>s.trim()).filter(Boolean).forEach(s=>{
+        allSubs.add(s==='其他'?(i.customSubCategory||'其他'):s);
+      });
+    }
+  });
+  const subArr=[...allSubs];
   if(subArr.length>0){
     subRow.style.display='';
     renderFilterChips('fmSubCategory',subArr,'subCategory');
@@ -2632,7 +2726,7 @@ function toggleFilterChip(e,dim,val){
   updateFilterCount();
 }
 function updateFilterCount(){
-  const total=S_filter.artist.length+S_filter.saleType.length+S_filter.category.length+S_filter.subCategory.length+S_filter.styleTag.length+S_filter.source.length+S_filter.tongjia.length+S_filter.status.length;
+  const total=S_filter.artist.length+S_filter.saleType.length+S_filter.category.length+S_filter.subCategory.length+S_filter.styleTag.length+S_filter.source.length+S_filter.tongjia.length+S_filter.transferRule.length+S_filter.status.length;
   document.getElementById('fmCount').textContent=total>0?`已选 ${total} 项`:'';
 }
 function applyFilter(){
@@ -2640,7 +2734,7 @@ function applyFilter(){
   renderMaterials();
 }
 function resetFilter(){
-  S_filter={artist:[],saleType:[],category:[],subCategory:[],styleTag:[],source:[],tongjia:[],status:[]};
+  S_filter={artist:[],saleType:[],category:[],subCategory:[],styleTag:[],source:[],tongjia:[],transferRule:[],status:[]};
   // Reset all chips
   document.querySelectorAll('#fmo .fm-chip.active').forEach(c=>c.classList.remove('active'));
   document.getElementById('fmSubRow').style.display='none';
@@ -2650,7 +2744,7 @@ function closeFilterModal(){
   document.getElementById('fmo').style.display='none';
 }
 function hasActiveFilter(){
-  return S_filter.artist.length>0||S_filter.saleType.length>0||S_filter.category.length>0||S_filter.subCategory.length>0||S_filter.styleTag.length>0||S_filter.source.length>0||S_filter.tongjia.length>0||S_filter.status.length>0;
+  return S_filter.artist.length>0||S_filter.saleType.length>0||S_filter.category.length>0||S_filter.subCategory.length>0||S_filter.styleTag.length>0||S_filter.source.length>0||S_filter.tongjia.length>0||S_filter.transferRule.length>0||S_filter.status.length>0;
 }
 function applyFilterToItems(items){
   if(!hasActiveFilter()) return items;
@@ -2675,12 +2769,17 @@ function applyFilterToItems(items){
     }
     if(S_filter.source.length>0){
       const psd=getPSD(i);
-      const srcs=psd?psd.split('\x00').filter(p=>p&&!p.startsWith('余')):[];
+      const srcs=psd?psd.split('\x00').filter(p=>p&&!p.startsWith('余')).map(s=>s.replace(/^赞助购入×\d+$/,'赞助购入')):[];
       if(!srcs.some(s=>S_filter.source.includes(s))) return false;
     }
     if(S_filter.tongjia.length>0){
       const tj=getTongjiaRule(i);
       if(!S_filter.tongjia.includes(tj)) return false;
+    }
+    if(S_filter.transferRule.length>0){
+      const trLabelMap={'不可转':'不可转让','退圈可转':'可退圈转让','不退圈可转':'可不退圈转让'};
+      const itemTrLabel=trLabelMap[i.transferRule||'不可转']||'不可转让';
+      if(!S_filter.transferRule.includes(itemTrLabel)) return false;
     }
     if(S_filter.status.length>0){
       let matchStatus=false;
@@ -2779,7 +2878,7 @@ document.getElementById('fownerNew').addEventListener('blur',function(){
 
 function openItemModal(){
   S.editItem=null; S.imgData=[]; S.payImgData=[];
-  document.getElementById('imt').textContent='添加素材';document.getElementById('di').style.display='none';
+  document.getElementById('imt').textContent='添加素材';
   clearItemForm();
   const ot=S.selType;
   document.querySelector(`input[name="fot"][value="${ot}"]`).checked=true;
@@ -2803,7 +2902,7 @@ function openItemModal(){
 function openEditItem(id){
   const i=S.items.find(x=>x.id===id);if(!i)return;
   S.editItem=i;
-  document.getElementById('imt').textContent='编辑素材';document.getElementById('di').style.display='';
+  document.getElementById('imt').textContent='编辑素材';
   clearItemForm();
   S.imgData=[...getImages(i)];
   renderImgGrid();
@@ -3613,7 +3712,7 @@ function autoFillRules(artistOverride){
     }
   }
 
-  if(filled.length>0) st('已从「'+artist+'」的已有记录自动填充：'+filled.join('、'));
+  // Auto-fill is silent — no toast notification
 }
 // Render multi-cat checkbox grid
 function renderCatGrid(checkedArr){
@@ -3644,7 +3743,14 @@ function onCatCheck(){
   if(cats.includes('加装')) jzg.style.display='';
   if(cats.includes('立绘')||cats.includes('卤蛋')) tjg.style.display='';
   // Sync from same-artist + same-category records (fills empty or auto-filled fields)
-  if(document.getElementById('fa').value.trim()) autoFillRules();
+  const ot=document.querySelector('input[name="fot"]:checked')?.value||'shop';
+  if(ot==='person'){
+    const ownerVal=document.getElementById('fowner').value;
+    const ownerName=ownerVal&&ownerVal!=='__new__'?ownerVal:document.getElementById('fownerNew').value.trim();
+    if(ownerName) autoFillRules(ownerName);
+  }else{
+    if(document.getElementById('fa').value.trim()) autoFillRules();
+  }
   // Default: 加装限制 → 无限制 (only if still empty or auto-filled)
   if(cats.includes('加装')&&(!document.querySelector('input[name="jzr"]:checked')||checkedIsAuto('jzr'))){
     const ulc=document.querySelector('input[name="jzr"][value="无限制"]');
@@ -4894,7 +5000,7 @@ function confirmSmartImport(){
     });
     imported++;
   });
-  sv();closeExcelImport();renderAll();autoExtractPersons();
+  sv();closeExcelImport();closeBackupModal();renderAll();autoExtractPersons();
   st(`智能导入完成：${imported} 条`);
 }
 
@@ -5204,7 +5310,7 @@ function runExcelImport(){
       S.items.push(item);imported++;
     }catch(err){skipped++;}
   });
-  svNow();closeExcelImport();renderAll();autoExtractPersons();st(`导入完成：${imported} 条成功${skipped>0?`，${skipped} 条跳过`:''}`);
+  svNow();closeExcelImport();closeBackupModal();renderAll();autoExtractPersons();st(`导入完成：${imported} 条成功${skipped>0?`，${skipped} 条跳过`:''}`);
 }
 
 // ---- Export/Import ----
@@ -5658,6 +5764,7 @@ function st(msg,type){const el=document.getElementById('tst');el.textContent=msg
 
 // ---- Keyboard ----
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeItemModal();closeLb();closeConfirm();closeExcelImport();hideCtxMenu();closeSourceModal();closeGroupModal();closeFilterModal();closeExportModal();closeBatchEdit();closeBackupModal();if(multiSelectMode)exitMultiSelect()}});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();doBackupNow()}});
 
 // ---- Drag & drop for import ----
 document.getElementById('xidrop').addEventListener('dragover',e=>{e.preventDefault();e.currentTarget.style.borderColor='var(--primary)'});
@@ -5670,50 +5777,17 @@ document.getElementById('xidrop').addEventListener('drop',e=>{
   handleXFile({target:inp});
 });
 
-// ---- Auto Backup System ----
-// Multi-layer backup: IndexedDB snapshot + File System Access API (local folder)
-// Triggered on page close (beforeunload/pagehide). Max 5 backup files (circular buffer).
-let _backupDirHandle=null;
-const MAX_BACKUPS=5;
-let _backupTriggered=false;
+// ---- Auto Backup System (IDB + Auto-Download) ----
+// Layer 1: IndexedDB — auto-save on every data change (instant, no prompts)
+// Layer 2: Auto-download — on page close, downloads a .json backup file to
+//          the Downloads folder. This is a REAL file that survives browser
+//          data clearing. Only downloads if data changed since last download.
+// Layer 3: IDB snapshot — separate 'idbBackup' key, checked on startup
+//          if primary data is empty (e.g. after browser data clearing).
 
-async function initBackup(){
-  // Load saved directory handle from IDB
-  try{
-    const handle=await idbGet('backupDirHandle');
-    if(handle){
-      _backupDirHandle=handle;
-      // Verify permission silently
-      try{
-        const perm=await handle.queryPermission({mode:'readwrite'});
-        if(perm!=='granted'){
-          // Permission expired — will re-request on next user interaction
-        }
-      }catch(e){}
-    }
-  }catch(e){console.warn('Backup init failed',e)}
-}
-
-async function setBackupFolder(){
-  if(typeof window.showDirectoryPicker!=='function'){
-    // Fallback: use auto-download method
-    confirm('当前浏览器不支持文件夹选择（可能因为以 file:// 方式打开）。\n是否改用"自动下载"备份方式？\n（每次关闭页面时自动下载一个备份文件到下载目录）',()=>{
-      idbSet('backupMethod','download');
-      updateBackupUI();
-      st('已切换为自动下载备份方式');
-    });
-    return;
-  }
-  try{
-    const handle=await window.showDirectoryPicker({mode:'readwrite'});
-    _backupDirHandle=handle;
-    idbSet('backupDirHandle',handle);
-    idbSet('backupMethod','folder');
-    st('备份文件夹已设置：'+handle.name);
-    updateBackupUI();
-  }catch(e){
-    if(e.name!=='AbortError') st('设置失败：'+e.message,'err');
-  }
+function initBackup(){
+  // No OPFS init needed — IDB is already initialized
+  // Just record that backup system is ready
 }
 
 function getBackupData(){
@@ -5725,78 +5799,101 @@ function getBackupData(){
   };
 }
 
-async function writeBackup(){
-  const data=getBackupData();
-  const jsonStr=JSON.stringify(data);
-  // 1. Always write IDB snapshot (separate key, survives "清空数据")
-  //    — but skip if current data is empty (preserve last good backup)
-  if(data.items&&data.items.length>0){
-    idbSet('idbBackup',data);
+// Save IDB snapshot (separate key, survives "清空数据" within the app)
+// Also saves to backup history (capped at 5, 5-min gap for auto-saves)
+const MAX_BACKUP_HISTORY=5;
+let _lastHistorySaveTime=0;
+async function writeIDBBackup(forceHistory){
+  if(S.items&&S.items.length>0){
+    const data=getBackupData();
+    await idbSet('idbBackup',data);
+    idbSet('lastBackupTime',new Date().toISOString());
+    // Save to history (manual = always; auto = 5-min gap)
+    const now=Date.now();
+    if(forceHistory||now-_lastHistorySaveTime>5*60*1000){
+      _lastHistorySaveTime=now;
+      // Yield between two heavy structured-clone writes
+      await new Promise(r=>setTimeout(r,0));
+      await saveBackupHistory(data);
+    }
   }
-  // 2. Try file system backup
-  if(_backupDirHandle){
-    try{
-      const perm=await _backupDirHandle.queryPermission({mode:'readwrite'});
-      if(perm!=='granted'){
-        // Try requesting (works if triggered by user gesture; silently fails on beforeunload)
-        try{
-          const req=await _backupDirHandle.requestPermission({mode:'readwrite'});
-          if(req!=='granted'){idbSet('lastBackupTime',new Date().toISOString());return true}
-        }catch(e2){idbSet('lastBackupTime',new Date().toISOString());return true}
+}
+
+// Save a backup snapshot to history list (capped at MAX_BACKUP_HISTORY)
+// Full data stored in SEPARATE IDB key to avoid cloning all history entries.
+// Only lightweight metadata is kept in the history array.
+async function saveBackupHistory(data){
+  try{
+    const backupId='bk_'+Date.now();
+    // Estimate size from image strings (much faster than JSON.stringify)
+    let _sz=0;
+    if(data.items){
+      for(const item of data.items){
+        if(item.img)_sz+=item.img.length;
+        if(item.imgs)for(const img of item.imgs)_sz+=img.length;
       }
-      // Circular buffer: slot 0..4 → 文游素材备份_1..5.json
-      const counter=(await idbGet('backupCounter'))||0;
-      const slot=counter%MAX_BACKUPS;
-      const filename='\u6587\u6e38\u7d20\u6750\u5907\u4efd_'+(slot+1)+'.json';
-      const fileHandle=await _backupDirHandle.getFileHandle(filename,{create:true});
-      const writable=await fileHandle.createWritable();
-      await writable.write(jsonStr);
-      await writable.close();
-      idbSet('backupCounter',counter+1);
-      idbSet('lastBackupTime',new Date().toISOString());
-      return true;
-    }catch(e){
-      console.warn('File backup failed:',e);
-      idbSet('lastBackupTime',new Date().toISOString());
-      return false;
     }
-  }
-  // No folder set — IDB backup already done above
-  idbSet('lastBackupTime',new Date().toISOString());
-  return true;
+    // Store full data in its own IDB key (1 structured clone)
+    await idbSet(backupId,data);
+    // Yield to let browser paint (prevents continuous freeze)
+    await new Promise(r=>setTimeout(r,0));
+    // Store only lightweight metadata in history array
+    const history=(await idbGet('backupHistory'))||[];
+    history.unshift({
+      id:backupId,
+      timestamp:data.exportedAt||new Date().toISOString(),
+      itemCount:data.items?data.items.length:0,
+      shopCount:data.shops?data.shops.length:0,
+      personCount:data.persons?data.persons.length:0,
+      size:_sz
+    });
+    // Remove old backups if exceeding limit
+    if(history.length>MAX_BACKUP_HISTORY){
+      const removed=history.splice(MAX_BACKUP_HISTORY);
+      // Delete old backup data from IDB to free space
+      removed.forEach(old=>idbDel(old.id));
+    }
+    await idbSet('backupHistory',history);
+  }catch(e){console.warn('saveBackupHistory error:',e)}
 }
 
-function triggerBackupOnUnload(){
-  if(_backupTriggered) return;
-  _backupTriggered=true;
-  writeBackup(); // fire and forget; IDB write is reliable, file write is best-effort
-}
-
+// Manually trigger IDB backup (no download — only saves to browser + history)
 async function doBackupNow(){
-  st('正在备份...');
-  const ok=await writeBackup();
-  if(ok){
-    const method=await idbGet('backupMethod');
-    if(!_backupDirHandle&&method!=='download'){
-      // No folder and no download method — offer download
-      triggerDownloadBackup(JSON.stringify(getBackupData()));
-    }
+  st('备份中...');
+  // Defer heavy work so UI can paint the toast first
+  setTimeout(async()=>{
+    await writeIDBBackup(true);
     st('备份成功');
-    updateBackupUI();
-  }else{
-    st('备份失败，请检查文件夹权限','err');
+    await updateBackupUI();
+    // Refresh backup list if modal is open
+    const modal=document.getElementById('bkmo');
+    if(modal&&modal.style.display==='flex'){
+      renderBackupList();
+    }
+  },50);
+}
+
+// Download a backup .json file to the user's Downloads folder
+function downloadBackupFile(){
+  try{
+    const jsonStr=JSON.stringify(getBackupData());
+    const blob=new Blob([jsonStr],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='\u6587\u6e38\u7d20\u6750\u5907\u4efd_'+new Date().toISOString().replace(/[:.]/g,'-').slice(0,19)+'.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    idbSet('lastBackupTime',new Date().toISOString());
+    return true;
+  }catch(e){
+    console.warn('Download backup failed:',e);
+    return false;
   }
 }
 
-function triggerDownloadBackup(jsonStr){
-  const blob=new Blob([jsonStr],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='\u6587\u6e38\u7d20\u6750\u5907\u4efd_'+new Date().toISOString().split('T')[0]+'.json';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
-}
-
+// Restore from a backup file
 function restoreFromBackup(){
   const input=document.createElement('input');
   input.type='file';input.accept='.json';
@@ -5828,66 +5925,161 @@ function restoreFromBackup(){
 function openBackupModal(){
   document.getElementById('bkmo').style.display='flex';
   updateBackupUI();
+  renderBackupList();
 }
 function closeBackupModal(){
   document.getElementById('bkmo').style.display='none';
 }
 
 async function updateBackupUI(){
-  const method=await idbGet('backupMethod');
   const lastTime=await idbGet('lastBackupTime');
   const status=document.getElementById('bkFolderStatus');
-  const setBtn=document.getElementById('bkSetBtn');
-  const changeBtn=document.getElementById('bkChangeBtn');
   const infoSection=document.getElementById('bkInfoSection');
   const methodEl=document.getElementById('bkMethod');
-  if(_backupDirHandle){
-    let permStatus='';
-    try{
-      const perm=await _backupDirHandle.queryPermission({mode:'readwrite'});
-      if(perm!=='granted') permStatus=' <span style="color:var(--warning);font-size:11px">（需重新授权）</span>';
-    }catch(e){}
-    status.innerHTML='<span style="color:var(--success);font-weight:600">\u2713 已设置</span>：'+_backupDirHandle.name+permStatus;
-    setBtn.style.display='none';
-    changeBtn.style.display='';
-    infoSection.style.display='';
-    methodEl.textContent='本地文件夹（关闭页面时自动备份）';
-    methodEl.style.color='var(--success)';
-    // Count backup files
-    try{
-      let count=0;
-      for await(const entry of _backupDirHandle.values()){
-        if(entry.name.startsWith('\u6587\u6e38\u7d20\u6750\u5907\u4efd_')&&entry.name.endsWith('.json')) count++;
-      }
-      document.getElementById('bkFileCount').textContent=count;
-    }catch(e){
-      document.getElementById('bkFileCount').textContent='?';
-    }
-  }else if(method==='download'){
-    status.innerHTML='<span style="color:var(--warning);font-weight:600">自动下载</span>：关闭页面时自动下载备份文件';
-    setBtn.style.display='';changeBtn.style.display='none';
-    infoSection.style.display='';
-    methodEl.textContent='自动下载到下载文件夹';
-    methodEl.style.color='var(--warning)';
-    document.getElementById('bkFileCount').textContent='-';
-  }else{
-    status.innerHTML='<span style="color:var(--text2)">未设置备份文件夹</span>';
-    setBtn.style.display='';changeBtn.style.display='none';
-    infoSection.style.display='none';
-  }
+  status.innerHTML='<span style="color:var(--success);font-weight:600">\u2713 自动备份已启用</span>';
+  infoSection.style.display='';
+  methodEl.textContent='IndexedDB 自动保存';
+  methodEl.style.color='var(--success)';
   if(lastTime){
     document.getElementById('bkLastTime').textContent=new Date(lastTime).toLocaleString('zh-CN');
   }else{
     document.getElementById('bkLastTime').textContent='从未备份';
   }
+  document.getElementById('bkFileCount').textContent=S.items?S.items.length:0;
+}
+
+// ---- Backup History List ----
+let _backupHistoryCache=[];
+
+async function renderBackupList(){
+  const container=document.getElementById('bkListContainer');
+  const countEl=document.getElementById('bkListCount');
+  const actionsEl=document.getElementById('bkListActions');
+  try{
+    _backupHistoryCache=(await idbGet('backupHistory'))||[];
+  }catch(e){_backupHistoryCache=[]}
+  if(_backupHistoryCache.length===0){
+    container.innerHTML='<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px">暂无备份记录<br><span style="font-size:11px">系统会在操作时自动创建备份</span></div>';
+    countEl.textContent='';
+    actionsEl.style.display='none';
+    return;
+  }
+  actionsEl.style.display='flex';
+  countEl.textContent='（共 '+_backupHistoryCache.length+' 条）';
+  container.innerHTML=_backupHistoryCache.map((bk,i)=>{
+    const dt=new Date(bk.timestamp);
+    const timeStr=dt.toLocaleString('zh-CN');
+    const sz=bk.size||0;
+    const szStr=sz>1024*1024?(sz/1024/1024).toFixed(1)+'MB':sz>1024?(sz/1024).toFixed(0)+'KB':sz+'B';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px">'+
+      '<input type="checkbox" class="bk-check" value="'+i+'" style="flex-shrink:0">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-weight:600;color:var(--text1)">'+eh(timeStr)+'</div>'+
+        '<div style="color:var(--text2);font-size:11px">'+bk.itemCount+' 条素材 · '+bk.shopCount+' 店铺 · '+bk.personCount+' 个人 · '+szStr+'</div>'+
+      '</div>'+
+      '<button class="btn btn-sm" style="flex-shrink:0;padding:2px 8px;font-size:11px" onclick="downloadBackupById(\''+bk.id+'\')">下载</button>'+
+      '<button class="btn btn-sm" style="flex-shrink:0;padding:2px 8px;font-size:11px;color:var(--success)" onclick="restoreBackupById(\''+bk.id+'\')">恢复</button>'+
+    '</div>';
+  }).join('');
+}
+
+async function downloadBackupById(id){
+  const bk=_backupHistoryCache.find(b=>b.id===id);
+  if(!bk){st('备份记录不存在','err');return}
+  st('正在准备下载...');
+  const data=await idbGet(bk.id);
+  if(!data){st('备份数据已丢失','err');return}
+  try{
+    const jsonStr=JSON.stringify(data);
+    const blob=new Blob([jsonStr],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='文游素材备份_'+bk.timestamp.replace(/[:.]/g,'-').slice(0,19)+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    st('已下载备份：'+new Date(bk.timestamp).toLocaleString('zh-CN'));
+  }catch(e){st('下载失败','err')}
+}
+
+async function downloadSelectedBackups(){
+  const checks=document.querySelectorAll('.bk-check:checked');
+  if(checks.length===0){st('请先勾选要下载的备份','err');return}
+  const indices=Array.from(checks).map(c=>parseInt(c.value));
+  let idx=0;
+  st('正在准备下载 '+indices.length+' 个备份...');
+  async function next(){
+    if(idx>=indices.length){st('已下载 '+indices.length+' 个备份文件');return}
+    const bk=_backupHistoryCache[indices[idx]];
+    if(bk){
+      const data=await idbGet(bk.id);
+      if(data){
+        try{
+          const jsonStr=JSON.stringify(data);
+          const blob=new Blob([jsonStr],{type:'application/json'});
+          const a=document.createElement('a');
+          a.href=URL.createObjectURL(blob);
+          a.download='文游素材备份_'+bk.timestamp.replace(/[:.]/g,'-').slice(0,19)+'.json';
+          document.body.appendChild(a);a.click();document.body.removeChild(a);
+          setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+        }catch(e){}
+      }
+    }
+    idx++;
+    setTimeout(next,400);
+  }
+  next();
+}
+
+function downloadAllBackups(){
+  if(_backupHistoryCache.length===0){st('暂无备份记录','err');return}
+  const checks=document.querySelectorAll('.bk-check');
+  checks.forEach(c=>c.checked=true);
+  downloadSelectedBackups();
+}
+
+async function restoreBackupById(id){
+  const bk=_backupHistoryCache.find(b=>b.id===id);
+  if(!bk){st('备份记录不存在','err');return}
+  st('正在读取备份数据...');
+  const data=await idbGet(bk.id);
+  if(!data){st('备份数据已丢失','err');return}
+  confirm('确认从备份恢复？这将覆盖当前所有数据。\n\n备份时间：'+new Date(bk.timestamp).toLocaleString('zh-CN')+'\n素材数量：'+bk.itemCount+' 条',()=>{
+    if(data.shops)S.shops=data.shops;
+    if(data.persons)S.persons=data.persons;
+    if(data.items)S.items=data.items;
+    if(data.groups)S.groups=data.groups;
+    if(data.sourceGroup)S.sourceGroup=data.sourceGroup;
+    if(data.groupCollapsed)S.groupCollapsed=data.groupCollapsed;
+    migrateImages();
+    svNow();renderAll();autoExtractPersons();
+    st('已从备份恢复 '+(data.items?data.items.length:0)+' 条素材');
+    closeBackupModal();
+  });
+}
+
+function clearBackupHistory(){
+  if(_backupHistoryCache.length===0){st('暂无备份记录','err');return}
+  confirm('确认清空所有备份记录？('+_backupHistoryCache.length+' 条)\n此操作不影响当前数据。',()=>{
+    // Delete individual backup data keys from IDB
+    _backupHistoryCache.forEach(bk=>idbDel(bk.id));
+    idbSet('backupHistory',[]);
+    _backupHistoryCache=[];
+    renderBackupList();
+    st('已清空备份记录');
+  });
 }
 
 async function checkIDBBackupOnStartup(){
   // If primary data is empty, check for IDB backup snapshot
   if(S.items.length===0&&S.shops.length===0&&S.persons.length===0){
-    const backup=await idbGet('idbBackup');
+    let backup=await idbGet('idbBackup');
+    // Fallback: check backup history (fetch full data from individual key)
+    if(!backup||!backup.items||backup.items.length===0){
+      const history=(await idbGet('backupHistory'))||[];
+      if(history.length>0) backup=await idbGet(history[0].id);
+    }
     if(backup&&backup.items&&backup.items.length>0){
-      confirm('检测到 IndexedDB 中有备份数据（'+backup.items.length+' 条素材），是否恢复？',()=>{
+      confirm('检测到浏览器中有备份数据（'+backup.items.length+' 条素材），是否恢复？\n\n（这通常发生在浏览器数据被清除后，备份仍保留了上次的数据）',()=>{
         S.shops=backup.shops||[];
         S.persons=backup.persons||[];
         S.items=backup.items||[];
@@ -5896,7 +6088,7 @@ async function checkIDBBackupOnStartup(){
         if(backup.groupCollapsed)S.groupCollapsed=backup.groupCollapsed;
         migrateImages();
         svNow();renderAll();autoExtractPersons();
-        st('已从 IndexedDB 备份恢复 '+S.items.length+' 条素材');
+        st('已从备份恢复 '+S.items.length+' 条素材');
       });
     }
   }
@@ -5927,7 +6119,7 @@ idbInit().then(()=>{
     selectedGroup = state.selectedGroup !== undefined ? state.selectedGroup : 'all';
     S._filterCat=state.filterCat||'all'; S._filterUsed=state.filterUsed||'all';
     S._filterSort=state.filterSort||'time_desc'; S._filterQuery=state.filterQuery||'';
-    if(state.S_filter){ S_filter=state.S_filter; if(!S_filter.status) S_filter.status=[]; if(!S_filter.subCategory) S_filter.subCategory=[]; if(!S_filter.styleTag) S_filter.styleTag=[]; }
+    if(state.S_filter){ S_filter=state.S_filter; if(!S_filter.status) S_filter.status=[]; if(!S_filter.subCategory) S_filter.subCategory=[]; if(!S_filter.styleTag) S_filter.styleTag=[]; if(!S_filter.transferRule) S_filter.transferRule=[]; }
     // Migrate legacy styleTag filter values
     S_filter.styleTag=S_filter.styleTag.map(t=>(t==='古现'||t==='通用')?'古现/通用':t);
   }
@@ -5973,9 +6165,20 @@ function startApp(){
   renderAll(true);
   setInterval(updateDataBanner,30000);
 }
-// Flush pending saves when leaving the page
-window.addEventListener('beforeunload',()=>{svNow();triggerBackupOnUnload()});
-window.addEventListener('pagehide',()=>{svNow();triggerBackupOnUnload()});
+// ---- Page close: flush pending IDB writes only (no auto-download) ----
+// Only saves if there are unsaved changes (debounce pending).
+// If data was already saved, closing = zero IDB writes = zero lag.
+let _closeSaved=false;
+function handleCloseSave(){
+  if(_closeSaved) return;
+  _closeSaved=true;
+  // Only flush if there are pending unsaved changes
+  if(_svPendingItems||_svTimer){
+    svNow();
+  }
+}
+window.addEventListener('beforeunload',handleCloseSave);
+window.addEventListener('pagehide',handleCloseSave);
 </script>
 </body>
 </html>
