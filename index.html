@@ -1158,15 +1158,46 @@ if(typeof IntersectionObserver!=='undefined'){
     entries.forEach(en=>{
       if(!en.isIntersecting) return;
       const img=en.target;
+      if(img.getAttribute('data-loaded')==='1') return; // already filled synchronously
       const cid=img.getAttribute('data-cid');
       if(!cid) return;
       const it=itemById(cid);
       if(!it) return;
       const idx=parseInt(img.getAttribute('data-idx')||'0',10)||0;
       const imgs=getImages(it);
-      if(imgs[idx]&&img.src!==imgs[idx]) img.src=imgs[idx];
+      if(imgs[idx]&&img.src!==imgs[idx]){img.src=imgs[idx];img.setAttribute('data-loaded','1');}
     });
   },{rootMargin:'400px'});
+}
+// Synchronously fill real images for cards currently in the visible viewport.
+// This eliminates the white flash: after innerHTML rebuild + scroll restore, visible
+// cards would otherwise show gray placeholders for one frame until IntersectionObserver fires.
+function fillVisibleCardImages(){
+  if(!_cardImgIO) return; // no IO → images already have real src
+  const grid=document.getElementById('matGrid');
+  if(!grid) return;
+  const mc=document.querySelector('.main-content');
+  if(!mc) return;
+  const mcRect=mc.getBoundingClientRect();
+  const vTop=mcRect.top-200, vBot=mcRect.bottom+200;
+  const cards=grid.children;
+  for(let i=0;i<cards.length;i++){
+    const card=cards[i];
+    if(!card.classList||!card.classList.contains('mc')) continue;
+    const r=card.getBoundingClientRect();
+    if(r.bottom<=vTop||r.top>=vBot) continue; // off-screen
+    const imgs=card.querySelectorAll('img[data-cid]');
+    for(let j=0;j<imgs.length;j++){
+      const img=imgs[j];
+      if(img.getAttribute('data-loaded')==='1') continue;
+      const cid=img.getAttribute('data-cid');
+      const it=itemById(cid);
+      if(!it) continue;
+      const idx=parseInt(img.getAttribute('data-idx')||'0',10)||0;
+      const all=getImages(it);
+      if(all[idx]){img.src=all[idx];img.setAttribute('data-loaded','1');}
+    }
+  }
 }
 
 function getImages(i){ return (i.images&&i.images.length)?i.images:[]; }
@@ -2058,7 +2089,7 @@ function toggleStatsRow(){
 
 // ---- Material Cards ----
 let cardImgIdx={};
-function renderCard(i){
+function renderCard(i,eager){
   const catTags=getCatTags(i);
   const tr=getTRBadge(i);
   const usageTag=getUsageTag(i);
@@ -2108,10 +2139,11 @@ function renderCard(i){
   if(multiSelectMode) mcClasses.push('mc-multiselect');
   if(isMultiSel) mcClasses.push('mc-selected');
   const mcAttrs=moveMode?` draggable="true" ondragstart="onMoveDragStart(event,'${cid}')" ondragover="onMoveDragOver(event)" ondrop="onMoveDrop(event,'${cid}')" ondragend="onMoveDragEnd(event)" ondragleave="onMoveDragLeave(event)"`:'';
-  // Lazy image: placeholder in HTML, real base64 injected by IntersectionObserver when near viewport
-  const lazyImg=mainImg&&_cardImgIO
+  // Image strategy: eager=true → real base64 directly (no flash); eager=false → lazy placeholder
+  const useLazy=mainImg&&_cardImgIO&&!eager;
+  const lazyImg=useLazy
     ? `<img src="${_cardPh}" data-cid="${cid}" data-idx="0" alt="素材图" loading="lazy" decoding="async" id="mcimg_${cid}">`
-    : (mainImg?`<img src="${mainImg}" alt="素材图" loading="lazy" decoding="async" id="mcimg_${cid}">`:'');
+    : (mainImg?`<img src="${mainImg}" data-cid="${cid}" data-idx="0" data-loaded="1" alt="素材图" loading="lazy" decoding="async" id="mcimg_${cid}">`:'');
   return `<div class="${mcClasses.join(' ')}" data-id="${cid}"${mcAttrs} oncontextmenu="showCardCtx(event,'${cid}')">
     <div class="mci" onclick="onCardAreaClick(event,'${cid}')" id="mci_${cid}">
       ${lazyImg||`<div class="mpl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
@@ -2145,7 +2177,7 @@ function cardPrevImg(cid){
   if(!cardImgIdx[cid]) cardImgIdx[cid]=0;
   cardImgIdx[cid]=(cardImgIdx[cid]-1+imgs.length)%imgs.length;
   const img=document.getElementById('mcimg_'+cid);
-  if(img){img.setAttribute('data-idx',cardImgIdx[cid]);img.src=imgs[cardImgIdx[cid]];}
+  if(img){img.setAttribute('data-idx',cardImgIdx[cid]);img.src=imgs[cardImgIdx[cid]];img.setAttribute('data-loaded','1');}
 }
 function cardNextImg(cid){
   const i=itemById(cid); if(!i) return;
@@ -2153,7 +2185,7 @@ function cardNextImg(cid){
   if(!cardImgIdx[cid]) cardImgIdx[cid]=0;
   cardImgIdx[cid]=(cardImgIdx[cid]+1)%imgs.length;
   const img=document.getElementById('mcimg_'+cid);
-  if(img){img.setAttribute('data-idx',cardImgIdx[cid]);img.src=imgs[cardImgIdx[cid]];}
+  if(img){img.setAttribute('data-idx',cardImgIdx[cid]);img.src=imgs[cardImgIdx[cid]];img.setAttribute('data-loaded','1');}
 }
 
 // Cache for getItemsForView — invalidated on data/view changes
@@ -2313,15 +2345,17 @@ function renderMaterials(preserveScroll,resetTop){
     firstBatchCount=Math.min(items.length,Math.max(RENDER_BATCH_SIZE,Math.ceil((scrollY+vh+300)/estCardH)));
   }
 
-  // In move mode, render all items at once (drag reorder needs complete DOM)
+  // In move mode, render all items at once (drag reorder needs complete DOM).
+  // Move mode may have many cards → use lazy loading to keep innerHTML small.
   if(moveMode){
-    el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${items.map(i=>renderCard(i)).join('')}</div>`;
+    el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${items.map(i=>renderCard(i,false)).join('')}</div>`;
     observeCardImages();
   }else{
     const firstBatch=items.length<=firstBatchCount?items:items.slice(0,firstBatchCount);
-    el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${firstBatch.map(i=>renderCard(i)).join('')}</div>`;
+    // First batch uses eager=true → real images directly, no placeholder flash
+    el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${firstBatch.map(i=>renderCard(i,true)).join('')}</div>`;
     observeCardImages();
-    // Schedule remaining items in background batches
+    // Schedule remaining items in background batches (lazy loading)
     if(firstBatchCount<items.length){
       _renderBatchItems=items;
       _renderBatchOffset=firstBatchCount;
@@ -2342,6 +2376,9 @@ function renderMaterials(preserveScroll,resetTop){
   if(scrollY!==null&&scrollY!==undefined){
     restoreMainScroll(scrollY);
   }
+  // Synchronously fill real images for visible cards — prevents the one-frame placeholder
+  // flash that IntersectionObserver (async) would otherwise cause.
+  fillVisibleCardImages();
 }
 
 // Background batch renderer: appends cards in small chunks via setTimeout
@@ -2361,12 +2398,14 @@ function _renderNextBatch(){
   const chunk=_renderBatchItems.slice(_renderBatchOffset,end);
   if(chunk.length>0){
     const before=grid.children.length;
-    grid.insertAdjacentHTML('beforeend',chunk.map(i=>renderCard(i)).join(''));
+    grid.insertAdjacentHTML('beforeend',chunk.map(i=>renderCard(i,false)).join(''));
     if(_cardImgIO){
       for(let ci=before;ci<grid.children.length;ci++){
         const imgs=grid.children[ci].querySelectorAll('img[data-cid]');
         for(let j=0;j<imgs.length;j++) _cardImgIO.observe(imgs[j]);
       }
+      // Fill any newly visible images synchronously (user may have scrolled during batch gap)
+      fillVisibleCardImages();
     }
   }
   _renderBatchOffset=end;
