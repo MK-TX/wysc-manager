@@ -210,6 +210,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .mc.mc-selected .mci::before{content:'';position:absolute;top:6px;left:6px;width:22px;height:22px;background:var(--primary);border-radius:50%;z-index:3;display:flex;align-items:center;justify-content:center}
 .mc.mc-selected .mci::after{content:'✓';position:absolute;top:6px;left:6px;width:22px;height:22px;color:#fff;font-size:14px;font-weight:700;z-index:4;display:flex;align-items:center;justify-content:center}
 .mc.mc-multiselect .mci{cursor:pointer}
+.mc.mc-multiselect .mcb{cursor:pointer}
 .mc.mc-multiselect .mci:hover::before{content:'';position:absolute;top:6px;left:6px;width:22px;height:22px;border:2px solid var(--primary);border-radius:50%;z-index:3;background:rgba(255,255,255,.8)}
 /* In multi-select mode: no hover lift/flash animation, only instant blue frame + checkmark */
 .mc.mc-multiselect{transition:none}
@@ -2002,13 +2003,12 @@ function renderCard(i){
   if(multiSelectMode) mcClasses.push('mc-multiselect');
   if(isMultiSel) mcClasses.push('mc-selected');
   const mcAttrs=moveMode?` draggable="true" ondragstart="onMoveDragStart(event,'${cid}')" ondragover="onMoveDragOver(event)" ondrop="onMoveDrop(event,'${cid}')" ondragend="onMoveDragEnd(event)" ondragleave="onMoveDragLeave(event)"`:'';
-  const mciClick=multiSelectMode?`toggleMultiSelect('${cid}')`:`openLb('${cid}')`;
   return `<div class="${mcClasses.join(' ')}" data-id="${cid}"${mcAttrs} oncontextmenu="showCardCtx(event,'${cid}')">
-    <div class="mci" onclick="${mciClick}" id="mci_${cid}">
+    <div class="mci" onclick="onCardAreaClick(event,'${cid}')" id="mci_${cid}">
       ${mainImg?`<img src="${mainImg}" alt="素材图" loading="lazy" decoding="async" id="mcimg_${cid}">`:`<div class="mpl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
       ${imgNav}
     </div>
-    <div class="mcb">
+    <div class="mcb" onclick="onCardAreaClick(event,'${cid}')">
       ${showOwner?`<div class="mcsrc">${i.ownerType==='shop'?I.shop:I.user}${eh(i.ownerName)}</div>`:''}
       <div class="mc-name">${eh(i.name||'未命名')}${i.price?`<span class="mcp">¥${getEffPrice(i)}${i.sponsorCount&&i.sponsorCount>1?`<span style="font-size:11px;color:var(--text2);font-weight:400">(${i.price}×${i.sponsorCount})</span>`:''}</span>`:''}</div>
       <div class="mca">${artistPrefix}：${eh(i.artist||'未知')}</div>
@@ -2793,6 +2793,17 @@ function ensureMsBar(){
 function setCardSelected(id,on){
   const card=document.querySelector(`.mc[data-id="${id}"]`);
   if(card) card.classList.toggle('mc-selected',on);
+}
+// Unified click handler for card body: in multi-select mode ANY click (image / tags / info area)
+// selects the item. In normal mode only the image area opens the lightbox.
+function onCardAreaClick(e,cid){
+  if(multiSelectMode){
+    e.preventDefault();
+    e.stopPropagation();
+    toggleMultiSelect(cid);
+    return;
+  }
+  if(e.target.closest('.mci')) openLb(cid);
 }
 function enterMultiSelect(id){
   if(!multiSelectMode){
