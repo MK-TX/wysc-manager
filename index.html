@@ -105,30 +105,31 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .main-content::-webkit-scrollbar{width:6px}
 .main-content::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
 
-.ov-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.ovc{background:var(--card);border-radius:var(--radius);padding:14px 16px;border:1px solid var(--border)}
-.ovc .ovl{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:5px;margin-bottom:6px}
+.ov-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+.ovc{background:var(--card);border-radius:var(--radius);padding:10px 14px;border:1px solid var(--border)}
+.ovc .ovl{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:5px;margin-bottom:4px}
 .ovc .ovl svg{width:14px;height:14px}
-.ovc .ovv{font-size:22px;font-weight:700}
+.ovc .ovv{font-size:20px;font-weight:700}
 .ovv.warn{color:var(--warning)}.ovv.ok{color:var(--success)}.ovv.mny{color:var(--primary)}.ovv.mny2{color:#8b5cf6}
 
-.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-.scard{background:var(--card);border-radius:var(--radius);padding:14px 16px;border:1px solid var(--border)}
-.scard h3{font-size:14px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}
+.scard{background:var(--card);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border);max-height:calc(50vh - 95px);overflow:hidden;display:flex;flex-direction:column}
+.scard h3{font-size:14px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-shrink:0}
 .scard h3 svg{width:15px;height:15px;color:var(--primary)}
-.chart-wrap{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.scard>div{overflow-y:auto;flex:1;min-height:0}
+.chart-wrap{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .chart-wrap svg{flex-shrink:0}
-.legend{flex:1;min-width:100px;max-height:260px;overflow-y:auto}
+.legend{flex:1;min-width:100px;max-height:140px;overflow-y:auto}
 .litem{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:12px;cursor:pointer}
 .litem:hover{opacity:.7}
 .ldot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
 .llb{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lvl{font-weight:600}
-.bars{display:flex;flex-direction:column;gap:8px}
+.bars{display:flex;flex-direction:column;gap:6px}
 .brow{display:flex;align-items:center;gap:8px}
-.blb{width:90px;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
-.btk{flex:1;height:26px;background:#f1f5f9;border-radius:6px;overflow:hidden}
-.bfi{height:100%;background:var(--primary);border-radius:6px;display:flex;align-items:center;padding-left:8px;color:#fff;font-size:11px;font-weight:600;transition:width .3s;white-space:nowrap}
+.blb{width:80px;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.btk{flex:1;height:22px;background:#f1f5f9;border-radius:5px;overflow:hidden}
+.bfi{height:100%;background:var(--primary);border-radius:5px;display:flex;align-items:center;padding-left:7px;color:#fff;font-size:11px;font-weight:600;transition:width .3s;white-space:nowrap}
 .emp{font-size:13px;color:var(--text2);padding:12px 0;text-align:center}
 
 .mat-sec{background:var(--card);border-radius:var(--radius);padding:16px;border:1px solid var(--border)}
@@ -246,7 +247,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .xi-drop{width:100%;min-height:120px;border:2px dashed var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .15s;text-align:center;flex-direction:column;gap:6px;padding:20px}
 .xi-drop:hover{border-color:var(--primary)}
 .xi-drop svg{width:40px;height:40px;color:var(--text2)}
-.xi-preview{max-height:180px;overflow:auto;margin-top:12px;border:1px solid var(--border);border-radius:var(--radius-sm)}
+.xi-preview{max-height:300px;overflow:auto;margin-top:12px;border:1px solid var(--border);border-radius:var(--radius-sm)}
 .xi-preview table{width:100%;border-collapse:collapse;font-size:11px}
 .xi-preview th{background:#f8fafc;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);position:sticky;top:0;font-weight:600}
 .xi-preview td{padding:5px 8px;border-bottom:1px solid var(--border);white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis}
@@ -335,6 +336,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .filter-modal .fm-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 .filter-modal .fm-ft{display:flex;gap:8px;padding:12px 20px 16px;border-top:1px solid var(--border);justify-content:flex-end;flex-shrink:0}
 .filter-modal .fm-count{font-size:12px;color:var(--text2);margin-left:auto;align-self:center}
+.ex-select{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--card);color:var(--text);cursor:pointer}
+.ex-select:focus{outline:none;border-color:var(--primary)}
 </style>
 </head>
 <body>
@@ -342,7 +345,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
 <header class="app-header">
   <h1><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>文游素材管理</h1>
   <div class="header-actions">
-    <button class="btn" onclick="exportJSON()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>导出备份</span></button>
+    <button class="btn" onclick="exportJSONDirect()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>导出代码</span></button>
+    <button class="btn" onclick="openExportModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg><span>导出Excel</span></button>
     <button class="btn" onclick="document.getElementById('ji').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>导入恢复</span></button>
     <button class="btn" onclick="handleXImportClick()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13v-2h6v2"/><path d="M12 9v6"/></svg><span>Excel导入</span></button>
 
@@ -380,7 +384,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
         <div class="mat-fl">
           <button class="btn btn-sm" id="fcatBtn" onclick="openFilterModal()">筛选条件 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button>
           <div class="sort-tabs" id="sortTabs"></div>
-          <div class="swrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="q" placeholder="搜索素材/画师..." oninput="renderMaterials()"></div>
+          <div class="swrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="q" placeholder="搜索素材/画师..." oninput="debouncedRenderMaterials()"></div>
           <button class="btn btn-primary btn-sm" onclick="openItemModal()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>添加素材</button>
         </div>
       </div>
@@ -409,6 +413,52 @@ input,select,textarea{font-family:inherit;font-size:16px}
   </div>
 </div>
 
+<!-- Export Modal -->
+<div class="mo" id="exmo" style="display:none" onclick="if(event.target===this)closeExportModal()">
+  <div class="filter-modal">
+    <div class="mdh fm-hd"><h3>导出Excel</h3><button class="btn-icon" onclick="closeExportModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="fm-body">
+      <div class="fm-sec"><h4>排序方式</h4>
+        <select id="exSort" class="ex-select">
+          <option value="time_desc">时间 最新→最早</option>
+          <option value="time_asc">时间 最早→最新</option>
+          <option value="price_desc">价格 高→低</option>
+          <option value="price_asc">价格 低→高</option>
+          <option value="name_asc">名称 A→Z</option>
+          <option value="name_desc">名称 Z→A</option>
+          <option value="category_asc">分类 A→Z</option>
+          <option value="category_desc">分类 Z→A</option>
+        </select>
+      </div>
+      <div class="fm-sec"><h4>选择导出字段（点击切换选中/取消）</h4>
+        <div class="fm-chips" id="exBaseFields">
+          <span class="fm-chip active" data-field="ownerName">所属</span>
+          <span class="fm-chip active" data-field="name">素材名称</span>
+          <span class="fm-chip active" data-field="artist">画师/美工</span>
+          <span class="fm-chip active" data-field="price">价格</span>
+          <span class="fm-chip active" data-field="category">分类</span>
+          <span class="fm-chip active" data-field="purchaseSource">购买来源</span>
+          <span class="fm-chip active" data-field="tongjiaRule">通加规则</span>
+          <span class="fm-chip active" data-field="transferRule">转让规则</span>
+          <span class="fm-chip active" data-field="usageLimit">使用次数规则</span>
+          <span class="fm-chip active" data-field="saleType">售卖类型</span>
+          <span class="fm-chip active" data-field="purchaseDate">购买日期</span>
+          <span class="fm-chip active" data-field="note">备注</span>
+          <span class="fm-chip active" data-field="isUsed">使用状态</span>
+          <span class="fm-chip active" data-field="isTransfer">是否转让</span>
+          <span class="fm-chip active" data-field="isDoublePoints">双倍积分</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">蓝色=已选中，灰色=未选中。导出列顺序：所属 | 素材名称 | 画师/美工 | 价格 | 分类 | 购买来源 | 通加规则 | 转让规则 | 使用次数规则 | 售卖类型 | 购买日期 | 备注 | 使用状态 | 是否转让 | 双倍积分</div>
+      </div>
+    </div>
+    <div class="fm-ft">
+      <span class="fm-count" id="exCount"></span>
+      <button class="btn btn-sm" onclick="closeExportModal()">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="doExport()">导出Excel</button>
+    </div>
+  </div>
+</div>
+
 <!-- Item Modal -->
 <div class="mo" id="imo" style="display:none">
   <div class="md">
@@ -426,7 +476,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
       </div>
 
       <!-- 所属 -->
-      <div class="fg"><label>所属 <span class="rq">*</span></label>
+      <div class="fg"><label>所属</label>
         <div class="rg">
           <label><input type="radio" name="fot" value="shop" onchange="onOwnerType()"> 店铺</label>
           <label><input type="radio" name="fot" value="person" onchange="onOwnerType()"> 个人</label>
@@ -436,7 +486,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
       </div>
 
       <!-- 素材名称 -->
-      <div class="fg"><label>素材名称 <span class="rq">*</span></label><input type="text" id="fn" placeholder="填写立绘/素材名字"></div>
+      <div class="fg"><label>素材名称</label><input type="text" id="fn" placeholder="填写立绘/素材名字"></div>
 
       <!-- 画师/美工 -->
       <div class="fg"><label>画师/美工/来源名字</label><input type="text" id="fa" placeholder="多人用逗号/顿号/x/X/+隔开" onblur="autoFillRules()"></div>
@@ -453,7 +503,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
       </div>
 
       <!-- 属性分类 -->
-      <div class="fg"><label>属性分类 <span class="rq">*</span></label>
+      <div class="fg"><label>属性分类</label>
         <div class="cat-grid" id="fc"></div>
         <div id="catsub" style="display:none;margin-top:6px"><label style="font-size:12px;color:var(--text2);margin-bottom:4px;display:block">选择子类</label><div class="cat-grid" id="fcsubGrid"></div></div>
         <input type="text" id="fccs" placeholder="自定义子分类" style="display:none;margin-top:6px">
@@ -463,7 +513,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 
       <!-- 加装限制 -->
       <div class="fg" id="jzg" style="display:none">
-        <label>加装限制 <span class="rq">*</span></label>
+        <label>加装限制</label>
         <div class="rg">
           <label><input type="checkbox" name="jzr" value="无限制" onchange="onJz()"> 无限制</label>
           <label><input type="checkbox" name="jzr" value="店专属" onchange="onJz()"> xx店专属加装</label>
@@ -475,8 +525,21 @@ input,select,textarea{font-family:inherit;font-size:16px}
         <input type="text" id="fjzcustom" placeholder="自定义限制说明" style="display:none;margin-top:6px">
       </div>
 
+      <!-- 选择标签 -->
+      <div class="fg" id="tagSec" style="display:none">
+        <label>选择标签</label>
+        <div class="rg">
+          <label><input type="radio" name="ftag" value="通用" onchange="onTagCheck()"> 通用</label>
+          <label><input type="radio" name="ftag" value="古代" onchange="onTagCheck()"> 古代</label>
+          <label><input type="radio" name="ftag" value="现代" onchange="onTagCheck()"> 现代</label>
+          <label><input type="radio" name="ftag" value="架空" onchange="onTagCheck()"> 架空</label>
+          <label><input type="radio" name="ftag" value="其他" onchange="onTagCheck()"> 其他</label>
+        </div>
+        <input type="text" id="ftagc" placeholder="自定义标签" style="display:none;margin-top:6px">
+      </div>
+
       <!-- 购买来源 -->
-      <div class="fg"><label>购买来源 <span class="rq">*</span></label>
+      <div class="fg"><label>购买来源</label>
         <div class="rg" id="psr">
           <label><input type="radio" name="ps" value="购入" onchange="onPS()"> 购入</label>
           <label><input type="radio" name="ps" value="赞助" onchange="onPS()"> 赞助</label>
@@ -509,7 +572,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 
       <!-- 通加规则 -->
       <div class="fg" id="tjg" style="display:none">
-        <label>通加规则 <span class="rq">*</span></label>
+        <label>通加规则</label>
         <div class="rg">
           <label><input type="radio" name="tj" value="不可穿通加" onchange="onTj()"> 不可穿通加</label>
           <label><input type="radio" name="tj" value="可穿通加" onchange="onTj()"> 可穿通加</label>
@@ -555,7 +618,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
       </div>
 
       <!-- 是否已转让 -->
-      <div class="fg" id="ftg" style="display:none"><label>是否已转让</label>
+      <div class="fg" id="ftg"><label>是否已转让</label>
         <div class="rg">
           <label><input type="radio" name="ftransfer" value="是" onchange="onTransfer()"> 是</label>
           <label><input type="radio" name="ftransfer" value="否" checked onchange="onTransfer()"> 否</label>
@@ -623,15 +686,16 @@ input,select,textarea{font-family:inherit;font-size:16px}
       <div class="xi-drop" id="xidrop" onclick="document.getElementById('xii').click()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
         <div>点击上传 .xlsx / .csv 文件，或拖拽到此处</div>
-        <div style="font-size:11px;color:var(--text2)">支持 Excel 工作簿（含图片）和 CSV，导入时自动创建不存在的店铺/个人</div>
+        <div style="font-size:11px;color:var(--text2)">支持多工作表 Excel 工作簿和 CSV，自动识别店铺名、价格列和数据格式</div>
       </div>
       <input type="file" id="xii" accept=".xlsx,.csv,.tsv,.txt" style="display:none" onchange="handleXFile(event)">
       <div id="ximap" style="display:none">
-        <div style="font-size:13px;font-weight:600;margin-bottom:8px">列映射</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">列映射（手动模式）</div>
         <div class="xi-map" id="xicols"></div>
         <div style="font-size:13px;font-weight:600;margin:12px 0 8px">预览（前5行）</div>
-        <div class="xi-preview" id="xiprev"></div>
+        <div class="xi-preview" id="xiprev2"></div>
       </div>
+      <div class="xi-preview" id="xiprev" style="display:none"></div>
     </div>
     <div class="mdf" id="ximdf" style="display:none"><button class="btn" onclick="closeExcelImport()">取消</button><button class="btn btn-primary" onclick="runExcelImport()">确认导入</button></div>
   </div>
@@ -715,6 +779,8 @@ const PREFIX='wb_wymaterial_';
 
 const MAIN_CATS=['立绘','卤蛋','加装','CG','美工','Q版','素材','特效','场景','音乐','黑科技','其他'];
 const SUBS={ '美工':['打光','空镜','封面','表白卡','UI','挂件','套图','宣传模板','字素','其他'], 'Q版':['绑定Q','养成Q','动物Q','表情包','其他'], '音乐':['BGM','主题曲','其他'] };
+const TAG_CATS=new Set(['立绘','卤蛋','加装','CG','美工','Q版','素材','特效','场景','音乐']);
+const TAG_SUB_CATS=new Set(['加装','美工','Q版','音乐']);
 const CCOL={'立绘':'#6366f1','卤蛋':'#f97316','加装':'#db2777','CG':'#8b5cf6','美工':'#f59e0b','Q版':'#22c55e','素材':'#64748b','特效':'#7c3aed','场景':'#0ea5e9','音乐':'#d946ef','黑科技':'#1e293b','其他':'#94a3b8'};
 
 // Preset shop name list — only names in this set are recognized as shops during import
@@ -895,6 +961,7 @@ function rafRenderAll(){
   if(_rafId) return; // Already scheduled
   _rafId=requestAnimationFrame(()=>{
     _rafId=null;
+    invalidateViewCache();
     renderSidebar();renderOV();renderDonut();renderBars();renderMaterials();updateDataBanner();
     const fc=document.getElementById('fc');
     fc.innerHTML='<option value="">请选择</option>'+MAIN_CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
@@ -971,6 +1038,7 @@ function getTjD(i){
 }
 function getEffPrice(i){return (i.price||0)*(i.sponsorCount||1);}
 function splitArtists(str){return (str||'').split(/[,，、xX+]/).map(s=>s.trim()).filter(Boolean)}
+function stripBrackets(s){return (s||'').replace(/[【】\[\]]/g,'').trim()}
 function getPSD(i){
   const m={'微店':'微店购入','淘宝':'淘宝购入','私戳':'私戳购入','填表':'填表购入'};
   if(i.purchaseSource==='购入') return m[i.purchaseSub]||(i.purchaseSub||'购入');
@@ -1070,6 +1138,7 @@ function switchSidebarTab(type){
   S.selType=type; S.selName='all'; selectedGroup='all';
   document.getElementById('stab-shop').classList.toggle('active',type==='shop');
   document.getElementById('stab-person').classList.toggle('active',type==='person');
+  invalidateViewCache();
   sv(); renderSidebar(); renderOV(); renderMaterials(); renderDonut(); renderBars();
 }
 function getSidebarList(){
@@ -1115,7 +1184,7 @@ function closeSourceModal(){
   document.getElementById('srcAddType').style.display='';
 }
 function submitSourceModal(){
-  const rawVal=document.getElementById('smi').value.trim();
+  const rawVal=stripBrackets(document.getElementById('smi').value.trim());
   if(!rawVal){st('请输入名称');return}
   if(SrcModalMode==='add'){
     const sat=document.querySelector('input[name="sat"]:checked')?.value;
@@ -1199,11 +1268,13 @@ function deleteSidebarSource(name){
 function selectGroup(groupName){
   multiSelectSources.clear();
   selectedGroup=groupName; S.selName='all';
+  invalidateViewCache();
   sv(); renderSidebar(); renderOV(); renderMaterials(); renderDonut(); renderBars();
 }
 function selectUngrouped(){
   multiSelectSources.clear();
   selectedGroup='all'; S.selName='all';
+  invalidateViewCache();
   sv(); renderSidebar(); renderOV(); renderMaterials(); renderDonut(); renderBars();
 }
 
@@ -1224,6 +1295,7 @@ function selectSource(e,name){
     renderSidebar();
   }
   S.selName=name; selectedGroup=null;
+  invalidateViewCache();
   sv(); renderSidebar(); renderOV(); renderMaterials(); renderDonut(); renderBars();
 }
 function sdragStart(e,idx,name){
@@ -1460,6 +1532,8 @@ function showCtxMenu(e,name){
     // Move to group
     const glist=S.groups[S.selType];
     h+=`<div class="ctx-item" onclick="ctxMoveToGroup()">${I.move}移动到分组${curGroup?`（当前：${curGroup}）`:''}</div>`;
+    const otherLabel=S.selType==='shop'?'个人':'店铺';
+    h+=`<div class="ctx-item" onclick="ctxMoveToOther()">${I.move}移动到${otherLabel}</div>`;
     h+=`<div class="ctx-divider"></div>`;
   }
   h+=`<div class="ctx-item danger" onclick="ctxDelete()">${I.trash}删除</div>`;
@@ -1483,6 +1557,28 @@ function ctxRename(){
 function ctxMoveToGroup(){
   if(!ctxTarget||ctxTarget==='all'){hideCtxMenu();return}
   const t=ctxTarget; hideCtxMenu(); openGroupModal(t);
+}
+function ctxMoveToOther(){
+  if(!ctxTarget||ctxTarget==='all'){hideCtxMenu();return}
+  const t=ctxTarget; hideCtxMenu();
+  const fromType=S.selType;
+  const toType=fromType==='shop'?'person':'shop';
+  const fromList=fromType==='shop'?S.shops:S.persons;
+  const toList=toType==='shop'?S.shops:S.persons;
+  if(toList.includes(t)){st('目标列表中已存在「'+t+'」');return}
+  const idx=fromList.indexOf(t);
+  if(idx>=0) fromList.splice(idx,1);
+  toList.push(t);
+  S.items.forEach(i=>{
+    if(i.ownerType===fromType&&i.ownerName===t){i.ownerType=toType;}
+  });
+  const ok=gref(fromType,t),nk=gref(toType,t);
+  if(S.sourceGroup[ok]){delete S.sourceGroup[ok]}
+  const opk=fromType+'_'+t,npk=toType+'_'+t;
+  if(S.pinned[opk]){S.pinned[npk]=true;delete S.pinned[opk]}
+  // Stay on current view — if the moved item was selected, go to "all"
+  if(S.selName===t){S.selName='';}
+  sv();renderAll();st('已移动到'+(toType==='shop'?'店铺':'个人'));
 }
 function ctxDelete(){
   if(!ctxTarget){hideCtxMenu();return}
@@ -1638,11 +1734,11 @@ function renderDonut(){
   const data=Object.entries(cats).map(([k,v])=>({label:k,value:v,color:CCOL[k]||'#94a3b8'}));
   if(data.length===0){el.innerHTML='<div class="emp">暂无数据</div>';return}
   data.sort((a,b)=>b.value-a.value);
-  const total=data.reduce((s,d)=>s+d.value,0),r=60,cx=80,cy=80,circ=2*Math.PI*r;
+  const total=data.reduce((s,d)=>s+d.value,0),r=48,cx=65,cy=65,circ=2*Math.PI*r;
   let off=0;
-  const segs=data.map(d=>{const len=(d.value/total)*circ;const s=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="22" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"/>`;off+=len;return s}).join('');
+  const segs=data.map(d=>{const len=(d.value/total)*circ;const s=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="20" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"/>`;off+=len;return s}).join('');
   const leg=data.map(d=>`<div class="litem" onclick="S_filter.category=['${d.label}'];applyFilter()"><span class="ldot" style="background:${d.color}"></span><span class="llb">${eh(d.label)}</span><span class="lvl">${d.value}</span></div>`).join('');
-  el.innerHTML=`<div class="chart-wrap"><svg width="160" height="160" viewBox="0 0 160 160">${segs}<text x="${cx}" y="${cy-5}" text-anchor="middle" font-size="22" font-weight="700" fill="#1e293b">${total}</text><text x="${cx}" y="${cy+15}" text-anchor="middle" font-size="11" fill="#64748b">素材总数</text></svg><div class="legend">${leg}</div></div>`;
+  el.innerHTML=`<div class="chart-wrap"><svg width="130" height="130" viewBox="0 0 130 130">${segs}<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="20" font-weight="700" fill="#1e293b">${total}</text><text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="10" fill="#64748b">素材总数</text></svg><div class="legend">${leg}</div></div>`;
 }
 
 function renderBars(){
@@ -1768,7 +1864,15 @@ function cardNextImg(cid){
   document.getElementById('mcimg_'+cid).src=imgs[cardImgIdx[cid]];
 }
 
+// Cache for getItemsForView — invalidated on data/view changes
+let _viewCache={key:null,items:null};
+function invalidateViewCache(){_viewCache={key:null,items:null};}
+
 function getItemsForView(){
+  // Build cache key from current view state
+  const cacheKey=(S.selType||'')+'|'+(selectedGroup===null?'null':selectedGroup)+'|'+(S.selName||'');
+  if(_viewCache.key===cacheKey&&_viewCache.items)return _viewCache.items;
+  
   let items=S.items.slice();
   if(selectedGroup!==null&&selectedGroup!=='all'){
     // A specific group is selected
@@ -1805,6 +1909,7 @@ function getItemsForView(){
       );
     }
   }
+  _viewCache={key:cacheKey,items:items};
   return items;
 }
 
@@ -1846,8 +1951,20 @@ function renderSortTabs(){
   }).join('');
 }
 
+// Debounced search to avoid excessive re-renders on each keystroke
+let _searchTimer=null;
+function debouncedRenderMaterials(){
+  clearTimeout(_searchTimer);
+  _searchTimer=setTimeout(()=>renderMaterials(),180);
+}
+
+// Chunked rendering: render first batch immediately, rest in background
+let _renderBatchTimer=null;
+let _renderBatchItems=null;
+const RENDER_BATCH_SIZE=24;
+
 function renderMaterials(){
-  let items=getItemsForView();
+  let items=getItemsForView().slice(); // Copy to avoid mutating cache
   const fsort=S._filterSort||'time_desc';
   const q=(document.getElementById('q').value||'').toLowerCase();
   // Persist filter state (lightweight, no full IDB save)
@@ -1876,7 +1993,22 @@ function renderMaterials(){
   const el=document.getElementById('mg');
   if(items.length===0){el.innerHTML='<div class="es"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>暂无素材</p><button class="btn btn-primary btn-sm" onclick="openItemModal()">添加第一份素材</button></div>';return}
   const moveBarHtml=moveMode?`<div class="move-bar"><div class="mb-info"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>拖拽卡片调整顺序</div><div class="mb-btns"><button class="mb-btn mb-cancel" onclick="cancelMoveMode()">取消</button><button class="mb-btn mb-save" onclick="saveMoveMode()">保存</button></div></div>`:'';
-  el.innerHTML=`${moveBarHtml}<div class="mat-grid">${items.map(i=>renderCard(i)).join('')}</div>`;
+  // Cancel any pending background batch render
+  if(_renderBatchTimer){clearTimeout(_renderBatchTimer);_renderBatchTimer=null;}
+  _renderBatchItems=null;
+
+  // In move mode, render all items at once (drag reorder needs complete DOM)
+  if(moveMode||items.length<=RENDER_BATCH_SIZE){
+    el.innerHTML=`${moveBarHtml}<div class="mat-grid" id="matGrid">${items.map(i=>renderCard(i)).join('')}</div>`;
+  }else{
+    // Render first batch immediately for fast initial paint
+    const firstBatch=items.slice(0,RENDER_BATCH_SIZE);
+    el.innerHTML=`${moveBarHtml}<div class="mat-grid" id="matGrid">${firstBatch.map(i=>renderCard(i)).join('')}</div>`;
+    // Schedule remaining items in background batches
+    _renderBatchItems=items;
+    _renderBatchOffset=RENDER_BATCH_SIZE;
+    _renderNextBatch();
+  }
 
   const ttEl=document.getElementById('mttl'),subEl=document.getElementById('msub');
   let title;
@@ -1885,6 +2017,25 @@ function renderMaterials(){
   else title=S.selName;
   ttEl.textContent=title; subEl.textContent=items.length+' 条';
   toggleStatsRow();
+}
+
+// Background batch renderer: appends cards in small chunks via setTimeout
+let _renderBatchOffset=0;
+function _renderNextBatch(){
+  if(!_renderBatchItems)return;
+  const grid=document.getElementById('matGrid');
+  if(!grid){_renderBatchItems=null;return;}
+  const end=Math.min(_renderBatchOffset+RENDER_BATCH_SIZE,_renderBatchItems.length);
+  const chunk=_renderBatchItems.slice(_renderBatchOffset,end);
+  if(chunk.length>0){
+    grid.insertAdjacentHTML('beforeend',chunk.map(i=>renderCard(i)).join(''));
+  }
+  _renderBatchOffset=end;
+  if(_renderBatchOffset<_renderBatchItems.length){
+    _renderBatchTimer=setTimeout(_renderNextBatch,0);
+  }else{
+    _renderBatchItems=null;_renderBatchTimer=null;
+  }
 }
 
 // ---- Filter Modal (Advanced Filter) ----
@@ -2026,6 +2177,7 @@ function updateDataBanner(){
   }
 }
 function renderAll(nokf){
+  invalidateViewCache();
   renderSidebar();renderOV();renderDonut();renderBars();renderMaterials();updateDataBanner();
   const fc=document.getElementById('fc');
   fc.innerHTML='<option value="">请选择</option>'+MAIN_CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
@@ -2076,8 +2228,10 @@ function openItemModal(){
   onOwnerType();
   if(S.selName!=='all'){document.getElementById('fowner').value=S.selName}
   document.querySelector('input[name="ftransfer"][value="否"]').checked=true;
-  document.querySelector('input[name="ful"][value="limited"]').checked=true;
-  document.querySelector('input[name="fulst"][value="total"]').checked=true;
+  const fulDefault=document.querySelector('input[name="ful"][value="limited"]');
+  if(fulDefault){fulDefault.checked=true;markAuto(fulDefault);}
+  const fulstDefault=document.querySelector('input[name="fulst"][value="total"]');
+  if(fulstDefault){fulstDefault.checked=true;markAuto(fulstDefault);}
   onUsageLimit();onUsageLimitSub();
   const psr=document.querySelector('input[name="ps"][value="购入"]'); if(psr){psr.checked=true;onPS()}
   document.getElementById('imo').style.display='flex';
@@ -2103,17 +2257,21 @@ function openEditItem(id){
   renderCatGrid(getCats(i));onCatCheck();
   const editCats=getCats(i);
   // Restore sub-category checkboxes
-  if(i.subCategory){
-    const subList=(i.subCategory||'').split(',');
-    setTimeout(()=>{
-      subList.forEach(s=>{
-        const cb=document.querySelector(`input[name="fcsk"][value="${s.trim()}"]`);
-        if(cb){cb.checked=true;onCatSubCheck()}
-      });
-    },50);
+  const subList=i.subCategory?(i.subCategory||'').split(','):[];
+  setTimeout(()=>{
+    subList.forEach(s=>{
+      const cb=document.querySelector(`input[name="fcsk"][value="${s.trim()}"]`);
+      if(cb){cb.checked=true;onCatSubCheck()}
+    });
     if(subList.includes('其他')){document.getElementById('fccs').style.display='';document.getElementById('fccs').value=i.customSubCategory||''}
     if(editCats.includes('Q版')&&subList.includes('绑定Q')){document.getElementById('fbl').style.display='';document.getElementById('fbl').value=i.boundLihui||''}
-  }
+    // Restore tag after all sub-items and restrictions are set
+    if(i.styleTag){
+      const tr=document.querySelector(`input[name="ftag"][value="${i.styleTag}"]`);
+      if(tr){tr.checked=true;onTagCheck()}
+      if(i.styleTag==='其他'&&i.customTag){document.getElementById('ftagc').value=i.customTag}
+    }
+  },50);
   if(editCats.includes('其他')){document.getElementById('fcc').style.display='';document.getElementById('fcc').value=i.customCategory||''}
   if(editCats.includes('加装')&&i.jzRestrict&&i.jzRestrict.length){
     i.jzRestrict.forEach(v=>{const cb=document.querySelector(`input[name="jzr"][value="${v}"]`);if(cb)cb.checked=true});
@@ -2226,29 +2384,45 @@ function clearItemForm(){
   document.getElementById('frvipnote').style.display='none';document.getElementById('frvipnote').value='';
   document.getElementById('frothernote').style.display='none';document.getElementById('frothernote').value='';
   document.getElementById('frSub').style.display='none';document.getElementById('frSubQuit').style.display='none';document.getElementById('frSubNoQuit').style.display='none';
-  document.getElementById('ftg').style.display='none';
   document.querySelectorAll('input[name="fst"]').forEach(r=>r.checked=false);
   document.getElementById('fa').value='';document.getElementById('fp').value='';document.getElementById('fpd').value='';
   document.getElementById('fdp').checked=false;document.getElementById('fct').checked=true;
   document.getElementById('fuc').value='0';document.getElementById('fucucheck').checked=false;
   document.getElementById('fucu').style.display='none';document.getElementById('fnt').value='';
+  document.querySelectorAll('input[name="ful"]').forEach(r=>{r.checked=false;r.removeAttribute('data-auto')});
+  document.querySelectorAll('input[name="fulst"]').forEach(r=>{r.checked=false;r.removeAttribute('data-auto')});
+  document.getElementById('fuls').style.display='none';document.getElementById('fucg').style.display='none';document.getElementById('fucu').style.display='none';
   document.getElementById('fuls-total').style.display='';document.getElementById('fuls-ls').style.display='none';
   document.getElementById('fuls-lu').style.display='none';document.getElementById('fuls-oth').style.display='none';
+  document.getElementById('fult').value='';document.getElementById('fult').removeAttribute('data-auto');
+  document.getElementById('fulLead').value='';document.getElementById('fulLead').removeAttribute('data-auto');
+  document.getElementById('fulLead2').value='';document.getElementById('fulLead2').removeAttribute('data-auto');
+  document.getElementById('fulSupp').value='';document.getElementById('fulSupp').removeAttribute('data-auto');
+  document.getElementById('fulOther').value='';document.getElementById('fulOther').removeAttribute('data-auto');
   S.payImgData=[];
   renderPayImgGrid();
   document.getElementById('payImgi').value='';
   document.getElementById('fpayNote').value='';
+  document.getElementById('tagSec').style.display='none';
+  document.querySelectorAll('input[name="ftag"]').forEach(r=>r.checked=false);
+  document.getElementById('ftagc').style.display='none';document.getElementById('ftagc').value='';
   onTransfer();
 }
 
 function saveItem(){
-  const name=document.getElementById('fn').value.trim();if(!name){st('请输入素材名称');return}
-  const cats=getCheckedCats();const cat=cats.join(',');if(cats.length===0){st('请选择属性分类');return}
+  const name=document.getElementById('fn').value.trim();
+  const cats=getCheckedCats();const cat=cats.join(',');
   const ot=document.querySelector('input[name="fot"]:checked')?.value||'shop';
   let on=document.getElementById('fowner').value;
-  if(on==='__new__'){on=document.getElementById('fownerNew').value.trim();if(!on){st('请输入名称');return}}
-  if(!on){st('请选择所属');return}
-  if(on==='__new__'||!((ot==='shop'?S.shops:S.persons).includes(on))){
+  if(on==='__new__'){on=stripBrackets(document.getElementById('fownerNew').value.trim())}
+  else if(on&&on!=='__new__'){on=stripBrackets(on)}
+  const artistVal=stripBrackets(document.getElementById('fa').value.trim());
+  const priceVal=document.getElementById('fp').value;
+  const noteVal=document.getElementById('fnt').value.trim();
+  const hasPS=!!document.querySelector('input[name="ps"]:checked');
+  // All fields optional, but at least one must be filled
+  if(!name&&!cat&&!on&&!artistVal&&!priceVal&&!noteVal&&!hasPS){st('请至少填写一项内容');return}
+  if(on&&on!=='__new__'&&!((ot==='shop'?S.shops:S.persons).includes(on))){
     if(ot==='shop') S.shops.push(on); else S.persons.push(on);
   }
   const ps=document.querySelector('input[name="ps"]:checked')?.value||'';
@@ -2290,9 +2464,12 @@ function saveItem(){
   const isSponsored=ps==='赞助'&&pp==='被赞助';
   const ult=document.querySelector('input[name="ful"]:checked')?.value||'limited';
   const ulst=document.querySelector('input[name="fulst"]:checked')?.value||'total';
+  const styleTag=document.querySelector('input[name="ftag"]:checked')?.value||'';
+  const customTag=styleTag==='其他'?document.getElementById('ftagc').value.trim():'';
   const item={
     id:S.editItem?S.editItem.id:gid(),ownerType:ot,ownerName:on,name,images:[...S.imgData],
     category:cat,subCategory:subCat,customSubCategory:csub,customCategory:cCat,boundLihui:bnd,
+    styleTag:styleTag,customTag:customTag,
     jzRestrict:jzRestrict,jzShop:jzShop,jzLihui:jzLihui,jzCustom:jzCustom,
     purchaseSource:ps,purchaseSub:pp,customPurchaseSource:ps==='其他'?document.getElementById('fpsc').value.trim():'',
     sponsorId:ps==='赞助'?document.getElementById('fsponsor').value.trim():'',isSponsored:ps==='赞助'&&pp==='被赞助',
@@ -2303,7 +2480,7 @@ function saveItem(){
     tongjiaRule:tr,tongjiaLimit:tjl,tongjiaType:tjt,tongjiaScope:tjs,
     transferRule:tRule,transferSub:transferSub,frVipNote:frVipNote,frOtherNote:frOtherNote,
     saleType:saleType,
-    artist:document.getElementById('fa').value.trim(),
+    artist:artistVal,
     price:parseFloat(document.getElementById('fp').value)||0,
     purchaseDate:document.getElementById('fpd').value,
     isDoublePoints:document.getElementById('fdp').checked,
@@ -2464,22 +2641,19 @@ function onTransferRule(){
   const sub=document.getElementById('frSub');
   const quit=document.getElementById('frSubQuit');
   const noquit=document.getElementById('frSubNoQuit');
-  const ftg=document.getElementById('ftg');
   if(v==='退圈可转'){
     sub.style.display='';quit.style.display='';noquit.style.display='none';
-    ftg.style.display='';
     const ps=document.querySelector('input[name="frsq"][value="私转"]');
     if(ps&&!document.querySelector('input[name="frsq"]:checked'))ps.checked=true;
   }else if(v==='不退圈可转'){
     sub.style.display='';quit.style.display='none';noquit.style.display='';onFrNoQuit();
-    ftg.style.display='';
   }else{
     sub.style.display='none';quit.style.display='none';noquit.style.display='none';
-    ftg.style.display='none';
-    // Reset transfer radio to 否 when hiding
+    // Reset transfer radio to 否 when transfer rule is 不可转
     const nr=document.querySelector('input[name="ftransfer"][value="否"]');
     if(nr)nr.checked=true;
     document.getElementById('ftransferid').style.display='none';
+    onTransfer();
   }
 }
 function onFrNoQuit(){
@@ -2637,12 +2811,46 @@ function onCatCheck(){
   const first=cats[0]||'';
   const sourceCats=['美工','特效','音乐','黑科技'];
   document.querySelector('#fa').previousElementSibling.textContent=sourceCats.includes(first)?'画师/美工/来源名字':'画师/美工名字';
+  updateTagVisibility();
+}
+function updateTagVisibility(){
+  const cats=getCheckedCats();
+  const tagSec=document.getElementById('tagSec');
+  let showTag=false;
+  // Categories without sub-items: show tag immediately
+  cats.forEach(c=>{ if(TAG_CATS.has(c)&&!TAG_SUB_CATS.has(c)) showTag=true; });
+  // 加装: need at least one jzr checked
+  if(cats.includes('加装')){
+    if(document.querySelectorAll('input[name="jzr"]:checked').length>0) showTag=true;
+  }
+  // 美工/Q版/音乐: need at least one fcsk checked
+  if(cats.some(c=>['美工','Q版','音乐'].includes(c))){
+    if(document.querySelectorAll('input[name="fcsk"]:checked').length>0) showTag=true;
+  }
+  if(showTag){
+    if(tagSec.style.display==='none'){
+      tagSec.style.display='';
+      const def=document.querySelector('input[name="ftag"][value="通用"]');
+      if(def&&!document.querySelector('input[name="ftag"]:checked')){def.checked=true;}
+      document.getElementById('ftagc').style.display='none';
+    }
+  }else{
+    tagSec.style.display='none';
+    document.querySelectorAll('input[name="ftag"]').forEach(r=>r.checked=false);
+    document.getElementById('ftagc').style.display='none';
+    document.getElementById('ftagc').value='';
+  }
+}
+function onTagCheck(){
+  const v=document.querySelector('input[name="ftag"]:checked')?.value;
+  document.getElementById('ftagc').style.display=v==='其他'?'':'none';
 }
 function onCatSubCheck(){
   const checked=Array.from(document.querySelectorAll('input[name="fcsk"]:checked')).map(c=>c.value);
   document.getElementById('fccs').style.display=checked.includes('其他')?'':'none';
   const cats=getCheckedCats();
   document.getElementById('fbl').style.display=(cats.includes('Q版')&&checked.includes('绑定Q'))?'':'none';
+  updateTagVisibility();
 }
 function getCheckedSubs(){return Array.from(document.querySelectorAll('input[name="fcsk"]:checked')).map(c=>c.value)}
 function onCatSub(){} // keep as no-op for backward compat
@@ -2672,6 +2880,7 @@ function onJz(){
   document.getElementById('fjzshop').style.display=checks.find(c=>c.value==='店专属').checked?'':'none';
   document.getElementById('fjzlihui').style.display=checks.find(c=>c.value==='绑定立绘').checked?'':'none';
   document.getElementById('fjzcustom').style.display=checks.find(c=>c.value==='自定义').checked?'':'none';
+  updateTagVisibility();
 }
 function onUsageLimit(){
   const v=document.querySelector('input[name="ful"]:checked')?.value;
@@ -3177,12 +3386,14 @@ let xiData=null,xiHeaders=null,xiImages=null; // xiImages: Map<rowIndex, base64[
 
 function handleXImportClick(){ openExcelImport(); }
 
-function openExcelImport(){xiData=null;xiHeaders=null;xiImages=null;
-  document.getElementById('xidrop').style.display='';document.getElementById('ximap').style.display='none';document.getElementById('ximdf').style.display='none';
+function openExcelImport(){xiData=null;xiHeaders=null;xiImages=null;xiSmartItems=null;
+  // Reset upload area text
+  document.getElementById('xidrop').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg><div>点击上传 .xlsx / .csv 文件，或拖拽到此处</div><div style="font-size:11px;color:var(--text2)">支持多工作表 Excel 工作簿和 CSV，自动识别店铺名、价格列和数据格式</div>';
+  document.getElementById('xidrop').style.display='';document.getElementById('ximap').style.display='none';document.getElementById('ximdf').style.display='none';document.getElementById('xiprev').style.display='none';
   document.getElementById('xii').value='';
   document.getElementById('ximo').style.display='flex';
 }
-function closeExcelImport(){document.getElementById('ximo').style.display='none';xiData=null;xiHeaders=null;xiImages=null}
+function closeExcelImport(){document.getElementById('ximo').style.display='none';xiData=null;xiHeaders=null;xiImages=null;xiSmartItems=null}
 
 // ---- CSV parsing ----
 function parseCSV(text){
@@ -3203,115 +3414,140 @@ function parseCSV(text){
 }
 
 // ---- .xlsx parsing ----
-async function parseXLSX(buf){
+async function parseXLSXAllSheets(buf){
   const entries=await parseZIP(buf);
   if(!entries) throw new Error('无法解析 ZIP 结构');
-
-  // Find key files
   const getEntry=n=>entries.find(e=>e.name===n||e.name.endsWith('/'+n));
-  const getEntryStartsWith=prefix=>entries.filter(e=>e.name.startsWith(prefix));
 
-  const ssEntry=getEntry('xl/sharedStrings.xml');
-  const sheetEntry=getEntry('xl/worksheets/sheet1.xml');
-  if(!sheetEntry) throw new Error('未找到工作表');
-
-  // Parse shared strings
+  // Parse shared strings (shared across all sheets)
   let sharedStrings=[];
+  const ssEntry=getEntry('xl/sharedStrings.xml');
   if(ssEntry){ try{
     const ssText=dec(new Uint8Array(ssEntry.data));
     const ssDoc=new DOMParser().parseFromString(ssText,'text/xml');
-    ssDoc.querySelectorAll('si>t,si>r>t').forEach(t=>sharedStrings.push(t.textContent||''));
+    ssDoc.querySelectorAll('si').forEach(si=>{let t='';si.querySelectorAll('t').forEach(e=>{t+=e.textContent||''});sharedStrings.push(t)});
   }catch(e){} }
 
-  // Parse sheet data
-  const sheetText=dec(new Uint8Array(sheetEntry.data));
-  const sheetDoc=new DOMParser().parseFromString(sheetText,'text/xml');
-  const rows=[],rowEls=sheetDoc.querySelectorAll('sheetData>row');
-  let maxCol=0;
-  rowEls.forEach(rowEl=>{
-    const r=parseInt(rowEl.getAttribute('r'))||0;
-    const cells=[];let colIdx=0;
-    rowEl.querySelectorAll('c').forEach(cEl=>{
-      const ref=cEl.getAttribute('r')||'';
-      const m=ref.match(/^([A-Z]+)(\d+)$/);
-      if(m){ colIdx=colRefToNum(m[1])-1; }
-      const t=cEl.getAttribute('t');
-      let val='';
-      if(t==='s'){
-        const vi=parseInt(cEl.querySelector('v')?.textContent);
-        val=sharedStrings[vi]||'';
-      }else{
-        val=cEl.querySelector('v')?.textContent||'';
-        // Also check inlineStr
-        if(!val&&t==='inlineStr') val=cEl.querySelector('is>t')?.textContent||'';
-      }
-      cells[colIdx]=val;
-      if(colIdx+1>maxCol) maxCol=colIdx+1;
-      colIdx++;
-    });
-    // Pad to maxCol
-    while(cells.length<maxCol) cells.push('');
-    rows.push({row:r, cells});
+  // Parse workbook.xml to get sheet names and rIds
+  const wbEntry=getEntry('xl/workbook.xml');
+  if(!wbEntry) throw new Error('未找到工作簿');
+  const wbText=dec(new Uint8Array(wbEntry.data));
+  const wbDoc=new DOMParser().parseFromString(wbText,'text/xml');
+  const sheetInfos=[];
+  wbDoc.querySelectorAll('sheet').forEach(sheetEl=>{
+    const name=sheetEl.getAttribute('name')||'';
+    let rId='';
+    for(const attr of sheetEl.attributes){
+      if(attr.name.endsWith(':id')||attr.name==='id') rId=attr.value;
+    }
+    sheetInfos.push({name,rId});
   });
 
-  // Try to extract images
-  const imgMap=new Map(); // rowIndex -> [base64 strings]
-  try{
-    // Find sheet relationships
-    const sheetRelsEntry=getEntry('xl/worksheets/_rels/sheet1.xml.rels');
-    let drawingRId='';
-    if(sheetRelsEntry){
-      const relsText=dec(new Uint8Array(sheetRelsEntry.data));
-      const relsDoc=new DOMParser().parseFromString(relsText,'text/xml');
-      relsDoc.querySelectorAll('Relationship').forEach(rel=>{
-        if((rel.getAttribute('Type')||'').includes('drawing')) drawingRId=rel.getAttribute('Id')||'';
+  // Parse workbook.xml.rels to map rIds to sheet files
+  const relsEntry=getEntry('xl/_rels/workbook.xml.rels');
+  const ridToTarget={};
+  if(relsEntry){
+    const relsText=dec(new Uint8Array(relsEntry.data));
+    const relsDoc=new DOMParser().parseFromString(relsText,'text/xml');
+    relsDoc.querySelectorAll('Relationship').forEach(rel=>{
+      if((rel.getAttribute('Type')||'').includes('worksheet'))
+        ridToTarget[rel.getAttribute('Id')||'']=rel.getAttribute('Target')||'';
+    });
+  }
+
+  // Parse each sheet
+  const sheets=[];
+  for(const info of sheetInfos){
+    const target=ridToTarget[info.rId]||'';
+    if(!target) continue;
+    // Resolve sheet file path (Target is relative to xl/)
+    const fileName=target.split('/').pop();
+    let sheetEntry=getEntry('xl/'+target.replace(/^\.\.\//g,''));
+    if(!sheetEntry) sheetEntry=entries.find(e=>e.name.endsWith('/'+fileName));
+    if(!sheetEntry) continue;
+
+    const sheetText=dec(new Uint8Array(sheetEntry.data));
+    const sheetDoc=new DOMParser().parseFromString(sheetText,'text/xml');
+    const rows=[];
+    const rowEls=sheetDoc.querySelectorAll('sheetData>row');
+    let maxCol=0;
+    rowEls.forEach(rowEl=>{
+      const cells=[];let colIdx=0;
+      let hasData=false;
+      rowEl.querySelectorAll('c').forEach(cEl=>{
+        const ref=cEl.getAttribute('r')||'';
+        const m=ref.match(/^([A-Z]+)(\d+)$/);
+        if(m){colIdx=colRefToNum(m[1])-1;}
+        const t=cEl.getAttribute('t');
+        let val='';
+        if(t==='s'){
+          const vi=parseInt(cEl.querySelector('v')?.textContent);
+          val=sharedStrings[vi]??'';
+        }else{
+          val=cEl.querySelector('v')?.textContent||'';
+          if(!val&&t==='inlineStr'){const isEl=cEl.querySelector('is');if(isEl){isEl.querySelectorAll('t').forEach(e=>{val+=e.textContent||''});}}
+        }
+        if(val) hasData=true;
+        cells[colIdx]=val;
+        if(colIdx+1>maxCol) maxCol=colIdx+1;
+        colIdx++;
       });
-    }
+      if(!hasData) return; // Skip empty rows (WPS may write 1M+ empty rows)
+      while(cells.length<maxCol) cells.push('');
+      rows.push(cells);
+    });
 
-    if(drawingRId){
-      // Find drawing relationships
-      const drawRelsEntry=getEntry('xl/drawings/_rels/drawing1.xml.rels');
-      const drawEntry=getEntry('xl/drawings/drawing1.xml');
-      if(drawRelsEntry&&drawEntry){
-        const drawRelsText=dec(new Uint8Array(drawRelsEntry.data));
-        const drawRelsDoc=new DOMParser().parseFromString(drawRelsText,'text/xml');
-        const ridToFile={};
-        drawRelsDoc.querySelectorAll('Relationship').forEach(rel=>{
-          ridToFile[rel.getAttribute('Id')||'']=(rel.getAttribute('Target')||'').replace('../media/','');
-        });
-
-        const drawText=dec(new Uint8Array(drawEntry.data));
-        const drawDoc=new DOMParser().parseFromString(drawText,'text/xml');
-        drawDoc.querySelectorAll('twoCellAnchor,oneCellAnchor').forEach(anchor=>{
-          const fromEl=anchor.querySelector('from');
-          if(!fromEl) return;
-          const row=parseInt(fromEl.querySelector('row')?.textContent)||0;
-          const blipEl=anchor.querySelector('blip');
-          if(!blipEl) return;
-          const embed=blipEl.getAttribute('r:embed')||blipEl.getAttribute('embed')||'';
-          const imgFile=ridToFile[embed];
-          if(!imgFile) return;
-
-          // Find image data in ZIP
-          const imgEntry=getEntry('xl/media/'+imgFile);
-          if(!imgEntry||!imgEntry.data) return;
-          let ext=imgFile.split('.').pop().toLowerCase();
-          if(!['png','jpg','jpeg','gif','webp'].includes(ext)) ext='png';
-          const mime=ext==='jpg'?'jpeg':ext;
-          const b64='data:image/'+mime+';base64,'+btoa(String.fromCharCode(...new Uint8Array(imgEntry.data)));
-
-          if(!imgMap.has(row)) imgMap.set(row,[]);
-          imgMap.get(row).push(b64);
+    // Try to extract images for this sheet
+    const imgMap=new Map();
+    try{
+      const sheetRelsEntry=getEntry('xl/worksheets/_rels/'+fileName+'.rels');
+      let drawingTarget='';
+      if(sheetRelsEntry){
+        const srText=dec(new Uint8Array(sheetRelsEntry.data));
+        const srDoc=new DOMParser().parseFromString(srText,'text/xml');
+        srDoc.querySelectorAll('Relationship').forEach(rel=>{
+          if((rel.getAttribute('Type')||'').includes('drawing')&&rel.getAttribute('Target'))
+            drawingTarget=rel.getAttribute('Target');
         });
       }
-    }
-  }catch(e){ /* Images optional */ }
+      if(drawingTarget){
+        const drawFileName=drawingTarget.split('/').pop();
+        const drawEntry=entries.find(e=>e.name.endsWith('/drawings/'+drawFileName));
+        const drawRelsEntry=entries.find(e=>e.name.endsWith('/drawings/_rels/'+drawFileName+'.rels'));
+        if(drawEntry&&drawRelsEntry){
+          const drawRelsText=dec(new Uint8Array(drawRelsEntry.data));
+          const drawRelsDoc=new DOMParser().parseFromString(drawRelsText,'text/xml');
+          const ridToFile={};
+          drawRelsDoc.querySelectorAll('Relationship').forEach(rel=>{
+            ridToFile[rel.getAttribute('Id')||'']=(rel.getAttribute('Target')||'').replace('../media/','');
+          });
+          const drawText=dec(new Uint8Array(drawEntry.data));
+          const drawDoc=new DOMParser().parseFromString(drawText,'text/xml');
+          drawDoc.querySelectorAll('twoCellAnchor,oneCellAnchor').forEach(anchor=>{
+            const fromEl=anchor.querySelector('from');
+            if(!fromEl) return;
+            const row=parseInt(fromEl.querySelector('row')?.textContent)||0;
+            const blipEl=anchor.querySelector('blip');
+            if(!blipEl) return;
+            const embed=blipEl.getAttribute('r:embed')||blipEl.getAttribute('embed')||'';
+            const imgFile=ridToFile[embed];
+            if(!imgFile) return;
+            const imgEntry=getEntry('xl/media/'+imgFile);
+            if(!imgEntry||!imgEntry.data) return;
+            let ext=imgFile.split('.').pop().toLowerCase();
+            if(!['png','jpg','jpeg','gif','webp'].includes(ext)) ext='png';
+            const mime=ext==='jpg'?'jpeg':ext;
+            const b64='data:image/'+mime+';base64,'+btoa(String.fromCharCode(...new Uint8Array(imgEntry.data)));
+            if(!imgMap.has(row)) imgMap.set(row,[]);
+            imgMap.get(row).push(b64);
+          });
+        }
+      }
+    }catch(e){ /* Images optional */ }
 
-  // Determine headers: first row is always header row
-  const headerRow=rows.length>0?rows[0].cells:['A','B','C','D','E'];
-  const dataRows=rows.slice(1).map(r=>r.cells);
-
-  return {headers:headerRow, data:dataRows, imgMap};
+    sheets.push({name:info.name, rows, imgMap});
+  }
+  return {sheets};
 }
 
 // ---- ZIP parsing ----
@@ -3386,6 +3622,336 @@ async function parseZIP(buf){
 function dec(arr){return new TextDecoder().decode(arr)}
 function colRefToNum(ref){let n=0;for(let i=0;i<ref.length;i++)n=n*26+(ref.charCodeAt(i)-64);return n}
 
+// ---- Smart import: auto-detect format and parse all sheets ----
+let xiSmartItems=null;
+
+function detectSheetFormat(rows){
+  if(!rows||rows.length===0) return 'unknown';
+  const row0=rows[0];
+  const headerKeywords=['店铺','价格','画师','美工','商品','素材','分类','属性','身份','日期','备注','转让','通加','使用','购买','来源','赞助','名称','种类','渠道','说明','类型','途径','作者'];
+  let headerMatchCount=0;
+  row0.forEach(cell=>{
+    if(cell&&typeof cell==='string'){
+      headerKeywords.forEach(kw=>{if(cell.includes(kw)) headerMatchCount++});
+    }
+  });
+  if(headerMatchCount>=2) return 'traditional';
+  // Block format: row 0 has sparse non-null text values with Chinese chars
+  let nonNullCount=0,hasChinese=false;
+  row0.forEach(cell=>{
+    if(cell!==undefined&&cell!==null&&cell.toString().trim()!==''){
+      nonNullCount++;
+      if(/[\u4e00-\u9fa5]/.test(cell.toString())) hasChinese=true;
+    }
+  });
+  if(nonNullCount>=1&&hasChinese&&rows.length>1) return 'block';
+  return 'unknown';
+}
+
+function parseBlockSheet(rows,sheetName){
+  if(!rows||rows.length<2) return [];
+  const isPersonSheet=sheetName.includes('个人');
+  // Find owner name positions in row 0 (non-null, non-numeric, non-"总计")
+  const row0=rows[0];
+  const owners=[];
+  for(let i=0;i<row0.length;i++){
+    const cell=row0[i];
+    if(cell===undefined||cell===null) continue;
+    let name=cell.toString().trim();
+    if(!name||name==='总计'||/^[\d,.]+$/.test(name)) continue;
+    // Strip 【】 from header to get clean shop name
+    const bracketM=name.match(/【(.+?)】/);
+    if(bracketM) name=bracketM[1].trim();
+    let otype;
+    if(PRESET_SHOPS.has(name)) otype='shop';
+    else if(isPersonSheet) otype='person';
+    else if(name==='个人') otype='person';
+    else otype='shop'; // Default to shop
+    owners.push({col:i,name,type:otype});
+  }
+  if(owners.length===0) return [];
+  const items=[];
+  // Skip last row if it contains "总计"
+  const lastRow=rows[rows.length-1];
+  const isLastTotal=lastRow&&lastRow[0]&&lastRow[0].toString().includes('总计');
+  const endIdx=isLastTotal?rows.length-1:rows.length;
+  for(let r=1;r<endIdx;r++){
+    const row=rows[r];
+    if(!row) continue;
+    for(const owner of owners){
+      const cellVal=row[owner.col];
+      if(cellVal===undefined||cellVal===null) continue;
+      let name=cellVal.toString().trim();
+      if(!name||name==='总计'||/^[\d,.]+$/.test(name)) continue;
+      // If cell value contains 【shop】artist, extract shop name and artist
+      let finalOwner=owner.name, finalType=owner.type, artist='';
+      const cellBracket=name.match(/【(.+?)】(.+)/);
+      if(cellBracket){
+        finalOwner=cellBracket[1].trim();
+        artist=cellBracket[2].trim();
+        name=artist; // Use artist name as material name
+        if(PRESET_SHOPS.has(finalOwner)) finalType='shop';
+      }
+      // Price is in the next column
+      let price=0;
+      const priceCell=row[owner.col+1];
+      if(priceCell!==undefined&&priceCell!==null){
+        const ps=priceCell.toString().replace(/[¥,]/g,'').trim();
+        price=parseFloat(ps)||0;
+      }
+      items.push({name,ownerName:finalOwner,ownerType:finalType,price,artist,category:'',sheetName});
+    }
+  }
+  return items;
+}
+
+function parseTraditionalSheetAuto(rows,sheetName){
+  if(!rows||rows.length<2) return [];
+  const headers=rows[0];
+  const dataRows=rows.slice(1);
+  const isPersonSheet=sheetName.includes('个人');
+  // Auto-detect column mapping from headers
+  const colMap={};
+  headers.forEach((h,i)=>{
+    const hl=(h||'').toString().toLowerCase().replace(/\s+/g,'');
+    if(!hl) return;
+    // Combined "店铺名+画师名" column — needs special parsing
+    if(hl.includes('店铺')&&hl.includes('画师')){
+      colMap.combinedOwnerArtist=i;
+      colMap.ownerName=i; // fallback
+      return;
+    }
+    // ownerName: 店铺, 所属, 购买途径, 卖家, 商家, 购自 (NOT 来源 — 来源 is treated as artist)
+    if((hl.includes('店铺')||hl.includes('所属')||hl.includes('购买途径')||hl.includes('卖家')||hl.includes('商家')||hl.includes('购自'))&&colMap.ownerName===undefined) colMap.ownerName=i;
+    if(hl.includes('身份')) colMap.role=i;
+    // artist: 画师, 美工, 作者, 来源 — all treated as the same field
+    if((hl.includes('画师')||hl.includes('美工')||hl.includes('作者')||hl.includes('来源'))&&colMap.artist===undefined) colMap.artist=i;
+    if((hl.includes('商品')||hl.includes('素材名')||hl.includes('名称')||hl.includes('作品'))&&colMap.name===undefined) colMap.name=i;
+    if((hl.includes('价格')||hl.includes('金额')||hl.includes('¥'))&&colMap.price===undefined) colMap.price=i;
+    // category: 分类, 属性, 类型
+    if((hl.includes('分类')||hl.includes('属性')||hl.includes('类型'))&&colMap.category===undefined) colMap.category=i;
+    // purchase channel: 渠道, 平台 (not 购买途径 which is ownerName)
+    if((hl.includes('渠道')||hl.includes('平台'))&&!hl.includes('购买途径')&&colMap.channel===undefined) colMap.channel=i;
+    if((hl.includes('日期')||hl.includes('时间'))&&colMap.date===undefined) colMap.date=i;
+    // note: 备注, 说明, 描述 — collect separately to combine later
+    if(hl.includes('备注')&&colMap.note===undefined) colMap.note=i;
+    else if((hl.includes('说明')||hl.includes('描述'))&&colMap.desc===undefined) colMap.desc=i;
+    if(hl.includes('转让')) colMap.transfer=i;
+    // usage limit: 种类, 限量类型, 次数 (covers 主角次数, 使用次数, NPC次数, etc.)
+    if((hl.includes('种类')||hl.includes('限量类型')||hl.includes('限次')||hl.includes('次数'))&&colMap.usageLimit===undefined) colMap.usageLimit=i;
+    // subCategory: 古/现
+    if((hl==='古/现'||hl.includes('古现')||hl.includes('朝代'))&&colMap.subCategory===undefined) colMap.subCategory=i;
+    // storage: 储存
+    if(hl.includes('储存')&&colMap.storage===undefined) colMap.storage=i;
+  });
+  // If no price column found, detect by numeric content
+  if(colMap.price===undefined){
+    let bestCol=-1,bestScore=0;
+    const mappedCols=new Set([colMap.name,colMap.ownerName,colMap.artist,colMap.date,colMap.usageLimit,colMap.category,colMap.combinedOwnerArtist,colMap.note,colMap.desc,colMap.channel,colMap.role,colMap.subCategory,colMap.storage,colMap.transfer].filter(x=>x!==undefined));
+    headers.forEach((h,i)=>{
+      if(mappedCols.has(i)) return; // Skip already-mapped columns
+      const hl=(h||'').toString().toLowerCase().replace(/\s+/g,'');
+      if(hl.includes('日期')||hl.includes('时间')||hl.includes('次数')||hl.includes('署名')) return; // Skip date/count/signature columns
+      let numCount=0,nonEmpty=0;
+      dataRows.forEach(row=>{
+        if(i<row.length){
+          const v=(row[i]||'').toString().trim();
+          if(v){nonEmpty++;if(/^[\d,.]+$/.test(v)||/^[¥￥][\d,.]+$/.test(v)) numCount++}
+        }
+      });
+      if(nonEmpty>=2&&numCount/nonEmpty>=0.6&&numCount>bestScore){bestScore=numCount;bestCol=i}
+    });
+    if(bestCol>=0) colMap.price=bestCol;
+  }
+  // If no name column found, use text left of price
+  if(colMap.name===undefined&&colMap.price!==undefined&&colMap.price>0){
+    const leftCol=colMap.price-1;
+    let hasText=false;
+    dataRows.forEach(row=>{
+      if(leftCol<row.length){
+        const v=(row[leftCol]||'').toString().trim();
+        if(v&&!/^[\d,.]+$/.test(v)) hasText=true;
+      }
+    });
+    if(hasText) colMap.name=leftCol;
+  }
+  // If still no name column, use category/类型 column as name (e.g. "CG胸像" is both name and category)
+  if(colMap.name===undefined&&colMap.category!==undefined){
+    colMap.name=colMap.category;
+    colMap.category=undefined; // Will be re-extracted from name
+  }
+  const items=[];
+  dataRows.forEach(row=>{
+    if(!row) return;
+    let name=colMap.name!==undefined?(row[colMap.name]||'').toString().trim():'';
+    if(!name) return;
+    // Handle combined "店铺名+画师名" column (e.g. "【沁梦阁】晓兮")
+    let ownerName='',artist='';
+    if(colMap.combinedOwnerArtist!==undefined){
+      const combined=(row[colMap.combinedOwnerArtist]||'').toString().trim();
+      const m=combined.match(/【(.+?)】(.+)/);
+      if(m){ ownerName=m[1].trim(); artist=m[2].trim(); }
+      else { ownerName=combined; }
+    } else {
+      ownerName=colMap.ownerName!==undefined?(row[colMap.ownerName]||'').toString().trim():'';
+      artist=colMap.artist!==undefined?(row[colMap.artist]||'').toString().trim():'';
+    }
+    // Post-process: if artist contains 【shop】artist and no separate owner, extract shop name
+    if(artist && !ownerName){
+      const bracketMatch=artist.match(/【(.+?)】(.+)/);
+      if(bracketMatch){ ownerName=bracketMatch[1].trim(); artist=bracketMatch[2].trim(); }
+      else if(PRESET_SHOPS.has(artist)){ ownerName=artist; artist=''; }
+    }
+    const priceRaw=colMap.price!==undefined?(row[colMap.price]||'').toString().trim():'';
+    const price=parseFloat(priceRaw.replace(/[¥,]/g,''))||0;
+    // If price text is non-numeric (e.g. "限时福利"), preserve it in notes
+    const priceNote=priceRaw&&isNaN(parseFloat(priceRaw.replace(/[¥,]/g,'')))?priceRaw:'';
+    let category=colMap.category!==undefined?(row[colMap.category]||'').toString().trim():'';
+    const channel=colMap.channel!==undefined?(row[colMap.channel]||'').toString().trim():'';
+    const note=colMap.note!==undefined?(row[colMap.note]||'').toString().trim():'';
+    const desc=colMap.desc!==undefined?(row[colMap.desc]||'').toString().trim():'';
+    const dateRaw=colMap.date!==undefined?(row[colMap.date]||'').toString().trim():'';
+    const usageLimitRaw=colMap.usageLimit!==undefined?(row[colMap.usageLimit]||'').toString().trim():'';
+    const subCat=colMap.subCategory!==undefined?(row[colMap.subCategory]||'').toString().trim():'';
+    const storage=colMap.storage!==undefined?(row[colMap.storage]||'').toString().trim():'';
+    // Determine owner type — import ALL rows, never skip
+    let otype;
+    if(ownerName==='个人') otype='person';
+    else if(isPersonSheet) otype='person';
+    else otype='shop'; // Default to shop — the data comes from a "店铺" column
+    // If no explicit category column, try to extract from "商品名" (e.g. "立绘（笑捻）" → 立绘)
+    if(!category){
+      for(const cat of MAIN_CATS){
+        if(name.startsWith(cat)||name.includes('（'+cat)||name.includes('('+cat)){
+          category=cat; break;
+        }
+      }
+    }
+    // Map 类型 column to main category + subcategory
+    let finalCategory=category, finalSubCategory='';
+    if(category){
+      if(MAIN_CATS.includes(category)){
+        finalCategory=category;
+      } else {
+        let foundParent='';
+        for(const parent in SUBS){
+          if(SUBS[parent].includes(category)){ foundParent=parent; break; }
+        }
+        if(foundParent){
+          finalCategory=foundParent;
+          finalSubCategory=category;
+        } else {
+          finalCategory=category;
+        }
+      }
+    }
+    const finalOwner=ownerName||'导入数据';
+    // Convert date: Excel serial number OR "2022.04.12" format OR plain text
+    let purchaseDate='';
+    if(dateRaw){
+      const serial=parseInt(dateRaw);
+      if(!isNaN(serial)&&serial>30000&&serial<60000){
+        const date=new Date(Date.UTC(1899,11,30)+serial*86400000);
+        purchaseDate=date.toISOString().slice(0,10);
+      } else if(/^\d{4}[.\-/]\d{1,2}[.\-/]\d{1,2}/.test(dateRaw)){
+        purchaseDate=dateRaw.replace(/[./]/g,'-').replace(/-/g,match=>match).substring(0,10);
+        // Normalize: "2022-04-12"
+        const dm=dateRaw.match(/^(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})/);
+        if(dm) purchaseDate=dm[1]+'-'+dm[2].padStart(2,'0')+'-'+dm[3].padStart(2,'0');
+      } else { purchaseDate=dateRaw; }
+    }
+    // Parse usage limit from "种类" or "主角次数" column
+    let usageLimitType='unlimited',usageTotal=1,usageNote='';
+    if(usageLimitRaw){
+      if(usageLimitRaw.includes('非限')||usageLimitRaw==='不限'){
+        usageLimitType='unlimited';
+      } else if(usageLimitRaw.includes('限时')&&usageLimitRaw.includes('限量')){
+        usageLimitType='limited';
+        const m=usageLimitRaw.match(/(\d+)次/); if(m) usageTotal=parseInt(m[1]);
+        usageNote=usageLimitRaw;
+      } else if(usageLimitRaw.includes('限量')){
+        usageLimitType='limited';
+        const m=usageLimitRaw.match(/(\d+)次/); if(m) usageTotal=parseInt(m[1]);
+      } else if(usageLimitRaw.includes('限时')){
+        usageLimitType='limited'; usageNote='限时';
+      } else if(/(\d+)\s*次/.test(usageLimitRaw)){
+        // "主角次数" format: "3次", "2次", "3次/6次"
+        usageLimitType='limited';
+        const m=usageLimitRaw.match(/(\d+)\s*次/); if(m) usageTotal=parseInt(m[1]);
+        if(usageLimitRaw.includes('/')) usageNote=usageLimitRaw;
+      }
+    }
+    // Parse transfer info from note
+    let isTransfer='否';
+    if(note){
+      if(note.includes('已转让')||note.includes('已转')) isTransfer='是';
+    }
+    // Purchase source: "接转" in note means purchaseSource=接转, NOT isTransfer
+    let purchaseSource='',purchaseSub='';
+    if(note&&note.includes('接转')){ purchaseSource='接转'; }
+    else if(channel){ purchaseSource='购入'; purchaseSub=channel; }
+    // Combine notes (desc + note + subCat + usageNote + storage + priceNote)
+    let fullNote='';
+    if(desc) fullNote=desc;
+    if(note&&!fullNote.includes(note)){ fullNote=(fullNote?fullNote+'；':'')+note; }
+    if(subCat&&!fullNote.includes(subCat)){ fullNote=(fullNote?fullNote+'；':'')+subCat; }
+    if(usageNote&&!fullNote.includes(usageNote)){ fullNote=(fullNote?fullNote+'；':'')+usageNote; }
+    if(priceNote&&!fullNote.includes(priceNote)){ fullNote=(fullNote?fullNote+'；':'')+priceNote; }
+    if(storage&&!fullNote.includes(storage)){ fullNote=(fullNote?fullNote+'；':'')+'储存:'+storage; }
+    // Handle multiple artists separated by 、 or , — create one item per artist
+    const artistList=artist?artist.split(/[、,]/).map(a=>a.trim()).filter(a=>a):[''];
+    for(const a of artistList){
+      items.push({name,ownerName:finalOwner,ownerType:otype,price,artist:a,
+        category:finalCategory,subCategory:finalSubCategory,
+        purchaseSource,purchaseSub,purchaseDate,note:fullNote,
+        usageLimitType,usageTotal,isTransfer,sheetName});
+    }
+  });
+  return items;
+}
+
+function buildSmartPreviewHTML(items,sheetSummary){
+  const preview=items.slice(0,30);
+  let html='<div style="font-size:13px;font-weight:600;margin-bottom:6px">智能解析结果</div>';
+  html+='<div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">';
+  sheetSummary.forEach(s=>{html+=s+'<br>'});
+  html+='<b>共 '+items.length+' 条数据</b></div>';
+  html+='<div class="xi-preview"><table><thead><tr><th>所属名称</th><th>类型</th><th>素材名称</th><th>画师</th><th>价格</th><th>分类</th><th>购买渠道</th><th>日期</th><th>使用限制</th><th>备注</th></tr></thead><tbody>';
+  preview.forEach(item=>{
+    const ulDesc=item.usageLimitType==='unlimited'?'不限':(item.usageLimitType==='limited'?(item.usageTotal>1?`限${item.usageTotal}次`:'限次'):'');
+    html+=`<tr><td>${eh(item.ownerName)}</td><td>${item.ownerType==='shop'?'店铺':'个人'}</td><td>${eh(item.name)}</td><td>${eh(item.artist||'')}</td><td style="text-align:right">${item.price||''}</td><td>${eh(item.category||'')}${item.subCategory?'/'+eh(item.subCategory):''}</td><td>${eh(item.purchaseSub||'')}</td><td>${eh(item.purchaseDate||'')}</td><td>${ulDesc}</td><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${eh(item.note||'')}">${eh(item.note||'')}</td></tr>`;
+  });
+  html+='</tbody></table></div>';
+  if(items.length>30) html+='<div style="font-size:12px;color:var(--text2);margin-top:6px">仅显示前30条，共'+items.length+'条</div>';
+  return html;
+}
+
+function confirmSmartImport(){
+  if(!xiSmartItems||xiSmartItems.length===0){st('没有可导入的数据','err');return}
+  let imported=0;
+  xiSmartItems.forEach(item=>{
+    const cleanOwner=stripBrackets(item.ownerName||'');
+    const cleanArtist=stripBrackets(item.artist||'');
+    if(item.ownerType==='shop'&&!S.shops.includes(cleanOwner)) S.shops.push(cleanOwner);
+    if(item.ownerType==='person'&&!S.persons.includes(cleanOwner)) S.persons.push(cleanOwner);
+    S.items.push({
+      id:gid(),ownerType:item.ownerType,ownerName:cleanOwner,name:item.name,images:[],
+      category:item.category||'',subCategory:item.subCategory||'',customSubCategory:'',customCategory:'',boundLihui:'',styleTag:'',customTag:'',
+      purchaseSource:item.purchaseSource||'',purchaseSub:item.purchaseSub||'',customPurchaseSource:'',
+      sponsorId:'',isSponsored:false,sponsorCount:1,sponsoredDone:0,
+      isTransfer:item.isTransfer||'否',transferId:'',tongjiaRule:'',tongjiaLimit:'',tongjiaType:'',tongjiaScope:'',
+      transferRule:'',transferSub:'',saleType:'',
+      artist:cleanArtist,price:item.price||0,purchaseDate:item.purchaseDate||'',isDoublePoints:false,
+      countInShop:true,countInPerson:true,
+      usageLimitType:item.usageLimitType||'unlimited',usageLimitSubtype:'total',usageTotal:item.usageTotal||1,usageLead:1,usageSupport:1,usageOtherNote:'',
+      usedCount:0,isUsed:false,note:item.note||'',createdAt:new Date().toISOString(),paymentImage:[],paymentNote:''
+    });
+    imported++;
+  });
+  sv();closeExcelImport();renderAll();autoExtractPersons();
+  st(`智能导入完成：${imported} 条`);
+}
+
 // ---- File handler ----
 function handleXFile(e){
   const file=e.target.files[0];e.target.value='';if(!file)return;
@@ -3398,23 +3964,61 @@ function handleXFile(e){
 }
 
 async function handleXLSXImport(file){
-  document.getElementById('xidrop').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:14px;color:var(--text2);margin-bottom:8px">正在解析 .xlsx 文件…</div><div style="font-size:12px;color:var(--text2)">包含图片可能需要几秒钟</div></div>';
+  document.getElementById('xidrop').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:14px;color:var(--text2);margin-bottom:8px">正在解析 .xlsx 文件…</div><div style="font-size:12px;color:var(--text2)">多工作表智能识别中</div></div>';
   try{
     const buf=await file.arrayBuffer();
-    const result=await parseXLSX(buf);
-    if(!result.data||result.data.length===0){st('文件中没有数据行','err');openExcelImport();return}
-
-    xiHeaders=result.headers;
-    xiData=result.data;
-    xiImages=result.imgMap; // Map<rowIndex, base64[]>
-    // rowIndex is the sheet row number (1-based), data rows start at sheet row 2
-    // So xiData[i] corresponds to sheet row i+2
-
+    const result=await parseXLSXAllSheets(buf);
+    if(!result.sheets||result.sheets.length===0){st('文件中没有数据','err');openExcelImport();return}
+    xiSmartItems=[];
+    const sheetSummary=[];
+    for(let si=0;si<result.sheets.length;si++){
+      const sheet=result.sheets[si];
+      if(!sheet.rows||sheet.rows.length===0) continue;
+      // Update progress UI
+      const progressPct=Math.round((si/result.sheets.length)*100);
+      document.getElementById('xidrop').innerHTML='<div style="text-align:center;padding:20px"><div style="font-size:14px;color:var(--text2);margin-bottom:8px">正在识别第 '+(si+1)+'/'+result.sheets.length+' 个工作表…</div><div style="font-size:12px;color:var(--text2);margin-bottom:10px">「'+eh(sheet.name)+'」('+sheet.rows.length+'行)</div><div style="width:240px;height:6px;background:#e2e8f0;border-radius:3px;margin:0 auto;overflow:hidden"><div style="width:'+progressPct+'%;height:100%;background:var(--primary);transition:width .3s"></div></div></div>';
+      // Yield to UI thread so progress can render
+      await new Promise(r=>setTimeout(r,0));
+      // Detect format FIRST, then decide whether to skip
+      const fmt=detectSheetFormat(sheet.rows);
+      let items=[];
+      if(fmt==='block'){
+        items=parseBlockSheet(sheet.rows,sheet.name);
+      } else if(fmt==='traditional'){
+        // For traditional format, check if it has data columns (not just a summary sheet)
+        const headers=sheet.rows[0]||[];
+        const dataKWs=['商品','素材名','名称','作品','类型','画师','美工','作者','价格','金额','次数'];
+        const hasDataCol=headers.some(h=>{
+          const hl=(h||'').toString().toLowerCase().replace(/\s+/g,'');
+          if(hl==='店铺名称'||hl==='店铺名') return false; // Exclude pure shop name columns
+          return dataKWs.some(kw=>hl.includes(kw));
+        });
+        if(!hasDataCol){
+          sheetSummary.push(`「${sheet.name}」: 汇总表，跳过`);
+          continue;
+        }
+        items=parseTraditionalSheetAuto(sheet.rows,sheet.name);
+      }
+      // Attach images if available
+      if(sheet.imgMap&&sheet.imgMap.size>0&&items.length>0){
+      }
+      xiSmartItems.push(...items);
+      if(items.length>0){
+        let summary=`「${sheet.name}」(${fmt==='block'?'块格式':'表格式'}): ${items.length}条`;
+        sheetSummary.push(summary);
+      } else if(fmt==='unknown'){
+        sheetSummary.push(`「${sheet.name}」: 未识别格式，跳过`);
+      }
+    }
+    if(xiSmartItems.length===0){st('未能从文件中解析出任何数据，请检查文件格式','err');openExcelImport();return}
+    // Show smart preview
     document.getElementById('xidrop').style.display='none';
-    document.getElementById('ximap').style.display='';
+    document.getElementById('ximap').style.display='none';
     document.getElementById('ximdf').style.display='flex';
-    buildXIMap();
-    buildXIPreview();
+    document.getElementById('ximdf').innerHTML='<button class="btn" onclick="closeExcelImport()">取消</button><button class="btn btn-primary" onclick="confirmSmartImport()">确认导入 ('+xiSmartItems.length+'条)</button>';
+    const previewEl=document.getElementById('xiprev');
+    previewEl.style.display='';
+    previewEl.innerHTML=buildSmartPreviewHTML(xiSmartItems,sheetSummary);
   }catch(err){
     st('解析 .xlsx 失败：'+err.message,'err');
     openExcelImport();
@@ -3428,12 +4032,38 @@ function handleCSVImport(file){
     if(text.charCodeAt(0)===0xFEFF) text=text.slice(1);
     const rows=parseCSV(text);
     if(rows.length<2){st('文件内容不足','err');return}
-    xiHeaders=rows[0];xiData=rows.slice(1);xiImages=null;
+    // Smart detect format
+    const fmt=detectSheetFormat(rows);
+    let items=[];
+    const sheetSummary=[];
+    if(fmt==='block'){
+      items=parseBlockSheet(rows,'CSV数据');
+      sheetSummary.push(`CSV(块格式): ${items.length}条`);
+    }else if(fmt==='traditional'){
+      items=parseTraditionalSheetAuto(rows,'CSV数据');
+      sheetSummary.push(`CSV(表格式): ${items.length}条`);
+    }
+    if(items.length===0){
+      // Fallback to manual column mapping
+      xiHeaders=rows[0];xiData=rows.slice(1);xiImages=null;
+      xiSmartItems=null;
+      document.getElementById('xidrop').style.display='none';
+      document.getElementById('ximap').style.display='';
+      document.getElementById('xiprev').style.display='none';
+      document.getElementById('ximdf').style.display='flex';
+      document.getElementById('ximdf').innerHTML='<button class="btn" onclick="closeExcelImport()">取消</button><button class="btn btn-primary" onclick="runExcelImport()">确认导入</button>';
+      buildXIMap();
+      buildXIPreview();
+      return;
+    }
+    xiSmartItems=items;
     document.getElementById('xidrop').style.display='none';
-    document.getElementById('ximap').style.display='';
+    document.getElementById('ximap').style.display='none';
     document.getElementById('ximdf').style.display='flex';
-    buildXIMap();
-    buildXIPreview();
+    document.getElementById('ximdf').innerHTML='<button class="btn" onclick="closeExcelImport()">取消</button><button class="btn btn-primary" onclick="confirmSmartImport()">确认导入 ('+items.length+'条)</button>';
+    const previewEl=document.getElementById('xiprev');
+    previewEl.style.display='';
+    previewEl.innerHTML=buildSmartPreviewHTML(items,sheetSummary);
   };
   reader.readAsText(file,'UTF-8');
 }
@@ -3534,7 +4164,7 @@ function buildXIMap(){
 }
 
 function buildXIPreview(){
-  const el=document.getElementById('xiprev');
+  const el=document.getElementById('xiprev2');
   const preview=xiData.slice(0,5);
   el.innerHTML=`<table><thead><tr>${xiHeaders.map(h=>`<th>${eh(h)}</th>`).join('')}</tr></thead><tbody>${preview.map(r=>`<tr>${r.map(c=>`<td title="${eh(c)}">${eh(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
@@ -3630,11 +4260,372 @@ function runExcelImport(){
 }
 
 // ---- Export/Import ----
-function exportJSON(){
+const ALL_EXPORT_FIELDS=['ownerName','name','artist','price','category','purchaseSource','tongjiaRule','transferRule','usageLimit','saleType','purchaseDate','note','isUsed','isTransfer','isDoublePoints'];
+let exState={fields:new Set(ALL_EXPORT_FIELDS)};
+
+function exportJSONDirect(){
   const data={shops:S.shops,persons:S.persons,items:S.items,groups:S.groups,sourceGroup:S.sourceGroup,exportedAt:new Date().toISOString()};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='文游素材备份_'+new Date().toISOString().split('T')[0]+'.json';a.click();
-  URL.revokeObjectURL(a.href);st('备份已导出');
+  URL.revokeObjectURL(a.href);st('代码备份已导出（含图片）');
+}
+
+function openExportModal(){
+  exState={fields:new Set(ALL_EXPORT_FIELDS)};
+  document.querySelectorAll('#exBaseFields .fm-chip').forEach(c=>{
+    c.classList.toggle('active',exState.fields.has(c.dataset.field));
+  });
+  document.getElementById('exSort').value='time_desc';
+  updateExCount();
+  document.getElementById('exmo').style.display='flex';
+}
+function closeExportModal(){
+  document.getElementById('exmo').style.display='none';
+}
+function toggleExportField(field, chipEl){
+  if(exState.fields.has(field)) exState.fields.delete(field);
+  else exState.fields.add(field);
+  if(chipEl) chipEl.classList.toggle('active');
+  updateExCount();
+}
+function updateExCount(){
+  const n=exState.fields.size;
+  document.getElementById('exCount').textContent=n>0?`已选 ${n} 个字段`:'未选任何字段';
+}
+
+// Attach click handlers to export field chips
+document.querySelectorAll('#exBaseFields .fm-chip').forEach(c=>{
+  c.addEventListener('click',()=>toggleExportField(c.dataset.field, c));
+});
+
+function getSortedItemsForExport(){
+  let items=S.items.slice();
+  const sortVal=document.getElementById('exSort')?.value||'time_desc';
+  switch(sortVal){
+    case 'time_desc': items.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));break;
+    case 'time_asc': items.sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));break;
+    case 'price_desc': items.sort((a,b)=>getEffPrice(b)-getEffPrice(a));break;
+    case 'price_asc': items.sort((a,b)=>getEffPrice(a)-getEffPrice(b));break;
+    case 'name_asc': items.sort((a,b)=>(a.name||'').localeCompare(b.name||'','zh'));break;
+    case 'name_desc': items.sort((a,b)=>(b.name||'').localeCompare(a.name||'','zh'));break;
+    case 'category_asc': items.sort((a,b)=>(a.category||'').localeCompare(b.category||'','zh'));break;
+    case 'category_desc': items.sort((a,b)=>(b.category||'').localeCompare(a.category||'','zh'));break;
+  }
+  return items;
+}
+
+function getFieldValue(item,field){
+  switch(field){
+    case 'ownerName': return (item.ownerType==='shop'?'店铺':'个人')+'：'+(item.ownerName||'');
+    case 'name': return item.name||'';
+    case 'artist': return item.artist||'';
+    case 'price': return item.price||0;
+    case 'category':{
+      const cats=getCats(item);
+      let s=cats.join('，');
+      if(item.subCategory) s+=' - '+item.subCategory;
+      if(item.customSubCategory) s+=' - '+item.customSubCategory;
+      return s;
+    }
+    case 'purchaseSource': return (getPSD(item)||'').replace(/\x00/g,'，');
+    case 'tongjiaRule': return getTjTag(item)||'';
+    case 'transferRule':{
+      const tr=getTRBadge(item);
+      return tr.t||'';
+    }
+    case 'usageLimit': return getUsageD(item)||'';
+    case 'saleType': return item.saleType||'';
+    case 'purchaseDate': return item.purchaseDate||'';
+    case 'note': return item.note||'';
+    case 'isUsed': {
+      if(item.isTransfer==='是'){
+        const countVal=item.ownerType==='shop'?(item.countInShop!==false):(item.countInPerson!==false);
+        return countVal?'已转算消费':'已转';
+      }
+      return item.isUsed?`已使用${item.usedCount?` ${item.usedCount}次`:''}`:'未使用';
+    }
+    case 'isTransfer': return item.isTransfer||'否';
+    case 'isDoublePoints': return item.isDoublePoints?'是':'否';
+    default: return '';
+  }
+}
+
+function getFieldLabel(field){
+  const labels={
+    ownerName:'所属',name:'素材名称',artist:'画师/美工',price:'价格',category:'分类',
+    purchaseSource:'购买来源',tongjiaRule:'通加规则',transferRule:'转让规则',usageLimit:'使用次数规则',
+    saleType:'售卖类型',purchaseDate:'购买日期',note:'备注',isUsed:'使用状态',isTransfer:'是否转让',isDoublePoints:'双倍积分'
+  };
+  return labels[field]||field;
+}
+
+function doExport(){
+  if(exState.fields.size===0){st('请至少选择一个字段','err');return}
+  const items=getSortedItemsForExport();
+  if(items.length===0){st('没有可导出的数据','err');return}
+  
+  // Build ordered field list: base fields first, then the 4 detail fields, then others
+  const fieldOrder=ALL_EXPORT_FIELDS;
+  const selectedFields=fieldOrder.filter(f=>exState.fields.has(f));
+  
+  exportXLSX(items,selectedFields);
+}
+
+function exportJSONEnhanced(items,fields){
+  // Legacy: direct JSON backup export (now called via exportJSONDirect)
+  const data={shops:S.shops,persons:S.persons,items:S.items,groups:S.groups,sourceGroup:S.sourceGroup,exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='文游素材备份_'+new Date().toISOString().split('T')[0]+'.json';a.click();
+  URL.revokeObjectURL(a.href);st('备份已导出（含图片）');
+  closeExportModal();
+}
+
+// ---- XLSX Generation ----
+async function exportXLSX(items,fields){
+  st('正在生成Excel文件…');
+  try{
+    const headers=fields.map(f=>getFieldLabel(f));
+    const colCount=fields.length;
+    
+    // Build shared strings
+    const strings=[];
+    const strMap=new Map();
+    function ss(val){
+      const s=val.toString();
+      if(strMap.has(s)) return strMap.get(s);
+      const idx=strings.length;
+      strings.push(s);
+      strMap.set(s,idx);
+      return idx;
+    }
+    
+    // Pre-populate shared strings with all cell values
+    const cellData=[]; // [rowIdx][colIdx] = {type:'s'|'n', val, sIdx}
+    // Header row
+    const headerRow=headers.map(h=>({type:'s',sIdx:ss(h)}));
+    cellData.push(headerRow);
+    // Data rows
+    for(const item of items){
+      const row=[];
+      for(let ci=0;ci<colCount;ci++){
+        const field=fields[ci];
+        const val=getFieldValue(item,field);
+        if(field==='price'){
+          const num=parseFloat(val)||0;
+          row.push({type:'n',val:num});
+        }else{
+          row.push({type:'s',sIdx:ss(val.toString())});
+        }
+      }
+      cellData.push(row);
+    }
+    
+    // Build sharedStrings XML
+    const ssXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="'+strings.length+'" uniqueCount="'+strings.length+'">'+strings.map(s=>'<si><t xml:space="preserve">'+escapeXML(s)+'</t></si>').join('')+'</sst>';
+    
+    // Build sheet XML
+    let sheetXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
+    // Column widths
+    sheetXML+='<cols>';
+    for(let i=0;i<colCount;i++){
+      let maxLen=headers[i].length;
+      for(const row of cellData){
+        const cell=row[i];
+        const val=cell.type==='s'?strings[cell.sIdx]:cell.val.toString();
+        if(val.length>maxLen) maxLen=val.length;
+      }
+      const w=Math.min(Math.max(maxLen+2,10),50);
+      sheetXML+=`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`;
+    }
+    sheetXML+='</cols>';
+    sheetXML+='<sheetData>';
+    for(let ri=0;ri<cellData.length;ri++){
+      let rowXML=`<row r="${ri+1}">`;
+      for(let ci=0;ci<colCount;ci++){
+        const cellRef=numToColRef(ci+1)+(ri+1);
+        const cell=cellData[ri][ci];
+        const style=ri===0?1:(cell.type==='n'?2:0);
+        if(cell.type==='n'){
+          rowXML+=`<c r="${cellRef}" s="${style}"><v>${cell.val}</v></c>`;
+        }else{
+          rowXML+=`<c r="${cellRef}" t="s" s="${style}"><v>${cell.sIdx}</v></c>`;
+        }
+      }
+      rowXML+='</row>';
+      sheetXML+=rowXML;
+    }
+    sheetXML+='</sheetData></worksheet>';
+    
+    // Build workbook XML
+    const wbXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="素材列表" sheetId="1" r:id="rId1"/></sheets></workbook>';
+    
+    // Build workbook.xml.rels
+    const wbRelsXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+    
+    // Build [Content_Types].xml
+    const ctXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
+    
+    // Build styles.xml (header bold + price number format)
+    const stylesXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="等线"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="等线"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF4472C4"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs></styleSheet>';
+    
+    // Build .rels
+    const relsXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+    
+    // Build ZIP
+    const files=[
+      {path:'[Content_Types].xml',data:ctXML},
+      {path:'_rels/.rels',data:relsXML},
+      {path:'xl/workbook.xml',data:wbXML},
+      {path:'xl/_rels/workbook.xml.rels',data:wbRelsXML},
+      {path:'xl/worksheets/sheet1.xml',data:sheetXML},
+      {path:'xl/sharedStrings.xml',data:ssXML},
+      {path:'xl/styles.xml',data:stylesXML}
+    ];
+    
+    const zipBlob=await buildZip(files);
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(zipBlob);
+    a.download='文游素材导出_'+new Date().toISOString().split('T')[0]+'.xlsx';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    st('Excel文件已导出（'+items.length+'条）');
+    closeExportModal();
+  }catch(err){
+    st('导出Excel失败：'+err.message,'err');
+    console.error(err);
+  }
+}
+
+function escapeXML(s){
+  return s.replace(/\x00/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+}
+
+function numToColRef(n){
+  let s='';
+  while(n>0){
+    const m=(n-1)%26;
+    s=String.fromCharCode(65+m)+s;
+    n=Math.floor((n-1)/26);
+  }
+  return s;
+}
+
+async function buildZip(files){
+  // Build ZIP file manually with deflate compression
+  const localParts=[];
+  const centralParts=[];
+  let offset=0;
+  
+  for(const file of files){
+    const encoder=new TextEncoder();
+    const dataBytes=encoder.encode(file.data);
+    
+    // Compress with deflate-raw
+    const cs=new CompressionStream('deflate-raw');
+    const writer=cs.writable.getWriter();
+    writer.write(dataBytes);writer.close();
+    const compressed=new Uint8Array(await new Response(cs.readable).arrayBuffer());
+    
+    const nameBytes=encoder.encode(file.path);
+    const crc=crc32(dataBytes);
+    const compSize=compressed.length;
+    const uncompSize=dataBytes.length;
+    
+    // Local file header
+    const localHeader=new Uint8Array(30+nameBytes.length);
+    const lh=new DataView(localHeader.buffer);
+    lh.setUint32(0,0x04034b50,true); // signature
+    lh.setUint16(4,20,true); // version needed
+    lh.setUint16(6,0,true); // flags
+    lh.setUint16(8,8,true); // compression: deflate
+    lh.setUint16(10,0,true); // mod time
+    lh.setUint16(12,0,true); // mod date
+    lh.setUint32(14,crc,true); // crc32
+    lh.setUint32(18,compSize,true); // compressed size
+    lh.setUint32(22,uncompSize,true); // uncompressed size
+    lh.setUint16(26,nameBytes.length,true); // filename length
+    lh.setUint16(28,0,true); // extra field length
+    localHeader.set(nameBytes,30);
+    
+    localParts.push(localHeader,compressed);
+    
+    // Central directory header
+    const centralHeader=new Uint8Array(46+nameBytes.length);
+    const ch=new DataView(centralHeader.buffer);
+    ch.setUint32(0,0x02014b50,true); // signature
+    ch.setUint16(4,20,true); // version made by
+    ch.setUint16(6,20,true); // version needed
+    ch.setUint16(8,0,true); // flags
+    ch.setUint16(10,8,true); // compression
+    ch.setUint16(12,0,true); // mod time
+    ch.setUint16(14,0,true); // mod date
+    ch.setUint32(16,crc,true); // crc32
+    ch.setUint32(20,compSize,true); // compressed size
+    ch.setUint32(24,uncompSize,true); // uncompressed size
+    ch.setUint16(28,nameBytes.length,true); // filename length
+    ch.setUint16(30,0,true); // extra field length
+    ch.setUint16(32,0,true); // comment length
+    ch.setUint16(34,0,true); // disk number
+    ch.setUint16(36,0,true); // internal attrs
+    ch.setUint32(38,0,true); // external attrs
+    ch.setUint32(42,offset,true); // local header offset
+    centralHeader.set(nameBytes,46);
+    
+    centralParts.push(centralHeader);
+    offset+=localHeader.length+compSize;
+  }
+  
+  // Calculate central directory size
+  let centralSize=0;
+  centralParts.forEach(p=>centralSize+=p.length);
+  
+  // End of central directory
+  const eocd=new Uint8Array(22);
+  const ed=new DataView(eocd.buffer);
+  ed.setUint32(0,0x06054b50,true); // signature
+  ed.setUint16(4,0,true); // disk number
+  ed.setUint16(6,0,true); // disk with central dir
+  ed.setUint16(8,files.length,true); // entries on this disk
+  ed.setUint16(10,files.length,true); // total entries
+  ed.setUint32(12,centralSize,true); // central dir size
+  ed.setUint32(16,offset,true); // central dir offset
+  ed.setUint16(20,0,true); // comment length
+  
+  // Combine all parts
+  const allParts=[...localParts,...centralParts,eocd];
+  let totalSize=0;
+  allParts.forEach(p=>totalSize+=p.length);
+  const result=new Uint8Array(totalSize);
+  let pos=0;
+  for(const part of allParts){
+    result.set(part,pos);
+    pos+=part.length;
+  }
+  
+  return new Blob([result],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+
+// CRC32 lookup table
+const crc32Table=[];
+for(let i=0;i<256;i++){
+  let c=i;
+  for(let j=0;j<8;j++){
+    if(c&1) c=0xEDB88320^(c>>>1);
+    else c=c>>>1;
+  }
+  crc32Table.push(c>>>0);
+}
+function crc32(bytes){
+  let crc=0xFFFFFFFF;
+  for(let i=0;i<bytes.length;i++){
+    crc=crc32Table[(crc^bytes[i])&0xFF]^(crc>>>8);
+  }
+  return (crc^0xFFFFFFFF)>>>0;
+}
+
+function exportJSON(){
+  // Direct JSON backup export (no modal)
+  exportJSONDirect();
 }
 function importJSON(e){
   const file=e.target.files[0];e.target.value='';if(!file)return;
@@ -3664,7 +4655,7 @@ function closeConfirm(){document.getElementById('co').style.display='none'}
 function st(msg,type){const el=document.getElementById('tst');el.textContent=msg;el.style.display='block';el.style.background=type==='err'?'var(--danger)':'#1e293b';clearTimeout(el._t);el._t=setTimeout(()=>{el.style.display='none'},2500)}
 
 // ---- Keyboard ----
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeItemModal();closeLb();closeConfirm();closeExcelImport();hideCtxMenu();closeSourceModal();closeGroupModal();closeFilterModal()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeItemModal();closeLb();closeConfirm();closeExcelImport();hideCtxMenu();closeSourceModal();closeGroupModal();closeFilterModal();closeExportModal()}});
 
 // ---- Drag & drop for import ----
 document.getElementById('xidrop').addEventListener('dragover',e=>{e.preventDefault();e.currentTarget.style.borderColor='var(--primary)'});
