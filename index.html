@@ -211,6 +211,11 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .mc.mc-selected .mci::after{content:'✓';position:absolute;top:6px;left:6px;width:22px;height:22px;color:#fff;font-size:14px;font-weight:700;z-index:4;display:flex;align-items:center;justify-content:center}
 .mc.mc-multiselect .mci{cursor:pointer}
 .mc.mc-multiselect .mci:hover::before{content:'';position:absolute;top:6px;left:6px;width:22px;height:22px;border:2px solid var(--primary);border-radius:50%;z-index:3;background:rgba(255,255,255,.8)}
+/* In multi-select mode: no hover lift/flash animation, only instant blue frame + checkmark */
+.mc.mc-multiselect{transition:none}
+.mc.mc-multiselect:hover{box-shadow:none;transform:none}
+.mc.mc-selected{transition:none}
+.mc.mc-selected:hover{box-shadow:0 0 0 3px var(--primary),0 3px 12px rgba(99,102,241,.2);transform:none}
 .ms-bar{position:sticky;top:0;z-index:50;background:var(--primary);color:#fff;padding:10px 16px;border-radius:8px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 12px rgba(99,102,241,.3)}
 .ms-bar .ms-info{font-size:13px;display:flex;align-items:center;gap:6px}
 .ms-bar .ms-btns{display:flex;gap:8px;flex-wrap:wrap}
@@ -2776,38 +2781,57 @@ function enterMoveMode(){
 let multiSelectMode=false;
 let selectedItems=new Set();
 
+function ensureMsBar(){
+  if(document.getElementById('msBar')) return;
+  const grid=document.getElementById('matGrid');
+  if(!grid) return;
+  const bar=document.createElement('div');
+  bar.className='ms-bar';
+  bar.id='msBar';
+  grid.parentNode.insertBefore(bar,grid);
+}
+function setCardSelected(id,on){
+  const card=document.querySelector(`.mc[data-id="${id}"]`);
+  if(card) card.classList.toggle('mc-selected',on);
+}
 function enterMultiSelect(id){
   if(!multiSelectMode){
     multiSelectMode=true;
     selectedItems=new Set([id]);
+    // No full re-render — just add classes to existing cards (keeps scroll position)
+    ensureMsBar();
+    document.querySelectorAll('#matGrid .mc').forEach(c=>c.classList.add('mc-multiselect'));
+    setCardSelected(id,true);
   }else{
-    if(selectedItems.has(id)) selectedItems.delete(id);
-    else selectedItems.add(id);
+    toggleMultiSelect(id);
+    return;
   }
-  renderMaterials();
   renderMultiSelectBar();
 }
 function exitMultiSelect(){
   multiSelectMode=false;
   selectedItems.clear();
-  renderMaterials();
+  document.querySelectorAll('#matGrid .mc').forEach(c=>c.classList.remove('mc-multiselect','mc-selected'));
   renderMultiSelectBar();
 }
 function toggleMultiSelect(id){
-  if(selectedItems.has(id)) selectedItems.delete(id);
-  else selectedItems.add(id);
-  renderMaterials();
+  const was=selectedItems.has(id);
+  if(was) selectedItems.delete(id); else selectedItems.add(id);
+  // Only toggle the clicked card's class — no full re-render, scroll stays in place
+  setCardSelected(id,!was);
   renderMultiSelectBar();
 }
 function selectAllVisible(){
   const visible=getItemsForView().map(i=>i.id);
   visible.forEach(id=>selectedItems.add(id));
-  renderMaterials();
+  document.querySelectorAll('#matGrid .mc').forEach(c=>{
+    if(selectedItems.has(c.dataset.id)) c.classList.add('mc-selected');
+  });
   renderMultiSelectBar();
 }
 function deselectAllVisible(){
   selectedItems.clear();
-  renderMaterials();
+  document.querySelectorAll('#matGrid .mc').forEach(c=>c.classList.remove('mc-selected'));
   renderMultiSelectBar();
 }
 function renderMultiSelectBar(){
@@ -2838,6 +2862,27 @@ function batchDeleteItems(){
     st(`已删除 ${n} 个素材`);
   });
 }
+function bindBatchEditAutoCheck(){
+  const form=document.getElementById('batchEditForm');
+  if(!form) return;
+  // Selecting any radio option auto-checks its field checkbox (e.g. 选择类型=古现/通用 → be_styleTag checked)
+  form.onchange=function(e){
+    const t=e.target;
+    if(t&&t.type==='radio'){
+      const cb=document.getElementById('be_'+t.name);
+      if(cb) cb.checked=true;
+    }
+  };
+  // Typing content into an input auto-checks its field checkbox; clearing unchecks it
+  form.oninput=function(e){
+    const t=e.target;
+    if(!t) return;
+    const isInput=t.type==='text'||t.type==='number'||t.type==='date'||t.tagName==='TEXTAREA';
+    if(!isInput) return;
+    const cb=document.getElementById(t.id.replace(/_val$/,''));
+    if(cb) cb.checked=t.value.trim()!=='';
+  };
+}
 function openBatchEdit(){
   if(selectedItems.size===0) return;
   // Reset form
@@ -2845,6 +2890,7 @@ function openBatchEdit(){
   document.querySelectorAll('#batchEditForm input[type="text"],#batchEditForm input[type="number"],#batchEditForm input[type="date"],#batchEditForm textarea').forEach(c=>c.value='');
   document.querySelectorAll('#batchEditForm input[type="radio"]').forEach(c=>c.checked=false);
   document.getElementById('batchEditCount').textContent=selectedItems.size;
+  bindBatchEditAutoCheck();
   document.getElementById('batchEditModal').style.display='flex';
 }
 function closeBatchEdit(){
