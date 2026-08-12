@@ -424,7 +424,10 @@ input,select,textarea{font-family:inherit;font-size:16px}
     <div class="fm-body">
       <div class="fm-sec"><h4>画师/美工</h4><div class="fm-chips" id="fmArtist"></div></div>
       <div class="fm-sec"><h4>售卖类型</h4><div class="fm-chips" id="fmSaleType"></div></div>
-      <div class="fm-sec"><h4>属性分类</h4><div class="fm-chips" id="fmCategory"></div></div>
+      <div class="fm-sec"><h4>属性分类</h4><div class="fm-chips" id="fmCategory"></div>
+        <div id="fmSubRow" style="display:none;margin-top:8px"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">子项</div><div class="fm-chips" id="fmSubCategory"></div></div>
+        <div id="fmTagRow" style="margin-top:8px"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">选择标签</div><div class="fm-chips" id="fmStyleTag"></div></div>
+      </div>
       <div class="fm-sec"><h4>购买来源</h4><div class="fm-chips" id="fmSource"></div></div>
       <div class="fm-sec"><h4>通加规则</h4><div class="fm-chips" id="fmTongjia"></div></div>
       <div class="fm-sec" id="fmStatusSec"><h4>状态</h4><div class="fm-chips" id="fmStatus"></div></div>
@@ -472,7 +475,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
           <span class="fm-chip active" data-field="isTransfer">是否转让</span>
           <span class="fm-chip active" data-field="isDoublePoints">双倍积分</span>
         </div>
-        <div style="font-size:11px;color:var(--text2);margin-top:4px">蓝色=已选中，灰色=未选中。导出列顺序：所属 | 素材名称 | 画师/美工 | 价格 | 分类 | 购买来源 | 通加规则 | 转让规则 | 使用次数规则 | 售卖类型 | 购买日期 | 备注 | 使用状态 | 是否转让 | 双倍积分</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:4px">蓝色=已选中，灰色=未选中。店铺导出列顺序：所属 | 素材名称 | 画师/美工 | 价格 | 分类 | 购买来源 | 通加规则 | 转让规则 | 使用次数规则 | 售卖类型 | 购买日期 | 备注 | 使用状态 | 是否转让 | 双倍积分。个人导出：无所属列，画师/美工为第一列，按画师/美工名排序。</div>
       </div>
     </div>
     <div class="fm-ft">
@@ -495,16 +498,12 @@ input,select,textarea{font-family:inherit;font-size:16px}
           <input type="text" id="be_ownerName_val" placeholder="新的所属名称" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
         </div>
         <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_name"> <strong>素材名称</strong></label>
+          <input type="text" id="be_name_val" placeholder="新的素材名称" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+        </div>
+        <div class="fm-sec">
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_artist"> <strong>画师/美工</strong></label>
-          <input type="text" id="be_artist_val" placeholder="新的画师/美工名" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
-        </div>
-        <div class="fm-sec">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_category"> <strong>分类</strong></label>
-          <input type="text" id="be_category_val" placeholder="新的分类（多个用逗号隔开）" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
-        </div>
-        <div class="fm-sec">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_price"> <strong>价格</strong></label>
-          <input type="number" id="be_price_val" placeholder="新的价格" min="0" step="0.01" style="width:120px;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+          <input type="text" id="be_artist_val" placeholder="新的画师/美工名（多人用逗号隔开）" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
         </div>
         <div class="fm-sec">
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_saleType"> <strong>售卖类型</strong></label>
@@ -517,8 +516,69 @@ input,select,textarea{font-family:inherit;font-size:16px}
           </div>
         </div>
         <div class="fm-sec">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_note"> <strong>备注</strong></label>
-          <textarea id="be_note_val" placeholder="新的备注内容" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;min-height:60px;resize:vertical;font-family:inherit"></textarea>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_category"> <strong>分类</strong></label>
+          <input type="text" id="be_category_val" placeholder="新的分类（多个用逗号隔开）" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_subCategory"> <strong>子分类</strong></label>
+          <input type="text" id="be_subCategory_val" placeholder="新的子分类（多个用逗号隔开）" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_styleTag"> <strong>选择类型</strong></label>
+          <div class="rg" style="margin-top:6px">
+            <label><input type="radio" name="be_styleTag" value="古现/通用"> 古现/通用</label>
+            <label><input type="radio" name="be_styleTag" value="古代"> 古代</label>
+            <label><input type="radio" name="be_styleTag" value="现代"> 现代</label>
+            <label><input type="radio" name="be_styleTag" value="其他"> 其他</label>
+          </div>
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_purchaseSource"> <strong>购买来源</strong></label>
+          <div class="rg" style="margin-top:6px">
+            <label><input type="radio" name="be_purchaseSource" value="购入"> 购入</label>
+            <label><input type="radio" name="be_purchaseSource" value="赞助"> 赞助</label>
+            <label><input type="radio" name="be_purchaseSource" value="接转"> 接转</label>
+            <label><input type="radio" name="be_purchaseSource" value="回购"> 回购</label>
+            <label><input type="radio" name="be_purchaseSource" value="定制"> 定制</label>
+            <label><input type="radio" name="be_purchaseSource" value="其他"> 其他</label>
+          </div>
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_tongjiaRule"> <strong>通加规则</strong></label>
+          <div class="rg" style="margin-top:6px">
+            <label><input type="radio" name="be_tongjiaRule" value="不可穿通加"> 不可穿通加</label>
+            <label><input type="radio" name="be_tongjiaRule" value="可穿通加"> 可穿通加</label>
+          </div>
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_transferRule"> <strong>转让规则</strong></label>
+          <div class="rg" style="margin-top:6px">
+            <label><input type="radio" name="be_transferRule" value="不可转"> 不可转</label>
+            <label><input type="radio" name="be_transferRule" value="退圈可转"> 退圈可转</label>
+            <label><input type="radio" name="be_transferRule" value="不退圈可转"> 不退圈可转</label>
+          </div>
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_price"> <strong>价格</strong></label>
+          <input type="number" id="be_price_val" placeholder="新的价格" min="0" step="0.01" style="width:120px;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_purchaseDate"> <strong>购买日期</strong></label>
+          <input type="date" id="be_purchaseDate_val" style="width:180px;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_isDoublePoints"> <strong>双倍积分</strong></label>
+          <div class="rg" style="margin-top:6px">
+            <label><input type="radio" name="be_isDoublePoints" value="true"> 是</label>
+            <label><input type="radio" name="be_isDoublePoints" value="false"> 否</label>
+          </div>
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_usageLimitType"> <strong>使用次数规则</strong></label>
+          <div class="rg" style="margin-top:6px">
+            <label><input type="radio" name="be_usageLimitType" value="limited"> 限制次数</label>
+            <label><input type="radio" name="be_usageLimitType" value="unlimited"> 不限制次数</label>
+          </div>
         </div>
         <div class="fm-sec">
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_isUsed"> <strong>使用状态</strong></label>
@@ -533,6 +593,10 @@ input,select,textarea{font-family:inherit;font-size:16px}
             <label><input type="radio" name="be_isTransfer" value="是"> 是</label>
             <label><input type="radio" name="be_isTransfer" value="否"> 否</label>
           </div>
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_note"> <strong>备注</strong></label>
+          <textarea id="be_note_val" placeholder="新的备注内容" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;min-height:60px;resize:vertical;font-family:inherit"></textarea>
         </div>
       </div>
     </div>
@@ -588,20 +652,17 @@ input,select,textarea{font-family:inherit;font-size:16px}
 
       <!-- 属性分类 -->
       <div class="fg"><label>属性分类</label>
-        <div class="cat-tag-row" style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start">
-          <div class="cat-grid" id="fc"></div>
-          <div id="tagSec" style="display:none" class="tag-inline">
-            <div class="rg" style="display:flex;flex-wrap:wrap;gap:4px">
-              <label><input type="radio" name="ftag" value="通用" onchange="onTagCheck()"> 通用</label>
-              <label><input type="radio" name="ftag" value="古代" onchange="onTagCheck()"> 古代</label>
-              <label><input type="radio" name="ftag" value="现代" onchange="onTagCheck()"> 现代</label>
-              <label><input type="radio" name="ftag" value="架空" onchange="onTagCheck()"> 架空</label>
-              <label><input type="radio" name="ftag" value="其他" onchange="onTagCheck()"> 其他</label>
-            </div>
-            <input type="text" id="ftagc" placeholder="自定义标签" style="display:none;margin-top:4px">
-          </div>
-        </div>
+        <div class="cat-grid" id="fc"></div>
         <div id="catsub" style="display:none;margin-top:6px"><label style="font-size:12px;color:var(--text2);margin-bottom:4px;display:block">选择子类</label><div class="cat-grid" id="fcsubGrid"></div></div>
+        <div id="tagSec" style="display:none;margin-top:6px"><label style="font-size:12px;color:var(--text2);margin-bottom:4px;display:block">选择类型</label>
+          <div class="rg" style="display:flex;flex-wrap:wrap;gap:4px">
+            <label><input type="radio" name="ftag" value="古现/通用" onchange="onTagCheck()"> 古现/通用</label>
+            <label><input type="radio" name="ftag" value="古代" onchange="onTagCheck()"> 古代</label>
+            <label><input type="radio" name="ftag" value="现代" onchange="onTagCheck()"> 现代</label>
+            <label><input type="radio" name="ftag" value="其他" onchange="onTagCheck()"> 其他</label>
+          </div>
+          <input type="text" id="ftagc" placeholder="自定义标签" style="display:none;margin-top:4px">
+        </div>
         <input type="text" id="fccs" placeholder="自定义子分类" style="display:none;margin-top:6px">
         <input type="text" id="fbl" placeholder="绑定的立绘名称" style="display:none;margin-top:6px">
         <input type="text" id="fcc" placeholder="自定义分类名称" style="display:none;margin-top:6px">
@@ -866,6 +927,26 @@ const TAG_CATS=new Set(['立绘','卤蛋','加装','CG','美工','Q版','素材'
 const TAG_SUB_CATS=new Set(['加装','美工','Q版','音乐']);
 const CCOL={'立绘':'#6366f1','卤蛋':'#f97316','加装':'#db2777','CG':'#8b5cf6','美工':'#f59e0b','Q版':'#22c55e','素材':'#64748b','特效':'#7c3aed','场景':'#0ea5e9','音乐':'#d946ef','黑科技':'#1e293b','其他':'#94a3b8'};
 
+// Detect styleTag from text content (古/现/古代/现代/古现)
+function detectStyleTag(){
+  const texts=Array.from(arguments).filter(t=>t&&typeof t==='string').map(t=>t.toLowerCase());
+  const combined=texts.join(' ');
+  // Check "古现" first (before "古" and "现" individually)
+  if(combined.includes('古现')) return '古现/通用';
+  // Also match "通用" keyword
+  if(combined.includes('通用')) return '古现/通用';
+  // Check "古代" and "现代"
+  if(combined.includes('古代')||combined.includes('古风')) return '古代';
+  if(combined.includes('现代')||combined.includes('现风')) return '现代';
+  // Check standalone "古" or "现" (from subCategory columns like 古/现)
+  for(const t of texts){
+    const v=t.trim();
+    if(v==='古'||v==='古代') return '古代';
+    if(v==='现'||v==='现代') return '现代';
+  }
+  return ''; // No match — leave empty (will default to 古现/通用 in form)
+}
+
 // Preset shop name list — only names in this set are recognized as shops during import
 const PRESET_SHOPS=new Set(['三分春色','寻意阁','烤鸭坊','喵样年华','光明顶','染霜华','春日宴','栖西楼','嗷呜菜园','森罗万象','犀峰阁','十四轩','癫笑往生','沁黎居','银河庄园','锦瑟','柠檬汽水糖','一沽酒','枕砚','弱水三千','河底捞','沁梦阁','一页书','画重锦','溯梦','休眠火山','定风波','琉心瑜','YSYS~TUDIO','甜鱼','清鸢','Evildoer','绘里','汉晴画轩','诸城叙梦','舞幺幺','金风细雨','千亦阁','酒香村','壹人组','有枝小店','储秀云心','欢乐炸鸡店','古道有巷','鸢上花','景云蔚','三薰屋','岁如初','十里长欢','子非鱼','易稚园','清曜','水墨蛋清','麻将馆麻酱','点今阁','云桓工作室','君笙拂兮','听说有神也有人便利小店','十二宫','临念樱','食鉴','长街小筑','妙蝉舟','稻香村','墨上枝头','无肉不欢','画厂','浮生若梦','小云楼','大观园','闲云鹤居','碧海潮生','千秋令','满庭芳','玉棂','丹青客','画夜','花果山','栖木轩','不眠夜','易梦铺子','十方庭','烩面馆','果酒一两','陌心堂','三台令','一川云山','清水滴墨','污力葫','夜阑听雨阁','竹间庭','惓思记','三叶草','纸入风华工作室','天边的鱼','未央宫','秦时歌','六壮士','聚锦州','韶华梦','壹鹊桥','凤华引','沐棠里','注咕生','一品墨客','鸽子小卖部','远山眉黛','诗晴画意','伊甸园','废画','忘川阁','相见欢','北梦店铺','他山玉','羽若雪兮','橙娘素材铺','圣山','能不能画','上上签','喜和爱','食半','青玉案','寒江雪','锦鲤绘','荷糖月色','妙笔花生','花晨月夕','永遇乐','向阳花','浮镜阁','好运来','兰亭阁','雪言禾心','鸽鸽屋','三重雪','清平乐','椒花颂声','青庭','无尽夏','枕山栖水','柔树特效','米卷儿小铺','紫光特效','笙歌惊鸿','黑相簿','黄桃罐头','泊客音频','寻欢CV工作室','乔一音乐屋','天音纪','久盟音画','麋鹿','寒松吟','花园','云月素材','猫耳面馆','晚荷渡','山水有色','迭代联盟','无声诗','六月集','五月流火','南梦湖','鹤云楼','汀雨阁','明日雪','浮生记','双栖阁','青玉阁','山有木兮','霖楚阁','悦君兮','春禅秋茗','故人归','陌上情','富婆养生会所','溯月楼','吟君音','璇星阁','喵花屋','归心殿','红莲落衣','大观园剧本分部','春日尽','小小柠檬','踏鹊枝','红尘之上','花暮瑾年','九重春色','墨离阁','意难平','无言书生','疏楼曲','西江月','花谷','幺幺零','亿镜','木寒阁','小山禾','江文明']);
 
@@ -1003,7 +1084,7 @@ function ld(){
     selectedGroup = st.selectedGroup !== undefined ? st.selectedGroup : 'all';
     S._filterCat=st.filterCat||'all'; S._filterUsed=st.filterUsed||'all';
     S._filterSort=st.filterSort||'time_desc'; S._filterQuery=st.filterQuery||'';
-    if(st.S_filter){ S_filter=st.S_filter; if(!S_filter.status) S_filter.status=[]; }
+    if(st.S_filter){ S_filter=st.S_filter; if(!S_filter.status) S_filter.status=[]; if(!S_filter.subCategory) S_filter.subCategory=[]; if(!S_filter.styleTag) S_filter.styleTag=[]; S_filter.styleTag=S_filter.styleTag.map(t=>(t==='古现'||t==='通用')?'古现/通用':t); }
     // If localStorage has data, we need to migrate to IDB
     if(S.shops.length||S.persons.length||S.items.length) _ldFromLS=true;
   }catch(e){ S.shops=[]; S.persons=[]; S.items=[]; S.pinned={}; S.groups={shop:[],person:[]}; S.sourceGroup={}; S.groupCollapsed={shop:{},person:{}}; }
@@ -1880,9 +1961,14 @@ function renderCard(i){
     <div class="img-nav next" onclick="event.stopPropagation();cardNextImg('${cid}')">${I.chevronR}</div>
     <div class="img-count">${imgs.length}张</div>`:'';
   // Category tags (colored pill, primary identifier — distinct from gray tags)
-  const catTagsHtml=catTags.map(t=>{
+  let catTagsHtml=catTags.map(t=>{
     return `<span class="mccat" style="background:${t.color};color:#fff">${eh(t.text)}</span>`;
   }).join('');
+  // Style type tag (古现/通用/古代/现代/其他) — shown as colored pill next to category tags
+  if(i.styleTag){
+    const tagLabel=i.styleTag==='其他'?(i.customTag||'其他'):i.styleTag;
+    catTagsHtml+=`<span class="mccat" style="background:#4f46e5;color:#fff">${eh(tagLabel)}</span>`;
+  }
   // Unified tags (neutral gray, below category tags)
   let uniTagsHtml='';
   if(i.saleType) uniTagsHtml+=`<span class="mcbg">${eh(i.saleType)}</span>`;
@@ -2131,19 +2217,19 @@ function _renderNextBatch(){
 }
 
 // ---- Filter Modal (Advanced Filter) ----
-let S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[],status:[]};
+let S_filter={artist:[],saleType:[],category:[],subCategory:[],styleTag:[],source:[],tongjia:[],status:[]};
 function openFilterModal(){
   const items=getItemsForView();
   // Collect all unique values
-  const artists=new Set(), saleTypes=new Set(), cats=new Set(), sources=new Set(), tongjias=new Set();
+  const artists=new Set(), saleTypes=new Set(), cats=new Set(), sources=new Set(), tongjias=new Set(), styleTags=new Set();
   items.forEach(i=>{
     if(i.artist) splitArtists(i.artist).forEach(a=>artists.add(a));
     if(i.saleType) saleTypes.add(i.saleType);
     getCats(i).forEach(c=>cats.add(c));
-    // Add styleTag to category filter options
+    // Collect style tags
     if(i.styleTag){
       const tagLabel=i.styleTag==='其他'?(i.customTag||'其他'):i.styleTag;
-      cats.add('标签:'+tagLabel);
+      styleTags.add(tagLabel);
     }
     const psd=getPSD(i);
     if(psd){
@@ -2155,6 +2241,8 @@ function openFilterModal(){
     const tj=getTongjiaRule(i);
     if(tj) tongjias.add(tj);
   });
+  // Always show standard style tag options
+  ['古现/通用','古代','现代','其他'].forEach(t=>styleTags.add(t));
   // Dynamic status options
   const statusOptions=[];
   const hasUsed=items.some(i=>i.isUsed);
@@ -2170,18 +2258,34 @@ function openFilterModal(){
   renderFilterChips('fmArtist',[...artists].sort((a,b)=>a.localeCompare(b,'zh')),'artist');
   renderFilterChips('fmSaleType',[...saleTypes].sort((a,b)=>a.localeCompare(b,'zh')),'saleType');
   renderFilterChips('fmCategory',[...cats].sort((a,b)=>a.localeCompare(b,'zh')),'category');
+  renderFilterChips('fmStyleTag',[...styleTags].sort((a,b)=>a.localeCompare(b,'zh')),'styleTag');
   renderFilterChips('fmSource',[...sources].sort((a,b)=>a.localeCompare(b,'zh')),'source');
   renderFilterChips('fmTongjia',[...tongjias].sort((a,b)=>a.localeCompare(b,'zh')),'tongjia');
+  // Update sub-category row based on selected categories
+  updateFilterSubRow();
   updateFilterCount();
   document.getElementById('fmo').style.display='flex';
+}
+function updateFilterSubRow(){
+  const selectedCats=S_filter.category;
+  const allSubs=new Set();
+  selectedCats.forEach(c=>{ if(SUBS[c]) SUBS[c].forEach(s=>allSubs.add(s)); });
+  const subArr=[...allSubs];
+  const subRow=document.getElementById('fmSubRow');
+  if(subArr.length>0){
+    subRow.style.display='';
+    renderFilterChips('fmSubCategory',subArr,'subCategory');
+  }else{
+    subRow.style.display='none';
+    S_filter.subCategory=[];
+  }
 }
 function renderFilterChips(containerId,values,dim){
   const el=document.getElementById(containerId);
   if(values.length===0){el.innerHTML='<span style="font-size:12px;color:var(--text2)">无</span>';return}
   el.innerHTML=values.map(v=>{
     const active=S_filter[dim].includes(v)?' active':'';
-    const display=v.startsWith('标签:')?v.slice(3):v;
-    return `<span class="fm-chip${active}" onclick="toggleFilterChip(event,'${dim}','${eh(v)}')">${eh(display)}</span>`;
+    return `<span class="fm-chip${active}" onclick="toggleFilterChip(event,'${dim}','${eh(v)}')">${eh(v)}</span>`;
   }).join('');
 }
 function renderStatusChips(options){
@@ -2196,10 +2300,12 @@ function toggleFilterChip(e,dim,val){
   const arr=S_filter[dim];
   const idx=arr.indexOf(val);
   if(idx>=0) arr.splice(idx,1); else arr.push(val);
+  // When category changes, update sub-category row
+  if(dim==='category') updateFilterSubRow();
   updateFilterCount();
 }
 function updateFilterCount(){
-  const total=S_filter.artist.length+S_filter.saleType.length+S_filter.category.length+S_filter.source.length+S_filter.tongjia.length+S_filter.status.length;
+  const total=S_filter.artist.length+S_filter.saleType.length+S_filter.category.length+S_filter.subCategory.length+S_filter.styleTag.length+S_filter.source.length+S_filter.tongjia.length+S_filter.status.length;
   document.getElementById('fmCount').textContent=total>0?`已选 ${total} 项`:'';
 }
 function applyFilter(){
@@ -2207,16 +2313,17 @@ function applyFilter(){
   renderMaterials();
 }
 function resetFilter(){
-  S_filter={artist:[],saleType:[],category:[],source:[],tongjia:[],status:[]};
+  S_filter={artist:[],saleType:[],category:[],subCategory:[],styleTag:[],source:[],tongjia:[],status:[]};
   // Reset all chips
   document.querySelectorAll('#fmo .fm-chip.active').forEach(c=>c.classList.remove('active'));
+  document.getElementById('fmSubRow').style.display='none';
   updateFilterCount();
 }
 function closeFilterModal(){
   document.getElementById('fmo').style.display='none';
 }
 function hasActiveFilter(){
-  return S_filter.artist.length>0||S_filter.saleType.length>0||S_filter.category.length>0||S_filter.source.length>0||S_filter.tongjia.length>0||S_filter.status.length>0;
+  return S_filter.artist.length>0||S_filter.saleType.length>0||S_filter.category.length>0||S_filter.subCategory.length>0||S_filter.styleTag.length>0||S_filter.source.length>0||S_filter.tongjia.length>0||S_filter.status.length>0;
 }
 function applyFilterToItems(items){
   if(!hasActiveFilter()) return items;
@@ -2228,11 +2335,16 @@ function applyFilterToItems(items){
     if(S_filter.saleType.length>0&&!S_filter.saleType.includes(i.saleType||'')) return false;
     if(S_filter.category.length>0){
       const iCats=getCats(i);
-      // Also check styleTag for tag: prefixed filters
+      if(!iCats.some(c=>S_filter.category.includes(c))) return false;
+    }
+    if(S_filter.subCategory.length>0){
+      const iSubs=(i.subCategory||'').split(',').map(s=>s.trim()).filter(Boolean);
+      if(i.customSubCategory) iSubs.push(i.customSubCategory);
+      if(!iSubs.some(s=>S_filter.subCategory.includes(s))) return false;
+    }
+    if(S_filter.styleTag.length>0){
       const iTag=i.styleTag?(i.styleTag==='其他'?(i.customTag||'其他'):i.styleTag):'';
-      const matchCat=iCats.some(c=>S_filter.category.includes(c));
-      const matchTag=iTag&&S_filter.category.includes('标签:'+iTag);
-      if(!matchCat&&!matchTag) return false;
+      if(!iTag||!S_filter.styleTag.includes(iTag)) return false;
     }
     if(S_filter.source.length>0){
       const psd=getPSD(i);
@@ -2620,8 +2732,11 @@ function showCardCtx(e,id){
   const i=S.items.find(x=>x.id===id); if(!i) return;
   const m=document.getElementById('ctxMenu');
   m.innerHTML=`
+    <div class="ctx-item" onclick="openEditItem('${id}');hideCtx()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>编辑商品
+    </div>
     <div class="ctx-item" onclick="enterMultiSelect('${id}');hideCtx()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>多选
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>批量多选
     </div>
     <div class="ctx-item" onclick="copyItem('${id}');hideCtx()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>复制商品
@@ -2630,11 +2745,8 @@ function showCardCtx(e,id){
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>移动排序
     </div>
     <div class="ctx-sep"></div>
-    <div class="ctx-item" onclick="openEditItem('${id}');hideCtx()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>编辑
-    </div>
     <div class="ctx-item danger" onclick="confirmDelItem('${id}');hideCtx()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>删除
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>删除商品
     </div>`;
   m.style.display='block';
   m.style.left=Math.min(e.clientX,window.innerWidth-160)+'px';
@@ -2730,7 +2842,7 @@ function openBatchEdit(){
   if(selectedItems.size===0) return;
   // Reset form
   document.querySelectorAll('#batchEditForm input[type="checkbox"]').forEach(c=>c.checked=false);
-  document.querySelectorAll('#batchEditForm input[type="text"],#batchEditForm input[type="number"],#batchEditForm textarea,#batchEditForm select').forEach(c=>c.value='');
+  document.querySelectorAll('#batchEditForm input[type="text"],#batchEditForm input[type="number"],#batchEditForm input[type="date"],#batchEditForm textarea').forEach(c=>c.value='');
   document.querySelectorAll('#batchEditForm input[type="radio"]').forEach(c=>c.checked=false);
   document.getElementById('batchEditCount').textContent=selectedItems.size;
   document.getElementById('batchEditModal').style.display='flex';
@@ -2740,37 +2852,93 @@ function closeBatchEdit(){
 }
 function applyBatchEdit(){
   const updates={};
-  // Check which fields are selected and collect values
+  // 所属名称
   if(document.getElementById('be_ownerName').checked){
     updates.ownerName=document.getElementById('be_ownerName_val').value.trim();
     if(!updates.ownerName){st('所属不能为空','err');return}
   }
+  // 素材名称
+  if(document.getElementById('be_name').checked){
+    updates.name=document.getElementById('be_name_val').value.trim();
+    if(!updates.name){st('素材名称不能为空','err');return}
+  }
+  // 画师/美工
   if(document.getElementById('be_artist').checked){
     updates.artist=document.getElementById('be_artist_val').value.trim();
   }
-  if(document.getElementById('be_category').checked){
-    updates.category=document.getElementById('be_category_val').value.trim();
-  }
-  if(document.getElementById('be_price').checked){
-    const p=parseFloat(document.getElementById('be_price_val').value);
-    if(isNaN(p)||p<0){st('价格无效','err');return}
-    updates.price=p;
-  }
+  // 售卖类型
   if(document.getElementById('be_saleType').checked){
     const r=document.querySelector('input[name="be_saleType"]:checked');
     if(!r){st('请选择售卖类型','err');return}
     updates.saleType=r.value;
   }
-  if(document.getElementById('be_note').checked){
-    updates.note=document.getElementById('be_note_val').value.trim();
+  // 分类
+  if(document.getElementById('be_category').checked){
+    updates.category=document.getElementById('be_category_val').value.trim();
   }
+  // 子分类
+  if(document.getElementById('be_subCategory').checked){
+    updates.subCategory=document.getElementById('be_subCategory_val').value.trim();
+  }
+  // 选择类型
+  if(document.getElementById('be_styleTag').checked){
+    const r=document.querySelector('input[name="be_styleTag"]:checked');
+    if(!r){st('请选择选择类型','err');return}
+    updates.styleTag=r.value;
+    if(r.value==='其他') updates.customTag=''; // will need manual edit for custom
+  }
+  // 购买来源
+  if(document.getElementById('be_purchaseSource').checked){
+    const r=document.querySelector('input[name="be_purchaseSource"]:checked');
+    if(!r){st('请选择购买来源','err');return}
+    updates.purchaseSource=r.value;
+  }
+  // 通加规则
+  if(document.getElementById('be_tongjiaRule').checked){
+    const r=document.querySelector('input[name="be_tongjiaRule"]:checked');
+    if(!r){st('请选择通加规则','err');return}
+    updates.tongjiaRule=r.value;
+  }
+  // 转让规则
+  if(document.getElementById('be_transferRule').checked){
+    const r=document.querySelector('input[name="be_transferRule"]:checked');
+    if(!r){st('请选择转让规则','err');return}
+    updates.transferRule=r.value;
+  }
+  // 价格
+  if(document.getElementById('be_price').checked){
+    const p=parseFloat(document.getElementById('be_price_val').value);
+    if(isNaN(p)||p<0){st('价格无效','err');return}
+    updates.price=p;
+  }
+  // 购买日期
+  if(document.getElementById('be_purchaseDate').checked){
+    updates.purchaseDate=document.getElementById('be_purchaseDate_val').value;
+  }
+  // 双倍积分
+  if(document.getElementById('be_isDoublePoints').checked){
+    const r=document.querySelector('input[name="be_isDoublePoints"]:checked');
+    if(r) updates.isDoublePoints=r.value==='true';
+  }
+  // 使用次数规则
+  if(document.getElementById('be_usageLimitType').checked){
+    const r=document.querySelector('input[name="be_usageLimitType"]:checked');
+    if(!r){st('请选择使用次数规则','err');return}
+    updates.usageLimitType=r.value;
+  }
+  // 使用状态
   if(document.getElementById('be_isUsed').checked){
     const r=document.querySelector('input[name="be_isUsed"]:checked');
     if(r) updates.isUsed=r.value==='true';
   }
+  // 是否已转让
   if(document.getElementById('be_isTransfer').checked){
     const r=document.querySelector('input[name="be_isTransfer"]:checked');
     if(r) updates.isTransfer=r.value;
+  }
+  // 备注
+  if(document.getElementById('be_note').checked){
+    updates.note=document.getElementById('be_note_val').value.trim();
   }
   const keys=Object.keys(updates);
   if(keys.length===0){st('请至少选择一项要修改的内容','err');return}
@@ -3060,7 +3228,7 @@ function updateTagVisibility(){
   if(showTag){
     if(tagSec.style.display==='none'){
       tagSec.style.display='';
-      const def=document.querySelector('input[name="ftag"][value="通用"]');
+      const def=document.querySelector('input[name="ftag"][value="古现/通用"]');
       if(def&&!document.querySelector('input[name="ftag"]:checked')){def.checked=true;}
       document.getElementById('ftagc').style.display='none';
     }
@@ -3929,7 +4097,7 @@ function parseBlockSheet(rows,sheetName){
         const ps=priceCell.toString().replace(/[¥,]/g,'').trim();
         price=parseFloat(ps)||0;
       }
-      items.push({name,ownerName:finalOwner,ownerType:finalType,price,artist,category:'',sheetName});
+      items.push({name,ownerName:finalOwner,ownerType:finalType,price,artist,category:'',sheetName,styleTag:detectStyleTag(name)});
     }
   }
   return items;
@@ -4128,13 +4296,15 @@ function parseTraditionalSheetAuto(rows,sheetName){
     if(usageNote&&!fullNote.includes(usageNote)){ fullNote=(fullNote?fullNote+'；':'')+usageNote; }
     if(priceNote&&!fullNote.includes(priceNote)){ fullNote=(fullNote?fullNote+'；':'')+priceNote; }
     if(storage&&!fullNote.includes(storage)){ fullNote=(fullNote?fullNote+'；':'')+'储存:'+storage; }
+    // Detect styleTag from name, subCategory, note, category
+    const styleTag=detectStyleTag(name,subCat,fullNote,finalCategory);
     // Handle multiple artists separated by 、 or , — create one item per artist
     const artistList=artist?artist.split(/[、,]/).map(a=>a.trim()).filter(a=>a):[''];
     for(const a of artistList){
       items.push({name,ownerName:finalOwner,ownerType:otype,price,artist:a,
         category:finalCategory,subCategory:finalSubCategory,
         purchaseSource,purchaseSub,purchaseDate,note:fullNote,
-        usageLimitType,usageTotal,isTransfer,sheetName});
+        usageLimitType,usageTotal,isTransfer,sheetName,styleTag});
     }
   });
   return items;
@@ -4166,7 +4336,7 @@ function confirmSmartImport(){
     if(item.ownerType==='person'&&!S.persons.includes(cleanOwner)) S.persons.push(cleanOwner);
     S.items.push({
       id:gid(),ownerType:item.ownerType,ownerName:cleanOwner,name:item.name,images:[],
-      category:item.category||'',subCategory:item.subCategory||'',customSubCategory:'',customCategory:'',boundLihui:'',styleTag:'',customTag:'',
+      category:item.category||'',subCategory:item.subCategory||'',customSubCategory:'',customCategory:'',boundLihui:'',styleTag:item.styleTag||'',customTag:'',
       purchaseSource:item.purchaseSource||'',purchaseSub:item.purchaseSub||'',customPurchaseSource:'',
       sponsorId:'',isSponsored:false,sponsorCount:1,sponsoredDone:0,
       isTransfer:item.isTransfer||'否',transferId:'',tongjiaRule:'',tongjiaLimit:'',tongjiaType:'',tongjiaScope:'',
@@ -4464,9 +4634,11 @@ function runExcelImport(){
       if(ulst.includes('主角')&&(ulst.includes('NPC')||ulst.includes('配角'))&&ulst.includes('不限')) finalUlst='leadUnlimited';
       else if(ulst.includes('主角')&&(ulst.includes('NPC')||ulst.includes('配角'))) finalUlst='leadSupport';
       else if(ulst.includes('其他')) finalUlst='other';
+      const finalStyleTag=detectStyleTag(name,cat,subCat,note);
       const item={
         id:gid(),ownerType:otype,ownerName:oname,name,images:(xiImages&&xiImages.get(i+2))||[],
         category:cat,subCategory:subCat,customSubCategory:csCat,customCategory:'',boundLihui:bnd,
+        styleTag:finalStyleTag,customTag:'',
         purchaseSource:finalPs,purchaseSub:finalPsub,customPurchaseSource:finalPs==='其他'?ps:'',
         sponsorId:spId,isSponsored:finalPs==='赞助'&&finalPsub==='被赞助',sponsorCount:finalPs==='赞助'&&finalPsub==='赞助'?spCount:1,sponsoredDone:0,
         isTransfer:finalIsTrans,
@@ -4597,15 +4769,34 @@ function doExport(){
   const fieldOrder=ALL_EXPORT_FIELDS;
   const selectedFields=fieldOrder.filter(f=>exState.fields.has(f));
   
-  // Split by ownerType for multi-sheet export
+  // Shop sheet: all shop-owned items, use selected fields as-is
   const shopItems=items.filter(i=>i.ownerType==='shop');
-  const personItems=items.filter(i=>i.ownerType==='person');
+  // Personal sheet: person-owned items + shop items whose artist has >=3 shop items
+  const shopArtistCount={};
+  shopItems.forEach(i=>{
+    if(i.artist) splitArtists(i.artist).forEach(n=>{shopArtistCount[n]=(shopArtistCount[n]||0)+1});
+  });
+  const recognizedPersons=new Set();
+  Object.entries(shopArtistCount).forEach(([a,cnt])=>{ if(cnt>=3) recognizedPersons.add(a); });
+  const personItems=items.filter(i=>
+    i.ownerType==='person'||
+    (i.ownerType==='shop'&&i.artist&&splitArtists(i.artist).some(n=>recognizedPersons.has(n)))
+  ).sort((a,b)=>(a.artist||'').localeCompare(b.artist||'','zh'));
+  // Personal fields: remove ownerName, move artist to front
+  const personFields=selectedFields.filter(f=>f!=='ownerName');
+  // Move artist to first position
+  const artistIdx=personFields.indexOf('artist');
+  if(artistIdx>0){personFields.splice(artistIdx,1);personFields.unshift('artist');}
+  else if(artistIdx===-1 && selectedFields.includes('artist')){
+    personFields.unshift('artist');
+  }
+  
   const sheets=[];
-  if(shopItems.length>0) sheets.push({name:'店铺',items:shopItems});
-  if(personItems.length>0) sheets.push({name:'个人',items:personItems});
+  if(shopItems.length>0) sheets.push({name:'店铺',items:shopItems,fields:selectedFields});
+  if(personItems.length>0) sheets.push({name:'个人',items:personItems,fields:personFields});
   if(sheets.length===0){st('没有可导出的数据','err');return}
   
-  exportXLSX(sheets,selectedFields);
+  exportXLSX(sheets);
 }
 
 function exportJSONEnhanced(items,fields){
@@ -4621,9 +4812,6 @@ function exportJSONEnhanced(items,fields){
 async function exportXLSX(sheets,fields){
   st('正在生成Excel文件…');
   try{
-    const headers=fields.map(f=>getFieldLabel(f));
-    const colCount=fields.length;
-    
     // Build shared strings
     const strings=[];
     const strMap=new Map();
@@ -4636,16 +4824,19 @@ async function exportXLSX(sheets,fields){
       return idx;
     }
     
-    // Build cell data for each sheet
-    const sheetDataArr=[]; // [{name, cellData}]
+    // Build cell data for each sheet (each sheet can have its own fields)
+    const sheetDataArr=[]; // [{name, cellData, fields, headers, colCount}]
     for(const sheet of sheets){
+      const sf=sheet.fields||fields||[];
+      const sHeaders=sf.map(f=>getFieldLabel(f));
+      const sColCount=sf.length;
       const cellData=[];
-      const headerRow=headers.map(h=>({type:'s',sIdx:ss(h)}));
+      const headerRow=sHeaders.map(h=>({type:'s',sIdx:ss(h)}));
       cellData.push(headerRow);
       for(const item of sheet.items){
         const row=[];
-        for(let ci=0;ci<colCount;ci++){
-          const field=fields[ci];
+        for(let ci=0;ci<sColCount;ci++){
+          const field=sf[ci];
           const val=getFieldValue(item,field);
           if(field==='price'){
             const num=parseFloat(val)||0;
@@ -4656,7 +4847,7 @@ async function exportXLSX(sheets,fields){
         }
         cellData.push(row);
       }
-      sheetDataArr.push({name:sheet.name,cellData});
+      sheetDataArr.push({name:sheet.name,cellData,fields:sf,headers:sHeaders,colCount:sColCount});
     }
     
     // Build sharedStrings XML
@@ -4665,11 +4856,11 @@ async function exportXLSX(sheets,fields){
     // Build sheet XML for each sheet
     const sheetXMLs=[];
     for(let si=0;si<sheetDataArr.length;si++){
-      const {cellData}=sheetDataArr[si];
+      const {cellData,headers:sHdrs,colCount:sCol}=sheetDataArr[si];
       let sheetXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
       sheetXML+='<cols>';
-      for(let i=0;i<colCount;i++){
-        let maxLen=headers[i].length;
+      for(let i=0;i<sCol;i++){
+        let maxLen=sHdrs[i].length;
         for(const row of cellData){
           const cell=row[i];
           const val=cell.type==='s'?strings[cell.sIdx]:cell.val.toString();
@@ -4682,7 +4873,7 @@ async function exportXLSX(sheets,fields){
       sheetXML+='<sheetData>';
       for(let ri=0;ri<cellData.length;ri++){
         let rowXML=`<row r="${ri+1}">`;
-        for(let ci=0;ci<colCount;ci++){
+        for(let ci=0;ci<sCol;ci++){
           const cellRef=numToColRef(ci+1)+(ri+1);
           const cell=cellData[ri][ci];
           const style=ri===0?1:(cell.type==='n'?2:0);
@@ -4954,7 +5145,9 @@ idbInit().then(()=>{
     selectedGroup = state.selectedGroup !== undefined ? state.selectedGroup : 'all';
     S._filterCat=state.filterCat||'all'; S._filterUsed=state.filterUsed||'all';
     S._filterSort=state.filterSort||'time_desc'; S._filterQuery=state.filterQuery||'';
-    if(state.S_filter){ S_filter=state.S_filter; if(!S_filter.status) S_filter.status=[]; }
+    if(state.S_filter){ S_filter=state.S_filter; if(!S_filter.status) S_filter.status=[]; if(!S_filter.subCategory) S_filter.subCategory=[]; if(!S_filter.styleTag) S_filter.styleTag=[]; }
+    // Migrate legacy styleTag filter values
+    S_filter.styleTag=S_filter.styleTag.map(t=>(t==='古现'||t==='通用')?'古现/通用':t);
   }
   if(pinned!==null) S.pinned=pinned;
   if(groups!==null) S.groups=groups;
@@ -4972,6 +5165,12 @@ idbInit().then(()=>{
 
 function startApp(){
   migrateImages();
+  // Migrate legacy styleTag values: '古现' and '通用' → '古现/通用'
+  let migrated=false;
+  S.items.forEach(i=>{
+    if(i.styleTag==='古现'||i.styleTag==='通用'){i.styleTag='古现/通用';migrated=true;}
+  });
+  if(migrated) sv();
   // Normalize legacy sort values (old "category" had no direction suffix)
   if(S._filterSort==='category') S._filterSort='category_asc';
   // Restore sort tabs & filter state BEFORE first render to prevent overwrite
