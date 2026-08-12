@@ -1096,28 +1096,44 @@ function ld(){
     if(S.shops.length||S.persons.length||S.items.length) _ldFromLS=true;
   }catch(e){ S.shops=[]; S.persons=[]; S.items=[]; S.pinned={}; S.groups={shop:[],person:[]}; S.sourceGroup={}; S.groupCollapsed={shop:{},person:{}}; }
 }
+let _svTimer=null;
+let _svPendingItems=false;
 function sv(){
-  // Save everything to IndexedDB (no size limit)
-  idbSet('shops',S.shops);
-  idbSet('persons',S.persons);
-  idbSet('items',S.items);
+  // Lightweight data (state/groups/etc) saved immediately; heavy items array debounced
   idbSet('state',{selType:S.selType,selName:S.selName,selectedGroup,filterCat:S._filterCat||'all',filterUsed:S._filterUsed||'all',filterSort:S._filterSort||'time_desc',filterQuery:S._filterQuery||'',S_filter});
   idbSet('pinned',S.pinned);
   idbSet('groups',S.groups);
   idbSet('sourceGroup',S.sourceGroup);
   idbSet('groupCollapsed',S.groupCollapsed);
-  // Also save small text data to localStorage as backup (best effort)
   try{
     localStorage.setItem(PREFIX+'state',JSON.stringify({selType:S.selType,selName:S.selName,selectedGroup,filterCat:S._filterCat||'all',filterUsed:S._filterUsed||'all',filterSort:S._filterSort||'time_desc',filterQuery:S._filterQuery||'',S_filter}));
     localStorage.setItem(PREFIX+'groups',JSON.stringify(S.groups));
     localStorage.setItem(PREFIX+'sourceGroup',JSON.stringify(S.sourceGroup));
     localStorage.setItem(PREFIX+'groupCollapsed',JSON.stringify(S.groupCollapsed));
   }catch(e){}
-  // Clean up old localStorage items data after successful IDB save
   if(_ldFromLS){
     try{localStorage.removeItem(PREFIX+'items');localStorage.removeItem(PREFIX+'shops');localStorage.removeItem(PREFIX+'persons');localStorage.removeItem(PREFIX+'pinned');_ldFromLS=false}catch(e){}
   }
+  // Debounce the heavy saves (items/shops/persons contain base64 images — expensive to clone)
+  _svPendingItems=true;
+  if(_svTimer) clearTimeout(_svTimer);
+  _svTimer=setTimeout(_svFlush,800);
   return true;
+}
+function _svFlush(){
+  _svTimer=null;
+  if(_svPendingItems){
+    _svPendingItems=false;
+    idbSet('shops',S.shops);
+    idbSet('persons',S.persons);
+    idbSet('items',S.items);
+  }
+}
+function svNow(){
+  // Force immediate flush (used by beforeunload / critical operations)
+  if(_svTimer){clearTimeout(_svTimer);_svTimer=null}
+  _svPendingItems=true;
+  _svFlush();
 }
 // Lightweight filter-state-only save (skip full IDB write of all items/images)
 function saveFilterState(){
@@ -1133,9 +1149,7 @@ function rafRenderAll(){
   _rafId=requestAnimationFrame(()=>{
     _rafId=null;
     invalidateViewCache();
-    renderSidebar();renderOV();renderDonut();renderBars();renderMaterials();updateDataBanner();
-    const fc=document.getElementById('fc');
-    fc.innerHTML='<option value="">请选择</option>'+MAIN_CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
+    renderSidebar();renderStats();renderMaterials();updateDataBanner();
   });
 }
 function eh(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
@@ -1423,7 +1437,7 @@ function switchSidebarTab(type){
   document.getElementById('stab-shop').classList.toggle('active',type==='shop');
   document.getElementById('stab-person').classList.toggle('active',type==='person');
   invalidateViewCache();
-  sv(); renderSidebar(); renderOV(); renderMaterials(false,true); renderDonut(); renderBars();
+  sv(); renderSidebar(); renderStats(); renderMaterials(false,true);
 }
 function getSidebarList(){
   return S.selType==='shop'?S.shops:S.persons;
@@ -1553,13 +1567,13 @@ function selectGroup(groupName){
   multiSelectSources.clear();
   selectedGroup=groupName; S.selName='all';
   invalidateViewCache();
-  sv(); renderSidebar(); renderOV(); renderMaterials(false,true); renderDonut(); renderBars();
+  sv(); renderSidebar(); renderStats(); renderMaterials(false,true);
 }
 function selectUngrouped(){
   multiSelectSources.clear();
   selectedGroup='all'; S.selName='all';
   invalidateViewCache();
-  sv(); renderSidebar(); renderOV(); renderMaterials(false,true); renderDonut(); renderBars();
+  sv(); renderSidebar(); renderStats(); renderMaterials(false,true);
 }
 
 // ---- Sidebar drag reorder ----
@@ -1580,7 +1594,7 @@ function selectSource(e,name){
   }
   S.selName=name; selectedGroup=null;
   invalidateViewCache();
-  sv(); renderSidebar(); renderOV(); renderMaterials(false,true); renderDonut(); renderBars();
+  sv(); renderSidebar(); renderStats(); renderMaterials(false,true);
 }
 function sdragStart(e,idx,name){
   dragSrc=name; dragIdx=idx; dragBefore=true;
@@ -2006,80 +2020,83 @@ function renderSidebar(){
   el.innerHTML=h;
 }
 
-// ---- Overview ----
-function renderOV(){
-  // Get items for current view
-  let viewItems=getItemsForView();
-  const tAll=viewItems.reduce((s,i)=>s+getEffPrice(i),0);
-  
-  // Consumption based on current view + owner type
-  let viewConsValue;
-  if(S.selType==='shop'){
-    viewConsValue=viewItems.filter(i=>i.countInShop!==false).reduce((s,i)=>s+getEffPrice(i)*(i.isDoublePoints?2:1),0);
-  }else{
-    viewConsValue=viewItems.filter(i=>i.countInPerson!==false).reduce((s,i)=>s+getEffPrice(i)*(i.isDoublePoints?2:1),0);
+// ---- Overview + Charts: combined single-pass render ----
+function renderStats(){
+  const viewItems=getItemsForView();
+  const isShop=S.selType==='shop';
+  const consLabel=isShop?'店铺消费':'个人消费';
+
+  // Single pass: compute OV stats + donut categories + bar sources
+  let tAll=0, viewConsValue=0, used=0;
+  const cats={}, srcs={};
+  const countedForBars=isShop
+    ? viewItems.filter(i=>i.countInShop!==false)
+    : viewItems.filter(i=>i.countInPerson!==false);
+
+  for(let j=0;j<viewItems.length;j++){
+    const i=viewItems[j];
+    const price=getEffPrice(i);
+    tAll+=price;
+    if(i.isUsed) used++;
+    // Donut: category counts
+    const c=getCats(i);
+    if(c.length>0) c.forEach(cat=>{cats[cat]=(cats[cat]||0)+1});
+    else cats['其他']=(cats['其他']||0)+1;
   }
-  
+  // Bar chart: consumption by source (only counted items)
+  for(let j=0;j<countedForBars.length;j++){
+    const i=countedForBars[j];
+    const dbl=i.isDoublePoints?2:1;
+    const val=getEffPrice(i)*dbl;
+    viewConsValue+=val;
+    if(isShop){
+      srcs[i.ownerName]=(srcs[i.ownerName]||0)+val;
+    }else{
+      if(i.ownerType==='shop'){
+        const names=splitArtists(i.artist);
+        if(names.length===0) srcs['未知']=(srcs['未知']||0)+val;
+        else names.forEach(n=>{srcs[n]=(srcs[n]||0)+val});
+      }else{
+        const names=splitArtists(i.ownerName);
+        if(names.length===0) srcs['未知']=(srcs['未知']||0)+val;
+        else names.forEach(n=>{srcs[n]=(srcs[n]||0)+val});
+      }
+    }
+  }
+
   const tIt=viewItems.length;
-  const used=viewItems.filter(i=>i.isUsed).length;
   const unused=tIt-used;
-  
-  const consLabel=S.selType==='shop'?'店铺消费':'个人消费';
-  
+
+  // Render OV
   document.getElementById('ov').innerHTML=`
     <div class="ovc"><div class="ovl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>总消费金额</div><div class="ovv mny">¥${tAll.toFixed(2)}</div></div>
     <div class="ovc"><div class="ovl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11a1 1 0 001 1h14a1 1 0 001-1V9"/></svg>${consLabel}</div><div class="ovv mny2">¥${viewConsValue.toFixed(2)}</div></div>
     <div class="ovc"><div class="ovl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>素材总数</div><div class="ovv">${tIt}</div></div>
     <div class="ovc"><div class="ovl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>已使用/未使用</div><div class="ovv"><span class="ok">${used}</span> / <span class="warn">${unused}</span></div></div>`;
-}
 
-// ---- Charts ----
-function renderDonut(){
-  const el=document.getElementById('ch1'),cats={};
-  let items=getItemsForView();
-  items.forEach(i=>{getCats(i).forEach(c=>{cats[c]=(cats[c]||0)+1});if(getCats(i).length===0)cats['其他']=(cats['其他']||0)+1});
-  const data=Object.entries(cats).map(([k,v])=>({label:k,value:v,color:CCOL[k]||'#94a3b8'}));
-  if(data.length===0){el.innerHTML='<div class="emp">暂无数据</div>';return}
-  data.sort((a,b)=>b.value-a.value);
-  const total=data.reduce((s,d)=>s+d.value,0),r=48,cx=65,cy=65,circ=2*Math.PI*r;
-  let off=0;
-  const segs=data.map(d=>{const len=(d.value/total)*circ;const s=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="20" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"/>`;off+=len;return s}).join('');
-  const leg=data.map(d=>`<div class="litem" onclick="S_filter.category=['${d.label}'];applyFilter()"><span class="ldot" style="background:${d.color}"></span><span class="llb">${eh(d.label)}</span><span class="lvl">${d.value}</span></div>`).join('');
-  el.innerHTML=`<div class="chart-wrap"><svg width="130" height="130" viewBox="0 0 130 130">${segs}<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="20" font-weight="700" fill="#1e293b">${total}</text><text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="10" fill="#64748b">素材总数</text></svg><div class="legend">${leg}</div></div>`;
-}
-
-function renderBars(){
-  const el=document.getElementById('ch2'),titleEl=document.getElementById('ch2title');
-  const srcs={};
-  let items=getItemsForView(); // Respect sidebar view filter
-
-  if(S.selType==='shop'){
-    items=items.filter(i=>i.countInShop!==false);
-    titleEl.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>店铺消费排行';
-    items.forEach(i=>{const dbl=i.isDoublePoints?2:1;srcs[i.ownerName]=(srcs[i.ownerName]||0)+getEffPrice(i)*dbl});
-  }else{
-    // Person tab: person-owned items + shop items with artist in S.persons
-    items=items.filter(i=>i.countInPerson!==false);
-    titleEl.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>个人消费排行';
-    items.forEach(i=>{
-      const dbl=i.isDoublePoints?2:1;
-      const val=getEffPrice(i)*dbl;
-      if(i.ownerType==='shop'){
-        // Split artist names by comma/顿号, each artist gets full price
-        const names=splitArtists(i.artist);
-        if(names.length===0){srcs['未知']=(srcs['未知']||0)+val}
-        else names.forEach(n=>{srcs[n]=(srcs[n]||0)+val});
-      }else{
-        const names=splitArtists(i.ownerName);
-        if(names.length===0){srcs['未知']=(srcs['未知']||0)+val}
-        else names.forEach(n=>{srcs[n]=(srcs[n]||0)+val});
-      }
-    });
+  // Render donut
+  const ch1El=document.getElementById('ch1');
+  const donutData=Object.entries(cats).map(([k,v])=>({label:k,value:v,color:CCOL[k]||'#94a3b8'}));
+  if(donutData.length===0){ch1El.innerHTML='<div class="emp">暂无数据</div>'}
+  else{
+    donutData.sort((a,b)=>b.value-a.value);
+    const total=donutData.reduce((s,d)=>s+d.value,0),r=48,cx=65,cy=65,circ=2*Math.PI*r;
+    let off=0;
+    const segs=donutData.map(d=>{const len=(d.value/total)*circ;const s=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.color}" stroke-width="20" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-off}" transform="rotate(-90 ${cx} ${cy})"/>`;off+=len;return s}).join('');
+    const leg=donutData.map(d=>`<div class="litem" onclick="S_filter.category=['${d.label}'];applyFilter()"><span class="ldot" style="background:${d.color}"></span><span class="llb">${eh(d.label)}</span><span class="lvl">${d.value}</span></div>`).join('');
+    ch1El.innerHTML=`<div class="chart-wrap"><svg width="130" height="130" viewBox="0 0 130 130">${segs}<text x="${cx}" y="${cy-4}" text-anchor="middle" font-size="20" font-weight="700" fill="#1e293b">${total}</text><text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="10" fill="#64748b">素材总数</text></svg><div class="legend">${leg}</div></div>`;
   }
-  const data=Object.entries(srcs).map(([k,v])=>({label:k,value:v}));data.sort((a,b)=>b.value-a.value);
-  if(data.length===0){el.innerHTML='<div class="emp">暂无消费数据</div>';return}
-  const max=Math.max(...data.map(d=>d.value),1);
-  el.innerHTML=`<div class="bars">${data.map(d=>{const w=(d.value/max)*100;return `<div class="brow"><span class="blb">${eh(d.label)}</span><div class="btk"><div class="bfi" style="width:${w}%">¥${d.value.toFixed(2)}</div></div></div>`}).join('')}</div>`;
+
+  // Render bars
+  const ch2El=document.getElementById('ch2'),titleEl=document.getElementById('ch2title');
+  const barTitleSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>';
+  titleEl.innerHTML=barTitleSvg+(isShop?'店铺消费排行':'个人消费排行');
+  const barData=Object.entries(srcs).map(([k,v])=>({label:k,value:v}));barData.sort((a,b)=>b.value-a.value);
+  if(barData.length===0){ch2El.innerHTML='<div class="emp">暂无消费数据</div>'}
+  else{
+    const max=Math.max(...barData.map(d=>d.value),1);
+    ch2El.innerHTML=`<div class="bars">${barData.map(d=>{const w=(d.value/max)*100;return `<div class="brow"><span class="blb">${eh(d.label)}</span><div class="btk"><div class="bfi" style="width:${w}%">¥${d.value.toFixed(2)}</div></div></div>`}).join('')}</div>`;
+  }
 }
 
 function toggleStatsRow(){
@@ -2593,10 +2610,10 @@ function updateDataBanner(){
 }
 function renderAll(nokf,preserveScroll){
   invalidateViewCache();
-  renderSidebar();renderOV();renderDonut();renderBars();renderMaterials(preserveScroll);updateDataBanner();
-  const fc=document.getElementById('fc');
-  fc.innerHTML='<option value="">请选择</option>'+MAIN_CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
-  // autoExtractPersons only on data changes, not on every render
+  renderSidebar();
+  renderStats(); // combined OV + donut + bars in a single pass over view items
+  renderMaterials(preserveScroll);
+  updateDataBanner();
 }
 function autoExtractPersons(){
   const artistCount={};
@@ -4977,7 +4994,7 @@ function runExcelImport(){
       S.items.push(item);imported++;
     }catch(err){skipped++;}
   });
-  sv();closeExcelImport();renderAll();autoExtractPersons();st(`导入完成：${imported} 条成功${skipped>0?`，${skipped} 条跳过`:''}`);
+  svNow();closeExcelImport();renderAll();autoExtractPersons();st(`导入完成：${imported} 条成功${skipped>0?`，${skipped} 条跳过`:''}`);
 }
 
 // ---- Export/Import ----
@@ -5411,13 +5428,13 @@ function importJSON(e){
         if(data.groups) S.groups=data.groups;
         if(data.sourceGroup) S.sourceGroup=data.sourceGroup;
         migrateImages();
-        sv();renderAll();autoExtractPersons();st(`导入 ${data.items?data.items.length:0} 条素材`);
+        svNow();renderAll();autoExtractPersons();st(`导入 ${data.items?data.items.length:0} 条素材`);
       }catch(err){st('导入失败：格式不正确','err')}
     };reader.readAsText(file);
   });
 }
 function confirmClearAll(){
-  confirm(`清空全部（${S.shops.length}个店铺、${S.persons.length}个个人、${S.items.length}条素材）？不可恢复！`,()=>{S.shops=[];S.persons=[];S.items=[];S.selType='shop';S.selName='all';S.pinned={};S.groups={shop:[],person:[]};S.sourceGroup={};selectedGroup='all';sv();renderAll();st('已全部清空')});
+  confirm(`清空全部（${S.shops.length}个店铺、${S.persons.length}个个人、${S.items.length}条素材）？不可恢复！`,()=>{S.shops=[];S.persons=[];S.items=[];S.selType='shop';S.selName='all';S.pinned={};S.groups={shop:[],person:[]};S.sourceGroup={};selectedGroup='all';svNow();renderAll();st('已全部清空')});
 }
 
 // ---- Confirm/Toast ----
@@ -5502,6 +5519,9 @@ function startApp(){
   renderAll(true);
   setInterval(updateDataBanner,30000);
 }
+// Flush pending saves when leaving the page
+window.addEventListener('beforeunload',()=>{svNow()});
+window.addEventListener('pagehide',()=>{svNow()});
 </script>
 </body>
 </html>
