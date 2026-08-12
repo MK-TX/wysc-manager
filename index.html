@@ -2144,8 +2144,13 @@ let _renderBatchTimer=null;
 let _renderBatchItems=null;
 const RENDER_BATCH_SIZE=24;
 
-function renderMaterials(){
+let _pendingScrollRestore=null;
+function getMainScroll(){const mc=document.querySelector('.main-content');return mc?mc.scrollTop:0}
+function restoreMainScroll(y){const mc=document.querySelector('.main-content');if(mc&&y!==null&&y!==undefined) mc.scrollTop=y}
+function renderMaterials(preserveScroll){
   let items=getItemsForView().slice(); // Copy to avoid mutating cache
+  // Preserve scroll position when requested (edit/save/copy/delete/move must not jump)
+  const scrollY=preserveScroll?getMainScroll():null;
   const fsort=S._filterSort||'time_desc';
   const q=(document.getElementById('q').value||'').toLowerCase();
   // Persist filter state (lightweight, no full IDB save)
@@ -2178,6 +2183,7 @@ function renderMaterials(){
   // Cancel any pending background batch render
   if(_renderBatchTimer){clearTimeout(_renderBatchTimer);_renderBatchTimer=null;}
   _renderBatchItems=null;
+  if(!preserveScroll) _pendingScrollRestore=null;
 
   // In move mode, render all items at once (drag reorder needs complete DOM)
   if(moveMode||items.length<=RENDER_BATCH_SIZE){
@@ -2200,6 +2206,14 @@ function renderMaterials(){
   ttEl.textContent=title; subEl.textContent=items.length+' 条';
   toggleStatsRow();
   renderMultiSelectBar();
+  // Restore scroll: synchronous path restores immediately, batched path defers to _renderNextBatch
+  if(scrollY!==null){
+    if(moveMode||items.length<=RENDER_BATCH_SIZE){
+      requestAnimationFrame(()=>restoreMainScroll(scrollY));
+    }else{
+      _pendingScrollRestore=scrollY;
+    }
+  }
 }
 
 // Background batch renderer: appends cards in small chunks via setTimeout
@@ -2218,6 +2232,11 @@ function _renderNextBatch(){
     _renderBatchTimer=setTimeout(_renderNextBatch,0);
   }else{
     _renderBatchItems=null;_renderBatchTimer=null;
+    // All batches appended — restore scroll position now that height is final
+    if(_pendingScrollRestore!==null){
+      const y=_pendingScrollRestore;_pendingScrollRestore=null;
+      requestAnimationFrame(()=>restoreMainScroll(y));
+    }
   }
 }
 
@@ -2395,9 +2414,9 @@ function updateDataBanner(){
     el.style.display='none';
   }
 }
-function renderAll(nokf){
+function renderAll(nokf,preserveScroll){
   invalidateViewCache();
-  renderSidebar();renderOV();renderDonut();renderBars();renderMaterials();updateDataBanner();
+  renderSidebar();renderOV();renderDonut();renderBars();renderMaterials(preserveScroll);updateDataBanner();
   const fc=document.getElementById('fc');
   fc.innerHTML='<option value="">请选择</option>'+MAIN_CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
   // autoExtractPersons only on data changes, not on every render
@@ -2722,10 +2741,10 @@ function saveItem(){
   if(ot==='person'&&item.artist) splitArtists(item.artist).forEach(n=>{if(n&&!S.persons.includes(n)) S.persons.push(n)});
   // Save to IndexedDB (large capacity, no practical limit)
   sv();
-  closeItemModal();renderAll();autoExtractPersons();st(S.editItem?'素材已更新':'素材已添加');
+  closeItemModal();renderAll(false,true);autoExtractPersons();st(S.editItem?'素材已更新':'素材已添加');
 }
 
-function confirmDelItem(id){const i=S.items.find(x=>x.id===id);if(!i)return;confirm(`删除「${i.name||'未命名'}」？不可恢复。`,()=>{S.items=S.items.filter(x=>x.id!==id);sv();renderAll();st('已删除')})}
+function confirmDelItem(id){const i=S.items.find(x=>x.id===id);if(!i)return;confirm(`删除「${i.name||'未命名'}」？不可恢复。`,()=>{S.items=S.items.filter(x=>x.id!==id);sv();renderAll(false,true);st('已删除')})}
 function deleteCurrentItem(){if(S.editItem){confirmDelItem(S.editItem.id);closeItemModal()}}
 
 // ---- Right-click context menu + Move mode ----
@@ -2767,7 +2786,7 @@ function copyItem(id){
   copy.usedCount=0;copy.isUsed=false;
   const idx=S.items.findIndex(x=>x.id===id);
   S.items.splice(idx+1,0,copy);
-  sv();renderAll();st(`已复制「${i.name||'未命名'}」`);
+  sv();renderAll(false,true);st(`已复制「${i.name||'未命名'}」`);
 }
 
 function enterMoveMode(){
@@ -2869,18 +2888,42 @@ function batchDeleteItems(){
   const n=selectedItems.size;
   confirm(`确定要删除选中的 ${n} 个素材吗？此操作不可恢复。`,()=>{
     S.items=S.items.filter(i=>!selectedItems.has(i.id));
-    sv();exitMultiSelect();renderAll();
+    sv();exitMultiSelect();renderAll(false,true);
     st(`已删除 ${n} 个素材`);
   });
 }
 function bindBatchEditAutoCheck(){
   const form=document.getElementById('batchEditForm');
   if(!form) return;
-  // Selecting any radio option auto-checks its field checkbox (e.g. 选择类型=古现/通用 → be_styleTag checked)
+  // Radio groups: the WHOLE option area (label/button box) counts as selecting —
+  // not just the circle. Selecting an option auto-checks its field checkbox;
+  // re-clicking an already checked option unchecks it, and when the whole group
+  // becomes empty the field checkbox unchecks too.
+  // (radio name equals the field checkbox id, both be_xxx)
+  // Use event delegation on the form so clicks on the label text/circle both work.
+  form.addEventListener('pointerdown',function(e){
+    const lab=e.target.closest('label');
+    if(!lab) return;
+    const r=lab.querySelector('input[type="radio"]');
+    if(r) r.dataset.prevChecked=r.checked?'1':'0';
+  });
+  form.addEventListener('click',function(e){
+    const lab=e.target.closest('label');
+    if(!lab) return;
+    const r=lab.querySelector('input[type="radio"]');
+    if(!r) return;
+    // Re-click on the already checked option → uncheck it
+    if(r.dataset.prevChecked==='1'&&r.checked){r.checked=false}
+    // Sync the field checkbox with whether any option in this group is selected
+    const any=Array.from(document.getElementsByName(r.name)).some(x=>x.checked);
+    const cb=document.getElementById(r.name);
+    if(cb) cb.checked=any;
+  });
+  // Keyboard selection still auto-checks its field checkbox
   form.onchange=function(e){
     const t=e.target;
-    if(t&&t.type==='radio'){
-      const cb=document.getElementById('be_'+t.name);
+    if(t&&t.type==='radio'&&t.checked){
+      const cb=document.getElementById(t.name);
       if(cb) cb.checked=true;
     }
   };
@@ -3006,12 +3049,12 @@ function applyBatchEdit(){
       count++;
     }
   });
-  sv();closeBatchEdit();exitMultiSelect();renderAll();
+  sv();closeBatchEdit();exitMultiSelect();renderAll(false,true);
   st(`已批量修改 ${count} 个素材（${keys.length} 个字段）`);
 }
 function cancelMoveMode(){
   moveMode=false;moveOrder=[];moveDragId=null;
-  renderMaterials();
+  renderMaterials(true);
 }
 function saveMoveMode(){
   // Read current DOM order
@@ -3022,7 +3065,7 @@ function saveMoveMode(){
   const itemMap={};S.items.forEach(i=>itemMap[i.id]=i);
   const queue=[...newOrder];
   S.items=S.items.map(i=>displaySet.has(i.id)?itemMap[queue.shift()]:i);
-  sv();moveMode=false;moveOrder=[];moveDragId=null;renderAll();st('顺序已保存');
+  sv();moveMode=false;moveOrder=[];moveDragId=null;renderAll(false,true);st('顺序已保存');
 }
 function onMoveDragStart(e,id){moveDragId=id;e.dataTransfer.effectAllowed='move';e.target.classList.add('dragging')}
 function onMoveDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';const c=e.currentTarget;c.classList.add('drag-over')}
@@ -3038,7 +3081,7 @@ function onMoveDrop(e,targetId){
   moveOrder.splice(fromIdx,1);
   moveOrder.splice(toIdx,0,moveDragId);
   moveDragId=null;
-  renderMaterials();
+  renderMaterials(true);
 }
 function onMoveDragEnd(e){e.target.classList.remove('dragging');document.querySelectorAll('.mc.drag-over').forEach(c=>c.classList.remove('drag-over'))}
 
