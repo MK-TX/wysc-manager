@@ -2271,8 +2271,9 @@ function renderMaterials(preserveScroll,resetTop){
   let items=getItemsForView().slice(); // Copy to avoid mutating cache
   invalidateIdMap(); // items may have changed; rebuild id→item index lazily
   // Preserve scroll position when requested (edit/save/copy/delete/move must not jump);
-  // resetTop=true forces scroll back to top (switching shop/person tab, group or source)
-  const scrollY=resetTop?0:(preserveScroll?getMainScroll():null);
+  // resetTop=true forces scroll back to top (switching shop/person tab, group or source).
+  // Default (search/filter/sort) also scrolls to top — avoids white flash from partial content.
+  const scrollY=resetTop?0:(preserveScroll?getMainScroll():0);
   const fsort=S._filterSort||'time_desc';
   const q=(document.getElementById('q').value||'').toLowerCase();
   // Persist filter state (lightweight, no full IDB save)
@@ -2300,21 +2301,32 @@ function renderMaterials(preserveScroll,resetTop){
   // Cancel any pending background batch render
   if(_renderBatchTimer){clearTimeout(_renderBatchTimer);_renderBatchTimer=null;}
   _renderBatchItems=null;
-  if(!preserveScroll) _pendingScrollRestore=null;
+
+  // First batch size: when preserving scroll position, render enough cards to cover the
+  // current scroll viewport so the synchronous scrollTop restore below succeeds in one paint.
+  // This eliminates the white flash caused by showing only a few cards while scroll is mid-list.
+  let firstBatchCount=RENDER_BATCH_SIZE;
+  if(preserveScroll&&!resetTop&&scrollY>0){
+    const mc=document.querySelector('.main-content');
+    const vh=mc?mc.clientHeight:600;
+    const estCardH=215; // estimated card height including gap
+    firstBatchCount=Math.min(items.length,Math.max(RENDER_BATCH_SIZE,Math.ceil((scrollY+vh+300)/estCardH)));
+  }
 
   // In move mode, render all items at once (drag reorder needs complete DOM)
-  if(moveMode||items.length<=RENDER_BATCH_SIZE){
+  if(moveMode){
     el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${items.map(i=>renderCard(i)).join('')}</div>`;
     observeCardImages();
   }else{
-    // Render first batch immediately for fast initial paint
-    const firstBatch=items.slice(0,RENDER_BATCH_SIZE);
+    const firstBatch=items.length<=firstBatchCount?items:items.slice(0,firstBatchCount);
     el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${firstBatch.map(i=>renderCard(i)).join('')}</div>`;
     observeCardImages();
     // Schedule remaining items in background batches
-    _renderBatchItems=items;
-    _renderBatchOffset=RENDER_BATCH_SIZE;
-    _renderNextBatch();
+    if(firstBatchCount<items.length){
+      _renderBatchItems=items;
+      _renderBatchOffset=firstBatchCount;
+      _renderNextBatch();
+    }
   }
 
   const ttEl=document.getElementById('mttl'),subEl=document.getElementById('msub');
@@ -2325,13 +2337,10 @@ function renderMaterials(preserveScroll,resetTop){
   ttEl.textContent=title; subEl.textContent=items.length+' 条';
   toggleStatsRow();
   renderMultiSelectBar();
-  // Restore scroll: synchronous path restores immediately, batched path defers to _renderNextBatch
-  if(scrollY!==null){
-    if(moveMode||items.length<=RENDER_BATCH_SIZE){
-      requestAnimationFrame(()=>restoreMainScroll(scrollY));
-    }else{
-      _pendingScrollRestore=scrollY;
-    }
+  // Restore scroll SYNCHRONOUSLY (same task as innerHTML replacement) so the browser
+  // paints the final state in a single frame — no white flash from an intermediate empty state.
+  if(scrollY!==null&&scrollY!==undefined){
+    restoreMainScroll(scrollY);
   }
 }
 
@@ -2365,11 +2374,6 @@ function _renderNextBatch(){
     _renderBatchTimer=setTimeout(_renderNextBatch,0);
   }else{
     _renderBatchItems=null;_renderBatchTimer=null;
-    // All batches appended — restore scroll position now that height is final
-    if(_pendingScrollRestore!==null){
-      const y=_pendingScrollRestore;_pendingScrollRestore=null;
-      requestAnimationFrame(()=>restoreMainScroll(y));
-    }
   }
 }
 
