@@ -113,13 +113,22 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .ovv.warn{color:var(--warning)}.ovv.ok{color:var(--success)}.ovv.mny{color:var(--primary)}.ovv.mny2{color:#8b5cf6}
 
 .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px}
-.scard{background:var(--card);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border);max-height:calc(50vh - 95px);overflow:hidden;display:flex;flex-direction:column}
+.scard{background:var(--card);border-radius:var(--radius);padding:12px 14px;border:1px solid var(--border);max-height:260px;overflow:hidden;display:flex;flex-direction:column}
 .scard h3{font-size:14px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-shrink:0}
 .scard h3 svg{width:15px;height:15px;color:var(--primary)}
-.scard>div{overflow-y:auto;flex:1;min-height:0}
+.scard>div{overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:transparent transparent}
+.scard>div::-webkit-scrollbar{width:5px;height:5px;background:transparent}
+.scard>div::-webkit-scrollbar-track{background:transparent}
+.scard>div::-webkit-scrollbar-thumb{background:rgba(99,102,241,.25);border-radius:10px;transition:background .2s}
+.scard>div:hover::-webkit-scrollbar-thumb{background:rgba(99,102,241,.45)}
+.scard>div::-webkit-scrollbar-thumb:hover{background:rgba(99,102,241,.6)}
 .chart-wrap{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
 .chart-wrap svg{flex-shrink:0}
-.legend{flex:1;min-width:100px;max-height:140px;overflow-y:auto}
+.legend{flex:1;min-width:100px;max-height:180px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:transparent transparent}
+.legend::-webkit-scrollbar{width:5px;background:transparent}
+.legend::-webkit-scrollbar-track{background:transparent}
+.legend::-webkit-scrollbar-thumb{background:rgba(99,102,241,.25);border-radius:10px}
+.legend:hover::-webkit-scrollbar-thumb{background:rgba(99,102,241,.45)}
 .litem{display:flex;align-items:center;gap:7px;padding:3px 0;font-size:12px;cursor:pointer}
 .litem:hover{opacity:.7}
 .ldot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
@@ -197,6 +206,21 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .move-bar .mb-save{background:#fff;color:var(--primary)}
 .move-bar .mb-cancel{background:rgba(255,255,255,.2);color:#fff}
 .mc.dragging{opacity:.4}
+.mc.mc-selected{box-shadow:0 0 0 3px var(--primary),0 3px 12px rgba(99,102,241,.2)}
+.mc.mc-selected .mci::before{content:'';position:absolute;top:6px;left:6px;width:22px;height:22px;background:var(--primary);border-radius:50%;z-index:3;display:flex;align-items:center;justify-content:center}
+.mc.mc-selected .mci::after{content:'✓';position:absolute;top:6px;left:6px;width:22px;height:22px;color:#fff;font-size:14px;font-weight:700;z-index:4;display:flex;align-items:center;justify-content:center}
+.mc.mc-multiselect .mci{cursor:pointer}
+.mc.mc-multiselect .mci:hover::before{content:'';position:absolute;top:6px;left:6px;width:22px;height:22px;border:2px solid var(--primary);border-radius:50%;z-index:3;background:rgba(255,255,255,.8)}
+.ms-bar{position:sticky;top:0;z-index:50;background:var(--primary);color:#fff;padding:10px 16px;border-radius:8px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 12px rgba(99,102,241,.3)}
+.ms-bar .ms-info{font-size:13px;display:flex;align-items:center;gap:6px}
+.ms-bar .ms-btns{display:flex;gap:8px;flex-wrap:wrap}
+.ms-bar .ms-btn{padding:6px 14px;border-radius:6px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s}
+.ms-bar .ms-btn-light{background:#fff;color:var(--primary)}
+.ms-bar .ms-btn-light:hover{background:#e0e7ff}
+.ms-bar .ms-btn-ghost{background:rgba(255,255,255,.2);color:#fff}
+.ms-bar .ms-btn-ghost:hover{background:rgba(255,255,255,.3)}
+.ms-bar .ms-btn-danger{background:#fee2e2;color:#dc2626}
+.ms-bar .ms-btn-danger:hover{background:#fecaca}
 .mc.drag-over{outline:2px dashed var(--primary);outline-offset:2px}
 .mc-move-hint{cursor:grab !important}
 .mc-move-hint:active{cursor:grabbing !important}
@@ -459,6 +483,66 @@ input,select,textarea{font-family:inherit;font-size:16px}
   </div>
 </div>
 
+<!-- Batch Edit Modal -->
+<div class="mo" id="batchEditModal" style="display:none" onclick="if(event.target===this)closeBatchEdit()">
+  <div class="filter-modal">
+    <div class="mdh fm-hd"><h3>批量编辑</h3><button class="btn-icon" onclick="closeBatchEdit()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="fm-body">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px">将批量修改 <strong id="batchEditCount" style="color:var(--primary)">0</strong> 个素材。勾选要修改的字段并填写新值，未勾选的字段保持不变。</div>
+      <div id="batchEditForm" style="display:flex;flex-direction:column;gap:14px">
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_ownerName"> <strong>所属名称</strong></label>
+          <input type="text" id="be_ownerName_val" placeholder="新的所属名称" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_artist"> <strong>画师/美工</strong></label>
+          <input type="text" id="be_artist_val" placeholder="新的画师/美工名" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_category"> <strong>分类</strong></label>
+          <input type="text" id="be_category_val" placeholder="新的分类（多个用逗号隔开）" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_price"> <strong>价格</strong></label>
+          <input type="number" id="be_price_val" placeholder="新的价格" min="0" step="0.01" style="width:120px;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px">
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_saleType"> <strong>售卖类型</strong></label>
+          <div class="rg" style="margin-top:6px">
+            <label><input type="radio" name="be_saleType" value="限时"> 限时</label>
+            <label><input type="radio" name="be_saleType" value="限量"> 限量</label>
+            <label><input type="radio" name="be_saleType" value="车"> 车</label>
+            <label><input type="radio" name="be_saleType" value="福利购"> 福利购</label>
+            <label><input type="radio" name="be_saleType" value="其他"> 其他</label>
+          </div>
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_note"> <strong>备注</strong></label>
+          <textarea id="be_note_val" placeholder="新的备注内容" style="width:100%;margin-top:6px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;min-height:60px;resize:vertical;font-family:inherit"></textarea>
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_isUsed"> <strong>使用状态</strong></label>
+          <div class="rg" style="margin-top:6px">
+            <label><input type="radio" name="be_isUsed" value="true"> 已使用</label>
+            <label><input type="radio" name="be_isUsed" value="false"> 未使用</label>
+          </div>
+        </div>
+        <div class="fm-sec">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="be_isTransfer"> <strong>是否已转让</strong></label>
+          <div class="rg" style="margin-top:6px">
+            <label><input type="radio" name="be_isTransfer" value="是"> 是</label>
+            <label><input type="radio" name="be_isTransfer" value="否"> 否</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fm-ft">
+      <button class="btn btn-sm" onclick="closeBatchEdit()">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="applyBatchEdit()">应用修改</button>
+    </div>
+  </div>
+</div>
+
 <!-- Item Modal -->
 <div class="mo" id="imo" style="display:none">
   <div class="md">
@@ -504,7 +588,19 @@ input,select,textarea{font-family:inherit;font-size:16px}
 
       <!-- 属性分类 -->
       <div class="fg"><label>属性分类</label>
-        <div class="cat-grid" id="fc"></div>
+        <div class="cat-tag-row" style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start">
+          <div class="cat-grid" id="fc"></div>
+          <div id="tagSec" style="display:none" class="tag-inline">
+            <div class="rg" style="display:flex;flex-wrap:wrap;gap:4px">
+              <label><input type="radio" name="ftag" value="通用" onchange="onTagCheck()"> 通用</label>
+              <label><input type="radio" name="ftag" value="古代" onchange="onTagCheck()"> 古代</label>
+              <label><input type="radio" name="ftag" value="现代" onchange="onTagCheck()"> 现代</label>
+              <label><input type="radio" name="ftag" value="架空" onchange="onTagCheck()"> 架空</label>
+              <label><input type="radio" name="ftag" value="其他" onchange="onTagCheck()"> 其他</label>
+            </div>
+            <input type="text" id="ftagc" placeholder="自定义标签" style="display:none;margin-top:4px">
+          </div>
+        </div>
         <div id="catsub" style="display:none;margin-top:6px"><label style="font-size:12px;color:var(--text2);margin-bottom:4px;display:block">选择子类</label><div class="cat-grid" id="fcsubGrid"></div></div>
         <input type="text" id="fccs" placeholder="自定义子分类" style="display:none;margin-top:6px">
         <input type="text" id="fbl" placeholder="绑定的立绘名称" style="display:none;margin-top:6px">
@@ -523,19 +619,6 @@ input,select,textarea{font-family:inherit;font-size:16px}
         <input type="text" id="fjzshop" placeholder="专属店铺名" style="display:none;margin-top:6px">
         <input type="text" id="fjzlihui" placeholder="绑定的立绘名" style="display:none;margin-top:6px">
         <input type="text" id="fjzcustom" placeholder="自定义限制说明" style="display:none;margin-top:6px">
-      </div>
-
-      <!-- 选择标签 -->
-      <div class="fg" id="tagSec" style="display:none">
-        <label>选择标签</label>
-        <div class="rg">
-          <label><input type="radio" name="ftag" value="通用" onchange="onTagCheck()"> 通用</label>
-          <label><input type="radio" name="ftag" value="古代" onchange="onTagCheck()"> 古代</label>
-          <label><input type="radio" name="ftag" value="现代" onchange="onTagCheck()"> 现代</label>
-          <label><input type="radio" name="ftag" value="架空" onchange="onTagCheck()"> 架空</label>
-          <label><input type="radio" name="ftag" value="其他" onchange="onTagCheck()"> 其他</label>
-        </div>
-        <input type="text" id="ftagc" placeholder="自定义标签" style="display:none;margin-top:6px">
       </div>
 
       <!-- 购买来源 -->
@@ -1822,8 +1905,15 @@ function renderCard(i){
     });
   }
   const countVal=i.ownerType==='shop'?(i.countInShop!==false):(i.countInPerson!==false);
-  return `<div class="mc${moveMode?' mc-move-hint':''}" data-id="${cid}"${moveMode?` draggable="true" ondragstart="onMoveDragStart(event,'${cid}')" ondragover="onMoveDragOver(event)" ondrop="onMoveDrop(event,'${cid}')" ondragend="onMoveDragEnd(event)" ondragleave="onMoveDragLeave(event)"`:''} oncontextmenu="showCardCtx(event,'${cid}')">
-    <div class="mci" onclick="openLb('${cid}')" id="mci_${cid}">
+  const isMultiSel=multiSelectMode&&selectedItems.has(cid);
+  const mcClasses=['mc'];
+  if(moveMode) mcClasses.push('mc-move-hint');
+  if(multiSelectMode) mcClasses.push('mc-multiselect');
+  if(isMultiSel) mcClasses.push('mc-selected');
+  const mcAttrs=moveMode?` draggable="true" ondragstart="onMoveDragStart(event,'${cid}')" ondragover="onMoveDragOver(event)" ondrop="onMoveDrop(event,'${cid}')" ondragend="onMoveDragEnd(event)" ondragleave="onMoveDragLeave(event)"`:'';
+  const mciClick=multiSelectMode?`toggleMultiSelect('${cid}')`:`openLb('${cid}')`;
+  return `<div class="${mcClasses.join(' ')}" data-id="${cid}"${mcAttrs} oncontextmenu="showCardCtx(event,'${cid}')">
+    <div class="mci" onclick="${mciClick}" id="mci_${cid}">
       ${mainImg?`<img src="${mainImg}" alt="素材图" loading="lazy" decoding="async" id="mcimg_${cid}">`:`<div class="mpl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
       ${imgNav}
     </div>
@@ -1993,17 +2083,18 @@ function renderMaterials(){
   const el=document.getElementById('mg');
   if(items.length===0){el.innerHTML='<div class="es"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>暂无素材</p><button class="btn btn-primary btn-sm" onclick="openItemModal()">添加第一份素材</button></div>';return}
   const moveBarHtml=moveMode?`<div class="move-bar"><div class="mb-info"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>拖拽卡片调整顺序</div><div class="mb-btns"><button class="mb-btn mb-cancel" onclick="cancelMoveMode()">取消</button><button class="mb-btn mb-save" onclick="saveMoveMode()">保存</button></div></div>`:'';
+  const msBarHtml=multiSelectMode?`<div class="ms-bar" id="msBar"></div>`:'';
   // Cancel any pending background batch render
   if(_renderBatchTimer){clearTimeout(_renderBatchTimer);_renderBatchTimer=null;}
   _renderBatchItems=null;
 
   // In move mode, render all items at once (drag reorder needs complete DOM)
   if(moveMode||items.length<=RENDER_BATCH_SIZE){
-    el.innerHTML=`${moveBarHtml}<div class="mat-grid" id="matGrid">${items.map(i=>renderCard(i)).join('')}</div>`;
+    el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${items.map(i=>renderCard(i)).join('')}</div>`;
   }else{
     // Render first batch immediately for fast initial paint
     const firstBatch=items.slice(0,RENDER_BATCH_SIZE);
-    el.innerHTML=`${moveBarHtml}<div class="mat-grid" id="matGrid">${firstBatch.map(i=>renderCard(i)).join('')}</div>`;
+    el.innerHTML=`${moveBarHtml}${msBarHtml}<div class="mat-grid" id="matGrid">${firstBatch.map(i=>renderCard(i)).join('')}</div>`;
     // Schedule remaining items in background batches
     _renderBatchItems=items;
     _renderBatchOffset=RENDER_BATCH_SIZE;
@@ -2017,6 +2108,7 @@ function renderMaterials(){
   else title=S.selName;
   ttEl.textContent=title; subEl.textContent=items.length+' 条';
   toggleStatsRow();
+  renderMultiSelectBar();
 }
 
 // Background batch renderer: appends cards in small chunks via setTimeout
@@ -2048,6 +2140,11 @@ function openFilterModal(){
     if(i.artist) splitArtists(i.artist).forEach(a=>artists.add(a));
     if(i.saleType) saleTypes.add(i.saleType);
     getCats(i).forEach(c=>cats.add(c));
+    // Add styleTag to category filter options
+    if(i.styleTag){
+      const tagLabel=i.styleTag==='其他'?(i.customTag||'其他'):i.styleTag;
+      cats.add('标签:'+tagLabel);
+    }
     const psd=getPSD(i);
     if(psd){
       // Split by the separator for multi-part labels (赞助购入 has "余N待赞助")
@@ -2083,7 +2180,8 @@ function renderFilterChips(containerId,values,dim){
   if(values.length===0){el.innerHTML='<span style="font-size:12px;color:var(--text2)">无</span>';return}
   el.innerHTML=values.map(v=>{
     const active=S_filter[dim].includes(v)?' active':'';
-    return `<span class="fm-chip${active}" onclick="toggleFilterChip(event,'${dim}','${eh(v)}')">${eh(v)}</span>`;
+    const display=v.startsWith('标签:')?v.slice(3):v;
+    return `<span class="fm-chip${active}" onclick="toggleFilterChip(event,'${dim}','${eh(v)}')">${eh(display)}</span>`;
   }).join('');
 }
 function renderStatusChips(options){
@@ -2130,7 +2228,11 @@ function applyFilterToItems(items){
     if(S_filter.saleType.length>0&&!S_filter.saleType.includes(i.saleType||'')) return false;
     if(S_filter.category.length>0){
       const iCats=getCats(i);
-      if(!iCats.some(c=>S_filter.category.includes(c))) return false;
+      // Also check styleTag for tag: prefixed filters
+      const iTag=i.styleTag?(i.styleTag==='其他'?(i.customTag||'其他'):i.styleTag):'';
+      const matchCat=iCats.some(c=>S_filter.category.includes(c));
+      const matchTag=iTag&&S_filter.category.includes('标签:'+iTag);
+      if(!matchCat&&!matchTag) return false;
     }
     if(S_filter.source.length>0){
       const psd=getPSD(i);
@@ -2518,6 +2620,9 @@ function showCardCtx(e,id){
   const i=S.items.find(x=>x.id===id); if(!i) return;
   const m=document.getElementById('ctxMenu');
   m.innerHTML=`
+    <div class="ctx-item" onclick="enterMultiSelect('${id}');hideCtx()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>多选
+    </div>
     <div class="ctx-item" onclick="copyItem('${id}');hideCtx()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>复制商品
     </div>
@@ -2553,6 +2658,131 @@ function enterMoveMode(){
   S._filterSort='manual';
   renderSortTabs();
   renderMaterials();
+}
+
+// ---- Multi-Select Mode ----
+let multiSelectMode=false;
+let selectedItems=new Set();
+
+function enterMultiSelect(id){
+  if(!multiSelectMode){
+    multiSelectMode=true;
+    selectedItems=new Set([id]);
+  }else{
+    if(selectedItems.has(id)) selectedItems.delete(id);
+    else selectedItems.add(id);
+  }
+  renderMaterials();
+  renderMultiSelectBar();
+}
+function exitMultiSelect(){
+  multiSelectMode=false;
+  selectedItems.clear();
+  renderMaterials();
+  renderMultiSelectBar();
+}
+function toggleMultiSelect(id){
+  if(selectedItems.has(id)) selectedItems.delete(id);
+  else selectedItems.add(id);
+  renderMaterials();
+  renderMultiSelectBar();
+}
+function selectAllVisible(){
+  const visible=getItemsForView().map(i=>i.id);
+  visible.forEach(id=>selectedItems.add(id));
+  renderMaterials();
+  renderMultiSelectBar();
+}
+function deselectAllVisible(){
+  selectedItems.clear();
+  renderMaterials();
+  renderMultiSelectBar();
+}
+function renderMultiSelectBar(){
+  const bar=document.getElementById('msBar');
+  if(!bar) return;
+  if(!multiSelectMode){bar.style.display='none';return}
+  bar.style.display='';
+  const n=selectedItems.size;
+  bar.innerHTML=`
+    <div class="ms-info">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>
+      已选 <strong>${n}</strong> 项
+    </div>
+    <div class="ms-btns">
+      <button class="ms-btn ms-btn-ghost" onclick="selectAllVisible()">全选</button>
+      <button class="ms-btn ms-btn-ghost" onclick="deselectAllVisible()">取消全选</button>
+      <button class="ms-btn ms-btn-light" onclick="openBatchEdit()" ${n===0?'disabled':''}>批量编辑</button>
+      <button class="ms-btn ms-btn-danger" onclick="batchDeleteItems()" ${n===0?'disabled':''}>批量删除</button>
+      <button class="ms-btn ms-btn-ghost" onclick="exitMultiSelect()">退出多选</button>
+    </div>`;
+}
+function batchDeleteItems(){
+  if(selectedItems.size===0) return;
+  const n=selectedItems.size;
+  confirm(`确定要删除选中的 ${n} 个素材吗？此操作不可恢复。`,()=>{
+    S.items=S.items.filter(i=>!selectedItems.has(i.id));
+    sv();exitMultiSelect();renderAll();
+    st(`已删除 ${n} 个素材`);
+  });
+}
+function openBatchEdit(){
+  if(selectedItems.size===0) return;
+  // Reset form
+  document.querySelectorAll('#batchEditForm input[type="checkbox"]').forEach(c=>c.checked=false);
+  document.querySelectorAll('#batchEditForm input[type="text"],#batchEditForm input[type="number"],#batchEditForm textarea,#batchEditForm select').forEach(c=>c.value='');
+  document.querySelectorAll('#batchEditForm input[type="radio"]').forEach(c=>c.checked=false);
+  document.getElementById('batchEditCount').textContent=selectedItems.size;
+  document.getElementById('batchEditModal').style.display='flex';
+}
+function closeBatchEdit(){
+  document.getElementById('batchEditModal').style.display='none';
+}
+function applyBatchEdit(){
+  const updates={};
+  // Check which fields are selected and collect values
+  if(document.getElementById('be_ownerName').checked){
+    updates.ownerName=document.getElementById('be_ownerName_val').value.trim();
+    if(!updates.ownerName){st('所属不能为空','err');return}
+  }
+  if(document.getElementById('be_artist').checked){
+    updates.artist=document.getElementById('be_artist_val').value.trim();
+  }
+  if(document.getElementById('be_category').checked){
+    updates.category=document.getElementById('be_category_val').value.trim();
+  }
+  if(document.getElementById('be_price').checked){
+    const p=parseFloat(document.getElementById('be_price_val').value);
+    if(isNaN(p)||p<0){st('价格无效','err');return}
+    updates.price=p;
+  }
+  if(document.getElementById('be_saleType').checked){
+    const r=document.querySelector('input[name="be_saleType"]:checked');
+    if(!r){st('请选择售卖类型','err');return}
+    updates.saleType=r.value;
+  }
+  if(document.getElementById('be_note').checked){
+    updates.note=document.getElementById('be_note_val').value.trim();
+  }
+  if(document.getElementById('be_isUsed').checked){
+    const r=document.querySelector('input[name="be_isUsed"]:checked');
+    if(r) updates.isUsed=r.value==='true';
+  }
+  if(document.getElementById('be_isTransfer').checked){
+    const r=document.querySelector('input[name="be_isTransfer"]:checked');
+    if(r) updates.isTransfer=r.value;
+  }
+  const keys=Object.keys(updates);
+  if(keys.length===0){st('请至少选择一项要修改的内容','err');return}
+  let count=0;
+  S.items.forEach(i=>{
+    if(selectedItems.has(i.id)){
+      keys.forEach(k=>{i[k]=updates[k]});
+      count++;
+    }
+  });
+  sv();closeBatchEdit();exitMultiSelect();renderAll();
+  st(`已批量修改 ${count} 个素材（${keys.length} 个字段）`);
 }
 function cancelMoveMode(){
   moveMode=false;moveOrder=[];moveDragId=null;
@@ -4316,7 +4546,7 @@ function getSortedItemsForExport(){
 
 function getFieldValue(item,field){
   switch(field){
-    case 'ownerName': return (item.ownerType==='shop'?'店铺':'个人')+'：'+(item.ownerName||'');
+    case 'ownerName': return item.ownerName||'';
     case 'name': return item.name||'';
     case 'artist': return item.artist||'';
     case 'price': return item.price||0;
@@ -4364,11 +4594,18 @@ function doExport(){
   const items=getSortedItemsForExport();
   if(items.length===0){st('没有可导出的数据','err');return}
   
-  // Build ordered field list: base fields first, then the 4 detail fields, then others
   const fieldOrder=ALL_EXPORT_FIELDS;
   const selectedFields=fieldOrder.filter(f=>exState.fields.has(f));
   
-  exportXLSX(items,selectedFields);
+  // Split by ownerType for multi-sheet export
+  const shopItems=items.filter(i=>i.ownerType==='shop');
+  const personItems=items.filter(i=>i.ownerType==='person');
+  const sheets=[];
+  if(shopItems.length>0) sheets.push({name:'店铺',items:shopItems});
+  if(personItems.length>0) sheets.push({name:'个人',items:personItems});
+  if(sheets.length===0){st('没有可导出的数据','err');return}
+  
+  exportXLSX(sheets,selectedFields);
 }
 
 function exportJSONEnhanced(items,fields){
@@ -4381,7 +4618,7 @@ function exportJSONEnhanced(items,fields){
 }
 
 // ---- XLSX Generation ----
-async function exportXLSX(items,fields){
+async function exportXLSX(sheets,fields){
   st('正在生成Excel文件…');
   try{
     const headers=fields.map(f=>getFieldLabel(f));
@@ -4399,71 +4636,92 @@ async function exportXLSX(items,fields){
       return idx;
     }
     
-    // Pre-populate shared strings with all cell values
-    const cellData=[]; // [rowIdx][colIdx] = {type:'s'|'n', val, sIdx}
-    // Header row
-    const headerRow=headers.map(h=>({type:'s',sIdx:ss(h)}));
-    cellData.push(headerRow);
-    // Data rows
-    for(const item of items){
-      const row=[];
-      for(let ci=0;ci<colCount;ci++){
-        const field=fields[ci];
-        const val=getFieldValue(item,field);
-        if(field==='price'){
-          const num=parseFloat(val)||0;
-          row.push({type:'n',val:num});
-        }else{
-          row.push({type:'s',sIdx:ss(val.toString())});
+    // Build cell data for each sheet
+    const sheetDataArr=[]; // [{name, cellData}]
+    for(const sheet of sheets){
+      const cellData=[];
+      const headerRow=headers.map(h=>({type:'s',sIdx:ss(h)}));
+      cellData.push(headerRow);
+      for(const item of sheet.items){
+        const row=[];
+        for(let ci=0;ci<colCount;ci++){
+          const field=fields[ci];
+          const val=getFieldValue(item,field);
+          if(field==='price'){
+            const num=parseFloat(val)||0;
+            row.push({type:'n',val:num});
+          }else{
+            row.push({type:'s',sIdx:ss(val.toString())});
+          }
         }
+        cellData.push(row);
       }
-      cellData.push(row);
+      sheetDataArr.push({name:sheet.name,cellData});
     }
     
     // Build sharedStrings XML
     const ssXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="'+strings.length+'" uniqueCount="'+strings.length+'">'+strings.map(s=>'<si><t xml:space="preserve">'+escapeXML(s)+'</t></si>').join('')+'</sst>';
     
-    // Build sheet XML
-    let sheetXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
-    // Column widths
-    sheetXML+='<cols>';
-    for(let i=0;i<colCount;i++){
-      let maxLen=headers[i].length;
-      for(const row of cellData){
-        const cell=row[i];
-        const val=cell.type==='s'?strings[cell.sIdx]:cell.val.toString();
-        if(val.length>maxLen) maxLen=val.length;
-      }
-      const w=Math.min(Math.max(maxLen+2,10),50);
-      sheetXML+=`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`;
-    }
-    sheetXML+='</cols>';
-    sheetXML+='<sheetData>';
-    for(let ri=0;ri<cellData.length;ri++){
-      let rowXML=`<row r="${ri+1}">`;
-      for(let ci=0;ci<colCount;ci++){
-        const cellRef=numToColRef(ci+1)+(ri+1);
-        const cell=cellData[ri][ci];
-        const style=ri===0?1:(cell.type==='n'?2:0);
-        if(cell.type==='n'){
-          rowXML+=`<c r="${cellRef}" s="${style}"><v>${cell.val}</v></c>`;
-        }else{
-          rowXML+=`<c r="${cellRef}" t="s" s="${style}"><v>${cell.sIdx}</v></c>`;
+    // Build sheet XML for each sheet
+    const sheetXMLs=[];
+    for(let si=0;si<sheetDataArr.length;si++){
+      const {cellData}=sheetDataArr[si];
+      let sheetXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
+      sheetXML+='<cols>';
+      for(let i=0;i<colCount;i++){
+        let maxLen=headers[i].length;
+        for(const row of cellData){
+          const cell=row[i];
+          const val=cell.type==='s'?strings[cell.sIdx]:cell.val.toString();
+          if(val.length>maxLen) maxLen=val.length;
         }
+        const w=Math.min(Math.max(maxLen+2,10),50);
+        sheetXML+=`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`;
       }
-      rowXML+='</row>';
-      sheetXML+=rowXML;
+      sheetXML+='</cols>';
+      sheetXML+='<sheetData>';
+      for(let ri=0;ri<cellData.length;ri++){
+        let rowXML=`<row r="${ri+1}">`;
+        for(let ci=0;ci<colCount;ci++){
+          const cellRef=numToColRef(ci+1)+(ri+1);
+          const cell=cellData[ri][ci];
+          const style=ri===0?1:(cell.type==='n'?2:0);
+          if(cell.type==='n'){
+            rowXML+=`<c r="${cellRef}" s="${style}"><v>${cell.val}</v></c>`;
+          }else{
+            rowXML+=`<c r="${cellRef}" t="s" s="${style}"><v>${cell.sIdx}</v></c>`;
+          }
+        }
+        rowXML+='</row>';
+        sheetXML+=rowXML;
+      }
+      sheetXML+='</sheetData></worksheet>';
+      sheetXMLs.push(sheetXML);
     }
-    sheetXML+='</sheetData></worksheet>';
     
-    // Build workbook XML
-    const wbXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="素材列表" sheetId="1" r:id="rId1"/></sheets></workbook>';
+    // Build workbook XML (multi-sheet)
+    const sheetCount=sheetDataArr.length;
+    let wbSheets='';
+    let wbRelsInner='';
+    let ctOverrides='';
+    for(let si=0;si<sheetCount;si++){
+      const rId='rId'+(si+1);
+      const sheetName=escapeXML(sheetDataArr[si].name);
+      wbSheets+=`<sheet name="${sheetName}" sheetId="${si+1}" r:id="${rId}"/>`;
+      wbRelsInner+=`<Relationship Id="${rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${si+1}.xml"/>`;
+      ctOverrides+=`<Override PartName="/xl/worksheets/sheet${si+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`;
+    }
+    // sharedStrings and styles are rId after all worksheets
+    const ssRid='rId'+(sheetCount+1);
+    const stRid='rId'+(sheetCount+2);
+    wbRelsInner+=`<Relationship Id="${ssRid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>`;
+    wbRelsInner+=`<Relationship Id="${stRid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>`;
     
-    // Build workbook.xml.rels
-    const wbRelsXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+    const wbXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+wbSheets+'</sheets></workbook>';
     
-    // Build [Content_Types].xml
-    const ctXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
+    const wbRelsXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+wbRelsInner+'</Relationships>';
+    
+    const ctXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+ctOverrides+'<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
     
     // Build styles.xml (header bold + price number format)
     const stylesXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="等线"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="等线"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF4472C4"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/><xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs></styleSheet>';
@@ -4471,16 +4729,18 @@ async function exportXLSX(items,fields){
     // Build .rels
     const relsXML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
     
-    // Build ZIP
+    // Build ZIP file list
     const files=[
       {path:'[Content_Types].xml',data:ctXML},
       {path:'_rels/.rels',data:relsXML},
       {path:'xl/workbook.xml',data:wbXML},
       {path:'xl/_rels/workbook.xml.rels',data:wbRelsXML},
-      {path:'xl/worksheets/sheet1.xml',data:sheetXML},
       {path:'xl/sharedStrings.xml',data:ssXML},
       {path:'xl/styles.xml',data:stylesXML}
     ];
+    for(let si=0;si<sheetXMLs.length;si++){
+      files.push({path:'xl/worksheets/sheet'+(si+1)+'.xml',data:sheetXMLs[si]});
+    }
     
     const zipBlob=await buildZip(files);
     const a=document.createElement('a');
@@ -4488,7 +4748,8 @@ async function exportXLSX(items,fields){
     a.download='文游素材导出_'+new Date().toISOString().split('T')[0]+'.xlsx';
     a.click();
     URL.revokeObjectURL(a.href);
-    st('Excel文件已导出（'+items.length+'条）');
+    const totalItems=sheets.reduce((s,sh)=>s+sh.items.length,0);
+    st('Excel文件已导出（'+totalItems+'条，'+sheetCount+'个工作表）');
     closeExportModal();
   }catch(err){
     st('导出Excel失败：'+err.message,'err');
@@ -4655,7 +4916,7 @@ function closeConfirm(){document.getElementById('co').style.display='none'}
 function st(msg,type){const el=document.getElementById('tst');el.textContent=msg;el.style.display='block';el.style.background=type==='err'?'var(--danger)':'#1e293b';clearTimeout(el._t);el._t=setTimeout(()=>{el.style.display='none'},2500)}
 
 // ---- Keyboard ----
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeItemModal();closeLb();closeConfirm();closeExcelImport();hideCtxMenu();closeSourceModal();closeGroupModal();closeFilterModal();closeExportModal()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeItemModal();closeLb();closeConfirm();closeExcelImport();hideCtxMenu();closeSourceModal();closeGroupModal();closeFilterModal();closeExportModal();closeBatchEdit();if(multiSelectMode)exitMultiSelect()}});
 
 // ---- Drag & drop for import ----
 document.getElementById('xidrop').addEventListener('dragover',e=>{e.preventDefault();e.currentTarget.style.borderColor='var(--primary)'});
