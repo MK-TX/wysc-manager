@@ -364,13 +364,16 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .filter-modal{background:var(--card);border-radius:var(--radius);max-width:600px;width:95vw;max-height:85vh;display:flex;flex-direction:column;margin:0}
 .filter-modal .fm-hd{padding:16px 20px 0;flex-shrink:0}
 .filter-modal h3{font-size:16px;margin:0}
-.filter-modal .fm-body{padding:16px 20px;overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:16px}
-.filter-modal .fm-sec{}
-.filter-modal .fm-sec h4{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.filter-modal .fm-body{padding:12px 20px;overflow-y:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:12px}
+.filter-modal .fm-sec{padding:10px 12px;border-radius:var(--radius-sm);background:var(--bg);border:1px solid var(--border)}
+.filter-modal .fm-sec h4{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;letter-spacing:.3px}
 .filter-modal .fm-chips{display:flex;flex-wrap:wrap;gap:6px}
 .filter-modal .fm-chip{padding:5px 12px;border-radius:16px;font-size:12px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:var(--card);color:var(--text);user-select:none}
 .filter-modal .fm-chip:hover{border-color:var(--primary);background:var(--primary-light)}
 .filter-modal .fm-chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.filter-modal .fm-grp-label{font-size:10px;color:var(--text2);font-weight:600;margin:6px 0 3px;letter-spacing:.3px;text-transform:uppercase}
+.filter-modal .fm-grp-label:first-child{margin-top:0}
+.filter-modal .fm-sub-note{font-size:11px;color:var(--text2);margin:6px 0 3px;font-weight:500}
 .filter-modal .fm-ft{display:flex;gap:8px;padding:12px 20px 16px;border-top:1px solid var(--border);justify-content:flex-end;flex-shrink:0}
 .filter-modal .fm-count{font-size:12px;color:var(--text2);margin-left:auto;align-self:center}
 .ex-select{width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--card);color:var(--text);cursor:pointer}
@@ -384,8 +387,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
   <div class="header-actions">
     <button class="btn" onclick="exportJSONDirect()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>导出代码</span></button>
     <button class="btn" onclick="openExportModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg><span>导出Excel</span></button>
-    <button class="btn" onclick="document.getElementById('ji').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>导入恢复</span></button>
-    <button class="btn" onclick="handleXImportClick()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13v-2h6v2"/><path d="M12 9v6"/></svg><span>Excel导入</span></button>
+    <button class="btn" onclick="document.getElementById('ji').click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>导入代码</span></button>
+    <button class="btn" onclick="handleXImportClick()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13v-2h6v2"/><path d="M12 9v6"/></svg><span>导入Excel</span></button>
 
     <button class="btn" onclick="openBackupModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>自动备份</span></button>
 
@@ -440,8 +443,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
       <div class="fm-sec" id="fmArtistSec"><h4 id="fmArtistLabel">画师/美工</h4><div class="fm-chips" id="fmArtist"></div></div>
       <div class="fm-sec" id="fmSaleTypeSec"><h4>售卖类型</h4><div class="fm-chips" id="fmSaleType"></div></div>
       <div class="fm-sec" id="fmCategorySec"><h4>属性分类</h4><div class="fm-chips" id="fmCategory"></div>
-        <div id="fmSubRow" style="display:none;margin-top:8px"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">子项</div><div class="fm-chips" id="fmSubCategory"></div></div>
-        <div id="fmTagRow" style="display:none;margin-top:8px"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">选择标签</div><div class="fm-chips" id="fmStyleTag"></div></div>
+        <div id="fmSubRow" style="display:none;margin-top:8px"><div class="fm-sub-note">子项</div><div class="fm-chips" id="fmSubCategory"></div></div>
+        <div id="fmTagRow" style="display:none;margin-top:8px"><div class="fm-sub-note">选择标签</div><div class="fm-chips" id="fmStyleTag"></div></div>
       </div>
       <div class="fm-sec" id="fmSourceSec"><h4>购买来源</h4><div class="fm-chips" id="fmSource"></div></div>
       <div class="fm-sec" id="fmTongjiaSec"><h4>通加规则</h4><div class="fm-chips" id="fmTongjia"></div></div>
@@ -727,6 +730,16 @@ input,select,textarea{font-family:inherit;font-size:16px}
             <div class="fg" style="margin:0;display:flex;align-items:center;gap:8px"><label style="font-size:12px">已赞助</label><input type="number" id="fsponcount2" min="0" value="0" style="width:60px"><span style="font-size:12px;color:var(--text2)">不影响总价</span></div>
           </div>
           <textarea id="fsponsor" placeholder="赞助人ID（可换行填写多个）" style="display:none;margin-top:6px;min-height:44px;resize:vertical;font-family:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);width:100%;box-sizing:border-box"></textarea>
+        </div>
+        <div id="psrz" style="display:none;margin-top:8px">
+          <div class="rg">
+            <label><input type="radio" name="prz" value="回购赞助" onchange="onPRZ()"> 回购赞助</label>
+            <label><input type="radio" name="prz" value="被回购赞助" onchange="onPRZ()"> 被回购赞助</label>
+          </div>
+          <div id="frspcWrap" style="display:none;margin-top:6px;gap:8px;flex-wrap:wrap">
+            <div class="fg" style="margin:0;display:flex;align-items:center;gap:8px"><label style="font-size:12px">赞助次数</label><input type="number" id="frsponcount" min="1" value="1" style="width:60px"> <span style="font-size:12px;color:var(--text2)">总价=价格×次数</span></div>
+          </div>
+          <textarea id="frsponsor" placeholder="赞助人ID（可换行填写多个）" style="display:none;margin-top:6px;min-height:44px;resize:vertical;font-family:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);width:100%;box-sizing:border-box"></textarea>
         </div>
         <input type="text" id="fpsc" placeholder="自定义购买来源" style="display:none;margin-top:6px">
       </div>
@@ -1464,12 +1477,18 @@ function getPSD(i){
     else{
       const sc=i.sponsorCount&&i.sponsorCount>1?`×${i.sponsorCount}`:'';
       const done=i.sponsoredDone||0, rem=(i.sponsorCount||1)-done;
-      t=`赞助购入${sc}`;
-      if(rem>0) t+=`\x00余${rem}待赞助`;
+      t=`赞助${sc}`;
+      if(rem>0) t+=`\x00余${rem}赞待`;
+    }
+  }
+  else if(i.purchaseSource==='回购'){
+    if(i.purchaseSub==='被回购赞助') t='被回购赞助';
+    else{
+      const sc=i.sponsorCount&&i.sponsorCount>1?`×${i.sponsorCount}`:'';
+      t=`回购赞助${sc}`;
     }
   }
   else if(i.purchaseSource==='接转') t='接转';
-  else if(i.purchaseSource==='回购') t='回购';
   else if(i.purchaseSource==='定制') t='定制';
   else if(i.purchaseSource==='其他') t=i.customPurchaseSource||'其他';
   else t='';
@@ -2283,7 +2302,20 @@ function renderCard(i,eager){
   let uniTagsHtml='';
   if(i.saleType) uniTagsHtml+=`<span class="mcbg">${eh(i.saleType)}</span>`;
   const psd=getPSD(i);
-  if(psd){psd.split('\x00').filter(Boolean).forEach(t=>{uniTagsHtml+=`<span class="mcbg">${eh(t)}</span>`})}
+  if(psd){
+    const parts=psd.split('\x00').filter(Boolean);
+    const hasPending=parts.some(p=>/^余\d+赞待$/.test(p));
+    parts.forEach(t=>{
+      if(hasPending&&/^赞助×?\d*$/.test(t)) return;
+      let psdStyle='';
+      if(t==='赞助'||/^赞助×\d+$/.test(t)) psdStyle='background:#dbeafe;color:#1e40af';
+      else if(t==='被赞助') psdStyle='background:#fce7f3;color:#9d174d';
+      else if(/^余\d+赞待$/.test(t)) psdStyle='background:#fef3c7;color:#92400e';
+      else if(t==='回购赞助'||/^回购赞助×\d+$/.test(t)) psdStyle='background:#d1fae5;color:#065f46';
+      else if(t==='被回购赞助') psdStyle='background:#ede9fe;color:#5b21b6';
+      uniTagsHtml+=`<span class="mcbg"${psdStyle?` style="${psdStyle}"`:''}>${eh(t)}</span>`;
+    });
+  }
   if(tr) uniTagsHtml+=`<span class="mcbg">${eh(tr.t)}</span>`;
   if(i.isDoublePoints) uniTagsHtml+=`<span class="mcbg">双倍积分</span>`;
   if(usageTag) uniTagsHtml+=`<span class="mcbg">${eh(usageTag)}</span>`;
@@ -2609,9 +2641,13 @@ function openFilterModal(){
   const artistLabel=document.getElementById('fmArtistLabel');
   if(artistLabel) artistLabel.textContent=S.selType==='person'?'所属':'画师/美工';
   // Collect all unique values from current view items only
-  const artists=new Set(), saleTypes=new Set(), cats=new Set(), sources=new Set(), tongjias=new Set(), styleTags=new Set(), transferRules=new Set();
+  const artistByOwner=new Map(), saleTypes=new Set(), cats=new Set(), sources=new Set(), tongjias=new Set(), styleTags=new Set(), transferRules=new Set();
   items.forEach(i=>{
-    if(i.artist) splitArtists(i.artist).forEach(a=>artists.add(a));
+    if(i.artist){
+      const owner=i.ownerName||'未分组';
+      if(!artistByOwner.has(owner)) artistByOwner.set(owner,new Set());
+      splitArtists(i.artist).forEach(a=>artistByOwner.get(owner).add(a));
+    }
     if(i.saleType) saleTypes.add(i.saleType);
     getCats(i).forEach(c=>cats.add(c));
     // Collect style tags from items only (no hardcoded)
@@ -2623,8 +2659,7 @@ function openFilterModal(){
     if(psd){
       psd.split('\x00').forEach(p=>{
         if(p&&!p.startsWith('余')){
-          // Normalize 赞助购入×N to 赞助购入
-          sources.add(p.replace(/^赞助购入×\d+$/,'赞助购入'));
+          sources.add(p.replace(/^赞助×\d+$/,'赞助').replace(/^回购赞助×\d+$/,'回购赞助'));
         }
       });
     }
@@ -2641,21 +2676,44 @@ function openFilterModal(){
   const statusOptions=[];
   const hasUsed=items.some(i=>i.isUsed);
   const hasUnused=items.some(i=>!i.isUsed);
-  const hasPendingSponsor=items.some(i=>{const psd=getPSD(i);return psd&&/余\d+待赞助/.test(psd)});
-  if(hasPendingSponsor) statusOptions.push({val:'pending_sponsor',label:'待赞助'});
+  const hasPendingSponsor=items.some(i=>{const psd=getPSD(i);return psd&&/余\d+赞待/.test(psd)});
+  if(hasPendingSponsor) statusOptions.push({val:'pending_sponsor',label:'赞待'});
   if(hasUnused&&hasUsed){statusOptions.push({val:'unused',label:'未使用'});statusOptions.push({val:'used',label:'已使用'});}
-  // Render chips and hide sections with no options
-  toggleFilterSec('fmArtistSec',[...artists].sort((a,b)=>a.localeCompare(b,'zh')),'fmArtist','artist');
-  toggleFilterSec('fmSaleTypeSec',[...saleTypes].sort((a,b)=>a.localeCompare(b,'zh')),'fmSaleType','saleType');
-  toggleFilterSec('fmCategorySec',[...cats].sort((a,b)=>a.localeCompare(b,'zh')),'fmCategory','category');
-  toggleFilterSec('fmSourceSec',[...sources].sort((a,b)=>a.localeCompare(b,'zh')),'fmSource','source');
-  toggleFilterSec('fmTongjiaSec',[...tongjias].sort((a,b)=>a.localeCompare(b,'zh')),'fmTongjia','tongjia');
-  toggleFilterSec('fmTransferRuleSec',[...transferRules],'fmTransferRule','transferRule');
+  // --- 画师/美工: group by shop/owner ---
+  const artistGroups=[...artistByOwner.entries()]
+    .sort((a,b)=>a[0].localeCompare(b,'zh'))
+    .map(([owner,set])=>({label:owner,values:[...set].sort((a,b)=>a.localeCompare(b,'zh'))}));
+  const artistSec=document.getElementById('fmArtistSec');
+  if(artistGroups.length===0){artistSec.style.display='none'}
+  else{artistSec.style.display='';renderGroupedFilterChips('fmArtist',artistGroups,'artist')}
+  // --- 售卖类型: custom order ---
+  const _stOrder={'限时':1,'限量':2,'车':3,'福利购':4,'其他':5};
+  toggleFilterSec('fmSaleTypeSec',[...saleTypes].sort((a,b)=>(_stOrder[a]||99)-(_stOrder[b]||99)),'fmSaleType','saleType');
+  // --- 属性分类: MAIN_CATS order ---
+  toggleFilterSec('fmCategorySec',[...cats].sort((a,b)=>(MAIN_CATS.indexOf(a)+1)-(MAIN_CATS.indexOf(b)+1)||a.localeCompare(b,'zh')),'fmCategory','category');
+  // --- 购买来源: grouped by type ---
+  const _srcGroups=[
+    {label:'购入类',vals:['购入','微店购入','淘宝购入','私戳购入','填表购入']},
+    {label:'赞助类',vals:['赞助','被赞助']},
+    {label:'回购类',vals:['回购赞助','被回购赞助']},
+    {label:'其他',vals:['接转','定制','其他']}
+  ];
+  const srcGroups=_srcGroups.map(g=>({label:g.label,values:g.vals.filter(v=>sources.has(v))}));
+  const srcSec=document.getElementById('fmSourceSec');
+  if(srcGroups.every(g=>g.values.length===0)){srcSec.style.display='none'}
+  else{srcSec.style.display='';renderGroupedFilterChips('fmSource',srcGroups,'source')}
+  // --- 通加规则: custom order ---
+  const _tjOrder={'不可穿通加':1,'可穿通加':2};
+  toggleFilterSec('fmTongjiaSec',[...tongjias].sort((a,b)=>(_tjOrder[a]||99)-(_tjOrder[b]||99)),'fmTongjia','tongjia');
+  // --- 转让规则: fixed order ---
+  const _trOrder={'不可转让':1,'可退圈转让':2,'可不退圈转让':3};
+  toggleFilterSec('fmTransferRuleSec',[...transferRules].sort((a,b)=>(_trOrder[a]||99)-(_trOrder[b]||99)),'fmTransferRule','transferRule');
   // Style tags - only from items
   const tagRow=document.getElementById('fmTagRow');
   if(styleTags.size>0){
     tagRow.style.display='';
-    renderFilterChips('fmStyleTag',[...styleTags].sort((a,b)=>a.localeCompare(b,'zh')),'styleTag');
+    const _tagOrder={'古代':1,'古现/通用':2,'欧风':3,'现代':4,'其他':5};
+    renderFilterChips('fmStyleTag',[...styleTags].sort((a,b)=>(_tagOrder[a]||99)-(_tagOrder[b]||99)),'styleTag');
   }else{
     tagRow.style.display='none';
   }
@@ -2692,7 +2750,7 @@ function updateFilterSubRow(){
       });
     }
   });
-  const subArr=[...allSubs];
+  const subArr=[...allSubs].sort((a,b)=>a.localeCompare(b,'zh'));
   if(subArr.length>0){
     subRow.style.display='';
     renderFilterChips('fmSubCategory',subArr,'subCategory');
@@ -2708,6 +2766,23 @@ function renderFilterChips(containerId,values,dim){
     const active=S_filter[dim].includes(v)?' active':'';
     return `<span class="fm-chip${active}" onclick="toggleFilterChip(event,'${dim}','${eh(v)}')">${eh(v)}</span>`;
   }).join('');
+}
+function renderGroupedFilterChips(containerId,groups,dim){
+  const el=document.getElementById(containerId);
+  const valid=groups.filter(g=>g.values.length>0);
+  if(valid.length===0){el.innerHTML='<span style="font-size:12px;color:var(--text2)">无</span>';el.style.display='';return}
+  let html='';
+  valid.forEach((g)=>{
+    if(g.label) html+=`<div class="fm-grp-label">${eh(g.label)}</div>`;
+    html+='<div class="fm-chips">';
+    g.values.forEach(v=>{
+      const active=S_filter[dim].includes(v)?' active':'';
+      html+=`<span class="fm-chip${active}" onclick="toggleFilterChip(event,'${dim}','${eh(v)}')">${eh(v)}</span>`;
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+  el.style.display='block';
 }
 function renderStatusChips(options){
   const el=document.getElementById('fmStatus');
@@ -2769,7 +2844,7 @@ function applyFilterToItems(items){
     }
     if(S_filter.source.length>0){
       const psd=getPSD(i);
-      const srcs=psd?psd.split('\x00').filter(p=>p&&!p.startsWith('余')).map(s=>s.replace(/^赞助购入×\d+$/,'赞助购入')):[];
+      const srcs=psd?psd.split('\x00').filter(p=>p&&!p.startsWith('余')).map(s=>s.replace(/^赞助×\d+$/,'赞助').replace(/^回购赞助×\d+$/,'回购赞助')):[];
       if(!srcs.some(s=>S_filter.source.includes(s))) return false;
     }
     if(S_filter.tongjia.length>0){
@@ -2784,7 +2859,7 @@ function applyFilterToItems(items){
     if(S_filter.status.length>0){
       let matchStatus=false;
       if(S_filter.status.includes('pending_sponsor')){
-        const psd=getPSD(i);if(psd&&/余\d+待赞助/.test(psd)) matchStatus=true;
+        const psd=getPSD(i);if(psd&&/余\d+赞待/.test(psd)) matchStatus=true;
       }
       if(S_filter.status.includes('unused')&&!i.isUsed) matchStatus=true;
       if(S_filter.status.includes('used')&&i.isUsed) matchStatus=true;
@@ -2956,8 +3031,20 @@ function openEditItem(id){
       }else{
         document.getElementById('fsponcount').value=i.sponsorCount||1;
         document.getElementById('fsponcount2').value=i.sponsoredDone||0;
+        document.getElementById('fsponsor').value=i.sponsorId||'';
       }
       onPZ();
+    }
+    if(i.purchaseSource==='回购'){
+      const przr=document.querySelector(`input[name="prz"][value="${i.purchaseSub||'回购赞助'}"]`);
+      if(przr){przr.checked=true}
+      if(i.purchaseSub==='被回购赞助'){
+        document.getElementById('frsponsor').value=i.sponsorId||'';
+      }else{
+        document.getElementById('frsponcount').value=i.sponsorCount||1;
+        document.getElementById('frsponsor').value=i.sponsorId||'';
+      }
+      onPRZ();
     }
     if(i.purchaseSource==='其他'){document.getElementById('fpsc').style.display='';document.getElementById('fpsc').value=i.customPurchaseSource||''}
   }
@@ -3024,10 +3111,11 @@ function clearItemForm(){
   document.getElementById('fccs').style.display='none';document.getElementById('fccs').value='';
   document.getElementById('fbl').style.display='none';document.getElementById('fbl').value='';
   document.getElementById('fcc').style.display='none';document.getElementById('fcc').value='';
-  document.querySelectorAll('input[name="ps"]').forEach(r=>r.checked=false);document.getElementById('psp').style.display='none';document.getElementById('psz').style.display='none';
-  document.querySelectorAll('input[name="pp"]').forEach(r=>r.checked=false);document.querySelectorAll('input[name="pz"]').forEach(r=>r.checked=false);document.getElementById('fpsc').style.display='none';document.getElementById('fpsc').value='';
+  document.querySelectorAll('input[name="ps"]').forEach(r=>r.checked=false);document.getElementById('psp').style.display='none';document.getElementById('psz').style.display='none';document.getElementById('psrz').style.display='none';
+  document.querySelectorAll('input[name="pp"]').forEach(r=>r.checked=false);document.querySelectorAll('input[name="pz"]').forEach(r=>r.checked=false);document.querySelectorAll('input[name="prz"]').forEach(r=>r.checked=false);document.getElementById('fpsc').style.display='none';document.getElementById('fpsc').value='';
   document.getElementById('fsponsor').style.display='none';document.getElementById('fsponsor').value='';
   document.getElementById('fspcWrap').style.display='none';document.getElementById('fsponcount').value='1';document.getElementById('fsponcount2').value='0';
+  document.getElementById('frsponsor').style.display='none';document.getElementById('frsponsor').value='';document.getElementById('frspcWrap').style.display='none';document.getElementById('frsponcount').value='1';
   document.querySelector('input[name="ftransfer"][value="否"]').checked=true;
   document.getElementById('ftransferid').style.display='none';document.getElementById('ftransferid').value='';
   document.getElementById('tjg').style.display='none';document.querySelectorAll('input[name="tj"]').forEach(r=>r.checked=false);
@@ -3089,7 +3177,7 @@ function saveItem(){
     if(ot==='shop') S.shops.push(on); else S.persons.push(on);
   }
   const ps=document.querySelector('input[name="ps"]:checked')?.value||'';
-  const pp=ps==='购入'?(document.querySelector('input[name="pp"]:checked')?.value||''):(ps==='赞助'?(document.querySelector('input[name="pz"]:checked')?.value||''):'');
+  const pp=ps==='购入'?(document.querySelector('input[name="pp"]:checked')?.value||''):(ps==='赞助'?(document.querySelector('input[name="pz"]:checked')?.value||''):(ps==='回购'?(document.querySelector('input[name="prz"]:checked')?.value||''):''));
   const isTrans=document.querySelector('input[name="ftransfer"]:checked')?.value||'否';
   let subCat='',csub='',cCat='',bnd='';
   const checkedSubs=getCheckedSubs();
@@ -3124,7 +3212,7 @@ function saveItem(){
     if(document.querySelector('input[name="frsnq"][value="其他"]').checked) frOtherNote=document.getElementById('frothernote').value.trim();
   }
   const saleType=document.querySelector('input[name="fst"]:checked')?.value||'';
-  const isSponsored=ps==='赞助'&&pp==='被赞助';
+  const isSponsored=(ps==='赞助'&&pp==='被赞助')||(ps==='回购'&&pp==='被回购赞助');
   const ult=document.querySelector('input[name="ful"]:checked')?.value||'limited';
   const ulst=document.querySelector('input[name="fulst"]:checked')?.value||'total';
   const styleTag=document.querySelector('input[name="ftag"]:checked')?.value||'';
@@ -3135,9 +3223,9 @@ function saveItem(){
     styleTag:styleTag,customTag:customTag,
     jzRestrict:jzRestrict,jzShop:jzShop,jzLihui:jzLihui,jzCustom:jzCustom,
     purchaseSource:ps,purchaseSub:pp,customPurchaseSource:ps==='其他'?document.getElementById('fpsc').value.trim():'',
-    sponsorId:ps==='赞助'?document.getElementById('fsponsor').value.trim():'',isSponsored:ps==='赞助'&&pp==='被赞助',
-    sponsorCount:ps==='赞助'&&pp==='赞助'?(parseInt(document.getElementById('fsponcount').value)||1):1,
-    sponsoredDone:ps==='赞助'&&pp==='赞助'?(parseInt(document.getElementById('fsponcount2').value)||0):0,
+    sponsorId:(ps==='赞助')?document.getElementById('fsponsor').value.trim():(ps==='回购')?document.getElementById('frsponsor').value.trim():'',isSponsored:(ps==='赞助'&&pp==='被赞助')||(ps==='回购'&&pp==='被回购赞助'),
+    sponsorCount:(ps==='赞助'&&pp==='赞助')?(parseInt(document.getElementById('fsponcount').value)||1):(ps==='回购'&&pp==='回购赞助')?(parseInt(document.getElementById('frsponcount').value)||1):1,
+    sponsoredDone:(ps==='赞助'&&pp==='赞助')?(parseInt(document.getElementById('fsponcount2').value)||0):(ps==='回购'&&pp==='回购赞助')?(parseInt(document.getElementById('frsponcount').value)||1):0,
     isTransfer:isTrans,
     transferId:isTrans==='是'?document.getElementById('ftransferid').value.trim():'',
     tongjiaRule:tr,tongjiaLimit:tjl,tongjiaType:tjt,tongjiaScope:tjs,
@@ -3531,6 +3619,7 @@ function onPS(){
   const v=document.querySelector('input[name="ps"]:checked')?.value;
   document.getElementById('psp').style.display=v==='购入'?'':'none';
   document.getElementById('psz').style.display=v==='赞助'?'':'none';
+  document.getElementById('psrz').style.display=v==='回购'?'':'none';
   document.getElementById('fpsc').style.display=v==='其他'?'':'none';
   if(v==='接转'){
     const fr=document.querySelector('input[name="fr"][value="不可转"]');if(fr)fr.checked=true;
@@ -3538,18 +3627,19 @@ function onPS(){
   }
   if(v!=='购入'){document.querySelectorAll('input[name="pp"]').forEach(r=>r.checked=false)}
   if(v!=='赞助'){document.querySelectorAll('input[name="pz"]').forEach(r=>r.checked=false)}
-  onPZ(); // refresh sub-field visibility
+  if(v!=='回购'){document.querySelectorAll('input[name="prz"]').forEach(r=>r.checked=false)}
+  onPZ();
+  onPRZ();
 }
 function onPZ(){
   const v=document.querySelector('input[name="pz"]:checked')?.value;
-  // pz=赞助: show sponsor count + sponsored done; hide sponsor ID
-  // pz=被赞助: show sponsor ID; hide sponsor count
   const wrap=document.getElementById('fspcWrap');
   const spId=document.getElementById('fsponsor');
   if(v==='赞助'){
-    wrap.style.display='flex';spId.style.display='none';
+    wrap.style.display='flex';spId.style.display='';
     if(!document.getElementById('fsponcount').value||document.getElementById('fsponcount').value==='1') document.getElementById('fsponcount').value='1';
     if(!document.getElementById('fsponcount2').value) document.getElementById('fsponcount2').value='0';
+    document.getElementById('fct').checked=true;
   }else if(v==='被赞助'){
     wrap.style.display='none';spId.style.display='';
     document.getElementById('fct').checked=false;
@@ -3557,6 +3647,22 @@ function onPZ(){
     wrap.style.display='none';spId.style.display='none';
   }
   if(v!=='赞助'){document.getElementById('fsponcount').value='1';document.getElementById('fsponcount2').value='0'}
+}
+function onPRZ(){
+  const v=document.querySelector('input[name="prz"]:checked')?.value;
+  const wrap=document.getElementById('frspcWrap');
+  const spId=document.getElementById('frsponsor');
+  if(v==='回购赞助'){
+    wrap.style.display='flex';spId.style.display='';
+    if(!document.getElementById('frsponcount').value||document.getElementById('frsponcount').value==='1') document.getElementById('frsponcount').value='1';
+    document.getElementById('fct').checked=true;
+  }else if(v==='被回购赞助'){
+    wrap.style.display='none';spId.style.display='';
+    document.getElementById('fct').checked=false;
+  }else{
+    wrap.style.display='none';spId.style.display='none';
+  }
+  if(v!=='回购赞助'){document.getElementById('frsponcount').value='1'}
 }
 function onTransfer(){
   const v=document.querySelector('input[name="ftransfer"]:checked')?.value;
@@ -5278,6 +5384,7 @@ function runExcelImport(){
       if(!['购入','赞助','接转','回购','定制','其他'].includes(finalPs)){if(ps.includes('赞助')&&!ps.includes('购入')) finalPs='赞助';else if(ps.includes('接转')) finalPs='接转';else if(ps.includes('回购')) finalPs='回购';else if(ps.includes('定制')) finalPs='定制';else if(ps.includes('购入')||ps.includes('微店')||ps.includes('淘宝')||ps.includes('私戳')||ps.includes('填表')) finalPs='购入';else if(ps) finalPs='其他'}
       if(finalPs==='购入'&&!['微店','淘宝','私戳','填表'].includes(finalPsub)&&psub){finalPsub='微店'}
       if(finalPs==='赞助'&&!['赞助','被赞助'].includes(finalPsub)){finalPsub=psub.includes('被赞助')?'被赞助':'赞助'}
+      if(finalPs==='回购'&&!['回购赞助','被回购赞助'].includes(finalPsub)){finalPsub=psub.includes('被')?'被回购赞助':'回购赞助'}
       let finalTr='';
       if(trR.includes('不退圈')) finalTr='不退圈可转';else if(trR.includes('退圈')) finalTr='退圈可转';else if(trR.includes('不可转')||trR.includes('不能转')) finalTr='不可转';else if(trR) finalTr=trR;
       let finalIsTrans='否';if(isTrans&&(isTrans.includes('是')||isTrans==='yes'||isTrans==='1')) finalIsTrans='是';
@@ -5292,15 +5399,15 @@ function runExcelImport(){
         category:cat,subCategory:subCat,customSubCategory:csCat,customCategory:'',boundLihui:bnd,
         styleTag:finalStyleTag,customTag:'',
         purchaseSource:finalPs,purchaseSub:finalPsub,customPurchaseSource:finalPs==='其他'?ps:'',
-        sponsorId:spId,isSponsored:finalPs==='赞助'&&finalPsub==='被赞助',sponsorCount:finalPs==='赞助'&&finalPsub==='赞助'?spCount:1,sponsoredDone:0,
+        sponsorId:spId,isSponsored:(finalPs==='赞助'&&finalPsub==='被赞助')||(finalPs==='回购'&&finalPsub==='被回购赞助'),sponsorCount:(finalPs==='赞助'&&finalPsub==='赞助')||(finalPs==='回购'&&finalPsub==='回购赞助')?spCount:1,sponsoredDone:finalPs==='回购'&&finalPsub==='回购赞助'?spCount:0,
         isTransfer:finalIsTrans,
         transferId:finalIsTrans==='是'?trId:'',
         tongjiaRule:tjR,tongjiaLimit:'',tongjiaType:tjT,tongjiaScope:tjS,
         transferRule:finalTr,transferSub:'',
         saleType:'',
         artist:otype==='person'?'':art,price,purchaseDate:pDate,isDoublePoints:dp,
-        countInShop:otype==='shop'?(finalPs==='赞助'&&finalPsub==='被赞助'?false:cis):true,
-        countInPerson:otype==='person'?(finalPs==='赞助'&&finalPsub==='被赞助'?false:cis):true,
+        countInShop:otype==='shop'?((finalPs==='赞助'&&finalPsub==='被赞助')||(finalPs==='回购'&&finalPsub==='被回购赞助')?false:cis):true,
+        countInPerson:otype==='person'?((finalPs==='赞助'&&finalPsub==='被赞助')||(finalPs==='回购'&&finalPsub==='被回购赞助')?false:cis):true,
         usageLimitType:finalUlt,usageLimitSubtype:finalUlst,
         usageTotal:ulTotal,usageLead:ulLead,usageSupport:ulSupp,usageOtherNote:ulONote,
         usedCount:uc,isUsed:isUsedFlag,
