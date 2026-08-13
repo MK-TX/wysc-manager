@@ -733,6 +733,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
         </div>
         <div id="psrz" style="display:none;margin-top:8px">
           <div class="rg">
+            <label><input type="radio" name="prz" value="回购" onchange="onPRZ()"> 回购</label>
             <label><input type="radio" name="prz" value="回购赞助" onchange="onPRZ()"> 回购赞助</label>
             <label><input type="radio" name="prz" value="被回购赞助" onchange="onPRZ()"> 被回购赞助</label>
           </div>
@@ -1483,6 +1484,7 @@ function getPSD(i){
   }
   else if(i.purchaseSource==='回购'){
     if(i.purchaseSub==='被回购赞助') t='被回购赞助';
+    else if(i.purchaseSub==='回购') t='回购';
     else{
       const sc=i.sponsorCount&&i.sponsorCount>1?`×${i.sponsorCount}`:'';
       t=`回购赞助${sc}`;
@@ -2313,6 +2315,7 @@ function renderCard(i,eager){
       else if(/^余\d+赞待$/.test(t)) psdStyle='background:#fef3c7;color:#92400e';
       else if(t==='回购赞助'||/^回购赞助×\d+$/.test(t)) psdStyle='background:#d1fae5;color:#065f46';
       else if(t==='被回购赞助') psdStyle='background:#ede9fe;color:#5b21b6';
+      else if(t==='回购') psdStyle='background:#cffafe;color:#155e75';
       uniTagsHtml+=`<span class="mcbg"${psdStyle?` style="${psdStyle}"`:''}>${eh(t)}</span>`;
     });
   }
@@ -2695,7 +2698,7 @@ function openFilterModal(){
   const _srcGroups=[
     {label:'购入类',vals:['购入','微店购入','淘宝购入','私戳购入','填表购入']},
     {label:'赞助类',vals:['赞助','被赞助']},
-    {label:'回购类',vals:['回购赞助','被回购赞助']},
+    {label:'回购类',vals:['回购','回购赞助','被回购赞助']},
     {label:'其他',vals:['接转','定制','其他']}
   ];
   const srcGroups=_srcGroups.map(g=>({label:g.label,values:g.vals.filter(v=>sources.has(v))}));
@@ -3040,6 +3043,8 @@ function openEditItem(id){
       if(przr){przr.checked=true}
       if(i.purchaseSub==='被回购赞助'){
         document.getElementById('frsponsor').value=i.sponsorId||'';
+      }else if(i.purchaseSub==='回购'){
+        // plain repurchase, no fields to fill
       }else{
         document.getElementById('frsponcount').value=i.sponsorCount||1;
         document.getElementById('frsponsor').value=i.sponsorId||'';
@@ -3659,6 +3664,9 @@ function onPRZ(){
   }else if(v==='被回购赞助'){
     wrap.style.display='none';spId.style.display='';
     document.getElementById('fct').checked=false;
+  }else if(v==='回购'){
+    wrap.style.display='none';spId.style.display='none';
+    document.getElementById('fct').checked=true;
   }else{
     wrap.style.display='none';spId.style.display='none';
   }
@@ -5384,7 +5392,7 @@ function runExcelImport(){
       if(!['购入','赞助','接转','回购','定制','其他'].includes(finalPs)){if(ps.includes('赞助')&&!ps.includes('购入')) finalPs='赞助';else if(ps.includes('接转')) finalPs='接转';else if(ps.includes('回购')) finalPs='回购';else if(ps.includes('定制')) finalPs='定制';else if(ps.includes('购入')||ps.includes('微店')||ps.includes('淘宝')||ps.includes('私戳')||ps.includes('填表')) finalPs='购入';else if(ps) finalPs='其他'}
       if(finalPs==='购入'&&!['微店','淘宝','私戳','填表'].includes(finalPsub)&&psub){finalPsub='微店'}
       if(finalPs==='赞助'&&!['赞助','被赞助'].includes(finalPsub)){finalPsub=psub.includes('被赞助')?'被赞助':'赞助'}
-      if(finalPs==='回购'&&!['回购赞助','被回购赞助'].includes(finalPsub)){finalPsub=psub.includes('被')?'被回购赞助':'回购赞助'}
+      if(finalPs==='回购'&&!['回购','回购赞助','被回购赞助'].includes(finalPsub)){finalPsub=psub.includes('被')?'被回购赞助':(psub==='回购'?'回购':'回购赞助')}
       let finalTr='';
       if(trR.includes('不退圈')) finalTr='不退圈可转';else if(trR.includes('退圈')) finalTr='退圈可转';else if(trR.includes('不可转')||trR.includes('不能转')) finalTr='不可转';else if(trR) finalTr=trR;
       let finalIsTrans='否';if(isTrans&&(isTrans.includes('是')||isTrans==='yes'||isTrans==='1')) finalIsTrans='是';
